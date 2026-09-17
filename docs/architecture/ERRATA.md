@@ -75,6 +75,11 @@ agent against a repository and cannot decide to stop is a defect, not a feature.
 **Do:** attempt counter on the incident, hard cap, and an explicit `ABANDONED` outcome.
 Exit criterion on S7.
 
+**Update (session 0003):** Bob Shell provides `--max-turns <n>` and `--max-cost <bobcoins>`
+natively, so the per-call bound is enforced by Bob rather than simulated by us
+(`bob/adapter.py`). BRE still owns the *cross-call* bound — the number of
+reinvestigation cycles per incident — which Bob knows nothing about.
+
 ---
 
 ### A5. The state machine has no failure or abort paths
@@ -130,6 +135,11 @@ runs single-tenant. Cheap now, painful later.
 **Do:** instrument token and latency per Bob call from the very first adapter call (S4 exit
 criterion). A cost claim cannot be reconstructed retroactively.
 
+**Update (session 0003):** resolved at the source. `bob run --format json` reports
+`stats.total_tokens`, `input_tokens`, `output_tokens`, cache counters, `duration_ms`,
+`session_costs` and `tool_calls`. `BobUsage` in `bob/adapter.py` carries them straight
+into `OutcomeRecord.cost_tokens` / `cost_wall_ms`. Nothing needs instrumenting around Bob.
+
 ---
 
 ## B. Stale — the doc drifted from the code
@@ -142,7 +152,7 @@ criterion). A cost claim cannot be reconstructed retroactively.
 | 37 | `cd bob-reliability-engineer` | the directory is `ReliabilityEngineer` |
 | 37 | POSIX venv activation | primary dev machine is Windows; the activate path differs |
 | 37 | "Testing: pytest" | `pytest` is not in `requirements.txt` and no tests exist |
-| 16 | `BobAdapter` exposes `investigate` / `remediate` / `verify` | section 10 assigns root-cause analysis to Bob, so `diagnose` is missing from the adapter |
+| 16 | `BobAdapter` exposes `investigate` / `remediate` / `verify` | section 10 assigns root-cause analysis to Bob, so `diagnose` was missing. **Fixed** — `bob/adapter.py` exposes `investigate` / `diagnose` / `plan_remediation` / `remediate` |
 | 18 | `POST /api/remediations/{id}/approve` | approvals are keyed by `incident_id` (section 12, and `ApprovalDB`), so the route is on the wrong noun |
 
 Three declared dependencies are unused: `aiosqlite` (the engine is sync), `httpx` (no Bob
