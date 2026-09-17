@@ -5,6 +5,10 @@ from .risk import RiskAssessment, RiskLevel, RiskAssessmentCreate
 from .approval import Approval, ApprovalCreate, ApprovalDecision
 from .remediation import Remediation, RemediationCreate
 from .verification import Verification, VerificationCreate, TestResult
+from .outcome import (
+    OutcomeRecord, OutcomeRecordCreate, OutcomeStatus,
+    PredictionType, ClaimClass,
+)
 
 __all__ = [
     "Incident", "IncidentCreate", "IncidentStatus", "IncidentType",
@@ -14,4 +18,6 @@ __all__ = [
     "Approval", "ApprovalCreate", "ApprovalDecision",
     "Remediation", "RemediationCreate",
     "Verification", "VerificationCreate", "TestResult",
+    "OutcomeRecord", "OutcomeRecordCreate", "OutcomeStatus",
+    "PredictionType", "ClaimClass",
 ]
