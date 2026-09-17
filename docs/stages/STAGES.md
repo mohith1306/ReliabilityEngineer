@@ -14,9 +14,9 @@ the command output or session entry that proves it. No evidence, not done.
 | | |
 |---|---|
 | **Current stage** | S2 — Evidence Collection |
-| **Blocked on** | nothing |
-| **Sharpest risk** | S4 (Bob integration mechanism is unverified — see thread 0001#7) |
-| **Environment** | CPython 3.13.7 venv; `venv/Scripts/python.exe -m pytest` → 20 passed, 3 xfailed |
+| **Blocked on** | S4 live verification — needs Bob Shell installed and `BOB_API_KEY` set |
+| **Sharpest risk** | S8 — ownership asymmetry is still assumed, not measured (thread 0001#8) |
+| **Environment** | CPython 3.13.7 venv; `venv/Scripts/python.exe -m pytest` → 35 passed, 3 xfailed |
 
 ---
 
@@ -28,7 +28,7 @@ the command output or session entry that proves it. No evidence, not done.
 | S1 | Foundation — models, state machine, DB, API | S0 | `DONE` | `pytest` → 20 passed, 3 xfailed — session [0002](../memory/sessions/0002-environment-verified.md) #4, #5 |
 | S2 | Evidence collection — connectors + investigation engine | S1 | `NOT_STARTED` | — |
 | S3 | Outcome ledger + evaluation harness | S1 | `NOT_STARTED` | — |
-| S4 | Bob adapter — **read paths only** | S2 | `NOT_STARTED` | — |
+| S4 | Bob adapter — **read paths only** | S2 | `BLOCKED` | adapter + 15 tests done; needs Bob Shell + `BOB_API_KEY` for the live call |
 | S5 | Risk engine + approval gate | S3, S4 | `NOT_STARTED` | — |
 | S6 | Remediation — the write path | S5 | `NOT_STARTED` | — |
 | S7 | Verification + rollback + bounded feedback loop | S6 | `NOT_STARTED` | — |
@@ -78,12 +78,17 @@ Criteria are written as commands with expected results. "Engine works" is not a 
 - [ ] Re-running the harness on an unchanged corpus reproduces the artifact (determinism)
 
 ### S4 — Bob adapter (read paths only)
-- [ ] The actual Bob interface is **confirmed by a working call**, not assumed — closes
-      thread 0001#7
-- [ ] `BobAdapter.investigate()` and `.diagnose()` return structured output conforming to
-      `models/diagnosis.py`
-- [ ] Token usage per call is captured and written to the outcome ledger
-- [ ] No method in `bob/` can write to a target repository at this stage
+- [x] Interface **documented**: `bob run --format json --mode ask|plan|agent`, auth via
+      `BOB_API_KEY` — session 0003, [ADR-0004](../decisions/ADR-0004-bob-invocation-surface.md)
+- [x] `BobAdapter` implemented with `preflight()`, argv construction and result parsing;
+      15 unit tests against the documented schema
+- [x] Write path guarded: `remediate()` raises `BobWriteRefused` without `allow_writes=True`
+- [ ] **Interface confirmed by a working call** — `python scripts/verify_bob.py` exits 0
+      and writes a stamped artifact. Closes thread 0001#7. *Blocked: Bob Shell not
+      installed, `BOB_API_KEY` not set.*
+- [ ] `investigate()` / `diagnose()` return output conforming to `models/diagnosis.py`
+      (needs a prompt + response schema, which needs a live Bob to iterate against)
+- [ ] Token usage per call written to the outcome ledger
 
 ### S5 — Risk engine + approval gate
 - [ ] `RiskClassifier` returns a level **plus its factor breakdown** (never a bare label)
@@ -126,3 +131,4 @@ Criteria are written as commands with expected results. "Engine works" is not a 
 | 2026-09-17 | S0 | NOT_STARTED → DONE | 0001 |
 | 2026-09-17 | S1 | retroactively marked DONE (built before the tracker existed) | 0001 |
 | 2026-09-17 | S1 | evidence attached — DONE is now verified, not assumed | 0002 |
+| 2026-09-17 | S4 | NOT_STARTED → BLOCKED — interface documented and adapter built; live call needs credentials | 0003 |
