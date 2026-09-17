@@ -9,3 +9,10 @@ dist/
 build/
 .pytest_cache/
 .mypy_cache/
+
+# session ledger artifacts
+runs/
+*.tmp
+
+# machine-local Claude Code settings (commands/ IS shared)
+.claude/settings.local.json
