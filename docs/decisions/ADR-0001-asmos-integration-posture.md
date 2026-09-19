@@ -44,10 +44,20 @@ is maintained. Re-implementation forfeits ASMOS's Chroma-backed semantic store, 
 needs its own similarity path. Nothing in ASMOS's *results* transfers automatically — BRE
 must earn its own numbers on its own corpus.
 
-**Risk carried forward.** Ownership asymmetry did not emerge organically in ASMOS's corpus.
-If it also fails to emerge in real incident history, the routing story weakens to "correct
-fallback behaviour," which is defensible but much less compelling. This must be **measured
-before S8 is built on it** — thread 0001#8.
+**Risk carried forward — now MEASURED, and it did not hold.** Session 0004 ran ASMOS's
+unmodified asymmetry metrics over four real repositories. Every one is NO-GO against the
+pre-registered criterion: observed OCI is high (0.77–1.00) but statistically
+indistinguishable from an agent-label permutation null, because high concentration is an
+artifact of having very few contributors. See
+[ASYMMETRY_FINDING.md](../architecture/ASYMMETRY_FINDING.md).
+
+This does not invalidate the decision above. It relocates the signal: **ownership must be
+learned from BRE's own outcome ledger, not bootstrapped from contribution history.** Commit
+authorship measures who writes a subsystem, not who is verifiably right about it — and
+BRE's agents are diagnosis sources that appear in no commit history at all. Git history
+also contains **zero refutation events** (0 reverts in 852 commits), while BRE manufactures
+refutation on every failed verification. The signal BRE needs does not exist in git; BRE
+creates it.
 
 ## Alternatives rejected
 

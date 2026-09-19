@@ -13,10 +13,10 @@ the command output or session entry that proves it. No evidence, not done.
 
 | | |
 |---|---|
-| **Current stage** | S2 — Evidence Collection |
+| **Current stage** | S2 — Evidence Collection (git connector done; repository + tests connectors next) |
 | **Blocked on** | S4 live verification — needs Bob Shell installed and `BOB_API_KEY` set |
-| **Sharpest risk** | S8 — ownership asymmetry is still assumed, not measured (thread 0001#8) |
-| **Environment** | CPython 3.13.7 venv; `venv/Scripts/python.exe -m pytest` → 35 passed, 3 xfailed |
+| **Sharpest risk** | S3 — the demo corpus must be built so asymmetry is *observable*; git history does not supply it ([finding](../architecture/ASYMMETRY_FINDING.md)) |
+| **Environment** | CPython 3.13.7 venv; `venv/Scripts/python.exe -m pytest` → 50 passed, 3 xfailed |
 
 ---
 
@@ -26,7 +26,7 @@ the command output or session entry that proves it. No evidence, not done.
 |---|---|---|---|---|
 | S0 | Alignment + working agreement | — | `DONE` | session [0001](../memory/sessions/0001-asmos-alignment-and-workflow.md) |
 | S1 | Foundation — models, state machine, DB, API | S0 | `DONE` | `pytest` → 20 passed, 3 xfailed — session [0002](../memory/sessions/0002-environment-verified.md) #4, #5 |
-| S2 | Evidence collection — connectors + investigation engine | S1 | `NOT_STARTED` | — |
+| S2 | Evidence collection — connectors + investigation engine | S1 | `IN_PROGRESS` | `connectors/git.py` + 18 tests — session [0004](../memory/sessions/0004-asymmetry-measured.md) #3 |
 | S3 | Outcome ledger + evaluation harness | S1 | `NOT_STARTED` | — |
 | S4 | Bob adapter — **read paths only** | S2 | `BLOCKED` | adapter + 15 tests done; needs Bob Shell + `BOB_API_KEY` for the live call |
 | S5 | Risk engine + approval gate | S3, S4 | `NOT_STARTED` | — |
@@ -61,7 +61,8 @@ Criteria are written as commands with expected results. "Engine works" is not a 
 
 ### S2 — Evidence collection
 - [ ] `RepositoryConnector` lists source files and detects project type for a target repo
-- [ ] `GitConnector` returns commit history, blame, and diffs for a named file
+- [x] `GitConnector` returns commit history and per-commit file lists, with author
+      identity resolution — session 0004 #3. *(blame/diff not yet needed)*
 - [ ] `TestConnector` discovers tests and returns a structured pass/fail result
 - [ ] `CIConnector` parses a real CI failure log into a structured failure record
 - [ ] `pytest tests/integration/test_investigation.py` passes and produces an evidence
@@ -110,7 +111,13 @@ Criteria are written as commands with expected results. "Engine works" is not a 
 - [ ] Rollback restores the checkpoint and sets the remediation to `ROLLED_BACK`
 
 ### S8 — ASMOS ownership routing + learning
-- [ ] Topic taxonomy derived from the target repo's structure
+
+> **Premise revised (session 0004).** Ownership is learned from the outcome ledger, NOT
+> bootstrapped from contribution history — measured, and git-derived asymmetry is
+> indistinguishable from chance. See [ASYMMETRY_FINDING.md](../architecture/ASYMMETRY_FINDING.md).
+
+- [x] Topic taxonomy derived from the target repo's structure — `connectors/git.py::default_topic_fn`
+- [ ] Ownership sourced from `OutcomeRecord` closures only, never from commit counts
 - [ ] Ownership updates **only** on a verification outcome (Invariant 3), asserted in test
 - [ ] Routing decision records its components: similarity, ownership, τ, action
 - [ ] τ tuned on the corpus, not hardcoded; the tuning run is a stamped artifact
@@ -132,3 +139,5 @@ Criteria are written as commands with expected results. "Engine works" is not a 
 | 2026-09-17 | S1 | retroactively marked DONE (built before the tracker existed) | 0001 |
 | 2026-09-17 | S1 | evidence attached — DONE is now verified, not assumed | 0002 |
 | 2026-09-17 | S4 | NOT_STARTED → BLOCKED — interface documented and adapter built; live call needs credentials | 0003 |
+| 2026-09-19 | S2 | NOT_STARTED → IN_PROGRESS — git connector complete | 0004 |
+| 2026-09-19 | S8 | premise revised — ownership from the ledger, not from git | 0004 |
