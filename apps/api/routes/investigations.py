@@ -1,7 +1,7 @@
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from apps.api.database import get_db, generate_id, InvestigationDB, EvidenceDB
+from apps.api.database import get_db, generate_id, IncidentDB, InvestigationDB, EvidenceDB
 from models.investigation import Investigation, InvestigationCreate, Evidence, EvidenceCreate, InvestigationStatus
 
 router = APIRouter()
@@ -9,11 +9,16 @@ router = APIRouter()
 
 @router.post("", response_model=Investigation, status_code=201)
 def create_investigation(inv: InvestigationCreate, db: Session = Depends(get_db)):
+    # An investigation of nothing is a data-integrity bug (ERRATA, closed session 0009).
+    if not db.query(IncidentDB).filter(IncidentDB.id == inv.incident_id).first():
+        raise HTTPException(status_code=404, detail="Incident not found")
+    now = datetime.utcnow()
     db_inv = InvestigationDB(
         id=generate_id(),
         incident_id=inv.incident_id,
         status=InvestigationStatus.PENDING.value,
-        created_at=datetime.utcnow(),
+        started_at=now,
+        created_at=now,
     )
     db.add(db_inv)
     db.commit()

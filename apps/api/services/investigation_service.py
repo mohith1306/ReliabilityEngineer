@@ -15,6 +15,7 @@ from apps.api.database import EvidenceDB, IncidentDB, InvestigationDB, generate_
 from models.incident import Incident, IncidentStatus
 from reliability.investigator.evidence import CollectedEvidence
 from reliability.investigator.investigator import Investigator
+from reliability.orchestration.lifecycle import Lifecycle, to_model
 
 logger = logging.getLogger("bre.investigation")
 
@@ -76,18 +77,7 @@ class _SQLAlchemyEvidenceStore:
 
 
 def _to_incident_model(row) -> Incident:
-    return Incident(
-        id=row.id,
-        repository=row.repository,
-        branch=row.branch,
-        type=row.type,
-        severity=row.severity,
-        status=row.status,
-        description=row.description,
-        metadata=row.metadata_json or {},
-        created_at=row.created_at,
-        updated_at=row.updated_at,
-    )
+    return to_model(row)
 
 
 def run_investigation(
@@ -112,10 +102,12 @@ def run_investigation(
 
     root = resolve_repo_root(incident, override=repo_path)
 
-    if incident.status == IncidentStatus.DETECTED:
-        incident.transition(IncidentStatus.INVESTIGATING)
-        incident_row.status = incident.status.value
-        incident_row.updated_at = incident.updated_at
+    # DETECTED and REINVESTIGATING both re-enter INVESTIGATING (the old code only
+    # handled DETECTED, so a re-investigation ran while the incident still read
+    # REINVESTIGATING). Through the lifecycle so the change is audited.
+    if incident.status in (IncidentStatus.DETECTED, IncidentStatus.REINVESTIGATING):
+        Lifecycle(db).transition(incident_row, IncidentStatus.INVESTIGATING, actor="investigator")
+        incident = _to_incident_model(incident_row)
 
     investigation = InvestigationDB(
         id=generate_id(),

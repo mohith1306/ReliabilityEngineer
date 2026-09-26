@@ -87,26 +87,16 @@ def transition_incident(incident_id: str, new_status: str, db: Session = Depends
     if not db_incident:
         raise HTTPException(status_code=404, detail="Incident not found")
 
-    incident = _to_model(db_incident)
-    try:
-        target_status = IncidentStatus(new_status)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-    try:
-        incident.transition(target_status)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
     from reliability.orchestration import gate
+    from reliability.orchestration.lifecycle import InvalidTransition, Lifecycle
 
     try:
-        gate.assert_can_enter(db, incident_id, target_status)
+        Lifecycle(db).transition(db_incident, new_status, actor="api:transition")
+    except InvalidTransition as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except gate.GateViolation as e:
         raise HTTPException(status_code=403, detail=str(e))
 
-    db_incident.status = incident.status.value
-    db_incident.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(db_incident)
     return _to_model(db_incident)
@@ -163,15 +153,6 @@ def investigate_incident(
 
 
 def _to_model(db_incident: IncidentDB) -> Incident:
-    return Incident(
-        id=db_incident.id,
-        repository=db_incident.repository,
-        branch=db_incident.branch,
-        type=db_incident.type,
-        severity=db_incident.severity,
-        status=db_incident.status,
-        description=db_incident.description,
-        metadata=db_incident.metadata_json or {},
-        created_at=db_incident.created_at,
-        updated_at=db_incident.updated_at,
-    )
+    from reliability.orchestration.lifecycle import to_model
+
+    return to_model(db_incident)

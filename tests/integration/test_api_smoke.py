@@ -176,21 +176,18 @@ def test_investigation_evidence_roundtrip(client):
 
 # ── known gaps, pinned so they cannot be silently forgotten ───────────────────
 
-@pytest.mark.xfail(reason="ERRATA: no FK constraint or existence check on incident_id", strict=True)
-def test_investigation_requires_a_real_incident(client):
+def test_investigation_requires_a_real_incident(client):  # was xfail: ERRATA S1 gap, fixed in 0009
     r = client.post("/api/investigations", json={"incident_id": "totally-made-up"})
     assert r.status_code in (400, 404)
 
 
-@pytest.mark.xfail(reason="ERRATA: create_investigation never sets started_at", strict=True)
-def test_investigation_records_when_it_started(client):
+def test_investigation_records_when_it_started(client):  # was xfail: fixed in 0009
     inc = _incident(client)
     inv = client.post("/api/investigations", json={"incident_id": inc["id"]}).json()
     assert inv["started_at"] is not None
 
 
-@pytest.mark.xfail(reason="ERRATA A5: no DETECTED -> CLOSED edge for false alarms", strict=True)
-def test_false_alarm_can_be_closed(client):
+def test_false_alarm_can_be_closed(client):  # was xfail: ERRATA A5 DETECTED->CLOSED, fixed in 0009
     inc = _incident(client)
     r = client.post(f"/api/incidents/{inc['id']}/transition", params={"new_status": "CLOSED"})
     assert r.status_code == 200
