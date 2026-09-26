@@ -275,7 +275,7 @@ def test_public_surface_is_read_only():
     adapter = BobAdapter(None)
     public = {name for name in dir(adapter) if not name.startswith("_")}
     writable = public - read_only - {
-        "db", "address", "provider", "topic", "turn_timeout",
+        "db", "address", "provider", "topic", "turn_timeout", "transport",
         "remediate", "verify",
     }
     assert not writable, f"unexpected public surface: {writable}"

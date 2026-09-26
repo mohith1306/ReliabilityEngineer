@@ -1,0 +1,14 @@
+# Normalise every text file to LF in the repository AND in the working tree, on every OS.
+# This project is built on Windows and macOS; without this, a Windows editor or tool that
+# writes CRLF turns a 5-line change into a whole-file diff and makes merges unreviewable.
+* text=auto eol=lf
+
+# Things that must never be touched.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.pptx binary
+*.woff2 binary

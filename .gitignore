@@ -16,3 +16,6 @@ runs/
 
 # machine-local Claude Code settings (commands/ IS shared)
 .claude/settings.local.json
+
+# Bob round-trip artifacts are stamped evidence and SHOULD be committed,
+# but never commit anything containing a key.

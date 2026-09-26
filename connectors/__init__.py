@@ -3,7 +3,10 @@
 ARCHITECTURE.md section 17. MVP set:
 
     repository.py  List files, detect project type and structure.
-    git.py         Commit history, blame, diffs. (gitpython is already declared.)
+    git.py         Commit history, blame, diffs for the investigator (GitPython).
+    git_history.py Commit log -> ownership claim events + author identity resolution
+                   (subprocess). Used by S8 / scripts/measure_asymmetry.py, not by the
+                   investigator.
     tests.py       Discover tests; run a scope; return structured results.
     ci.py          Parse CI failure output into a structured failure record.
 

@@ -18,3 +18,4 @@ to `Superseded by ADR-NNNN`.
 | [0001](ADR-0001-asmos-integration-posture.md) | ASMOS integration posture | Accepted |
 | [0002](ADR-0002-session-memory-protocol.md) | Session memory protocol | Accepted |
 | [0003](ADR-0003-outcome-ledger.md) | Outcome ledger | Accepted |
+| [0004](ADR-0004-bob-invocation-surface.md) | Bob invocation surface | Accepted |

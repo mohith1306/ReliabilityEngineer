@@ -51,6 +51,14 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 from urllib.parse import urlparse
 
+from .errors import (  # noqa: F401  (re-exported: callers import these from here)
+    BobError,
+    BobHostUnavailable,
+    BobNotInstalled,
+    BobProtocolError,
+    BobTurnTimeout,
+)
+
 AHP_PROTOCOL_VERSION = "0.1.0"
 ROOT_CHANNEL = "ahp-root://"
 DEFAULT_REQUEST_TIMEOUT = 15.0
@@ -64,26 +72,6 @@ _CLI_CANDIDATES = (
     _APP_BIN / "bobide",
     _APP_BIN / "bobide-tunnel",
 )
-
-
-class BobError(Exception):
-    """Base class for every Bob transport failure."""
-
-
-class BobNotInstalled(BobError):
-    raise_note = "no bobide binary found; set BOB_CLI_PATH"
-
-
-class BobHostUnavailable(BobError):
-    """No usable agent host: none running, stale lockfile, or undownloadable server."""
-
-
-class BobProtocolError(BobError):
-    """A JSON-RPC error returned by the host."""
-
-
-class BobTurnTimeout(BobError):
-    """A chat turn did not complete within the deadline."""
 
 
 @dataclass(frozen=True)
@@ -100,15 +88,49 @@ class AgentHostAddress:
         return f"ws://{self.host}:{self.port}?tkn={self.token}"
 
     def pid_alive(self) -> bool:
-        if self.pid is None:
-            return True
-        try:
-            os.kill(self.pid, 0)
-        except ProcessLookupError:
-            return False
-        except PermissionError:
-            return True
+        return _pid_alive(self.pid)
+
+
+def _pid_alive(pid: Optional[int]) -> bool:
+    """Is `pid` a running process? Never signals it.
+
+    `os.kill(pid, 0)` is the POSIX idiom, but on Windows any signal other than
+    CTRL_C_EVENT/CTRL_BREAK_EVENT is delivered as TerminateProcess -- so the
+    "liveness probe" would kill the very Bob host it was checking. Windows takes
+    the OpenProcess/GetExitCodeProcess route instead.
+    """
+    if pid is None:
         return True
+    if os.name == "nt":
+        import ctypes
+        from ctypes import wintypes
+
+        PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+        STILL_ACTIVE = 259
+        ERROR_ACCESS_DENIED = 5
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel32.OpenProcess.restype = wintypes.HANDLE  # 64-bit handles: default int truncates
+        kernel32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+        kernel32.GetExitCodeProcess.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD)]
+        kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+        handle = kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, int(pid))
+        if not handle:
+            # Access denied still means the process exists; only "no such pid" is dead.
+            return ctypes.get_last_error() == ERROR_ACCESS_DENIED
+        try:
+            code = wintypes.DWORD()
+            if not kernel32.GetExitCodeProcess(handle, ctypes.byref(code)):
+                return True
+            return code.value == STILL_ACTIVE
+        finally:
+            kernel32.CloseHandle(handle)
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
 
 
 def find_cli() -> Optional[Path]:

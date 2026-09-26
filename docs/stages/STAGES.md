@@ -14,9 +14,9 @@ the command output or session entry that proves it. No evidence, not done.
 | | |
 |---|---|
 | **Current stage** | S6 — Remediation (the write path) |
-| **Blocked on** | nothing (S4's darwin host gap is documented, not blocking: thread 0005#1) |
-| **Sharpest risk** | S6 is the first mutation of a target repo — checkpoint-before-patch and branch-only writes must hold |
-| **Environment** | CPython 3.14.7 venv (macOS dev box); `python -m pytest` → 84 passed, 3 xfailed |
+| **Blocked on** | S4 live verification — Bob Shell must be installed and `BOB_API_KEY` set *by a human*; nothing else is blocked |
+| **Sharpest risk** | **Bob has never been called live.** Both adapters (Bob Shell CLI, agent-host WebSocket) are proven only against documentation and fakes |
+| **Environment** | CPython 3.13.7 venv on Windows (also run on macOS, 3.14.7); see the latest session for the current `pytest` count |
 
 ---
 
@@ -28,7 +28,7 @@ the command output or session entry that proves it. No evidence, not done.
 | S1 | Foundation — models, state machine, DB, API | S0 | `DONE` | `pytest` → 20 passed, 3 xfailed — session [0002](../memory/sessions/0002-environment-verified.md) #4, #5 |
 | S2 | Evidence collection — connectors + investigation engine | S1 | `DONE` | `pytest` → 40 passed, 3 xfailed — session [0003](../memory/sessions/0003-evidence-collection-end-to-end.md) #5 |
 | S3 | Outcome ledger + evaluation harness | S1 | `DONE` | `pytest` → 60 passed, 3 xfailed; harness `10 incidents: 10 confirmed, 0 refuted` — session [0004](../memory/sessions/0004-outcome-ledger-and-harness.md) #6 |
-| S4 | Bob adapter — **read paths only** | S2 | `DONE` | `pytest` → 72 passed, 3 xfailed; real CLI call `IBM Bob 1.126.0+bob2.1.0` — session [0005](../memory/sessions/0005-bob-interface-spike-and-adapter.md) #4, #7 |
+| S4 | Bob adapter — **read paths only** | S2 | `BLOCKED` | adapter + transports + 27 tests done against fakes and docs; live call needs Bob Shell + `BOB_API_KEY` — sessions [0005](../memory/sessions/0005-bob-interface-spike-and-adapter.md), [0007](../memory/sessions/0007-bob-interface-confirmed.md), 0009 |
 | S5 | Risk engine + approval gate | S3, S4 | `DONE` | `pytest` → 84 passed, 3 xfailed; gate denies + unblocks with approval — session [0006](../memory/sessions/0006-risk-engine-and-approval-gate.md) #8 |
 | S6 | Remediation — the write path | S5 | `NOT_STARTED` | — |
 | S7 | Verification + rollback + bounded feedback loop | S6 | `NOT_STARTED` | — |
@@ -93,20 +93,23 @@ Criteria are written as commands with expected results. "Engine works" is not a 
       — `test_rerun_reproduces_the_artifact` (`stable_view` equality, two runs)
 
 ### S4 — Bob adapter (read paths only)
-- [x] The actual Bob interface is **confirmed by a working call**, not assumed — closes
-      thread 0001#7 — `probe_cli()` → `IBM Bob 1.126.0+bob2.1.0` from the installed
-      binary; real lockfile format parsed (`test_probe_cli_calls_the_installed_bob_binary`,
-      `test_discovery_parses_the_real_lockfile_format`); protocol recovered from shipped
-      JS + binaries (session 0005 #3). Residual: live WS round trip blocked on darwin
-      (no REH build published) — thread 0005#1
-- [x] `BobAdapter.investigate()` and `.diagnose()` return structured output conforming to
-      `models/diagnosis.py` — `test_investigate_returns_diagnosis_and_writes_ledger`,
-      `test_diagnose_returns_diagnosis` (12 passed total)
-- [x] Token usage per call is captured and written to the outcome ledger
-      — `cost_rollup` asserts 1920 tokens (1500+420) + measured wall ms per call
-- [x] No method in `bob/` can write to a target repository at this stage
-      — four enforced ways: stubs raise, repo byte-hash test, source scan,
-      public-surface test (session 0005 #6)
+- [x] Interface **documented**: `bob run --format json --mode ask|plan|agent`, auth via
+      `BOB_API_KEY` — session [0007](../memory/sessions/0007-bob-interface-confirmed.md),
+      [ADR-0004](../decisions/ADR-0004-bob-invocation-surface.md)
+- [x] Second surface **recovered**: the IDE's agent-host WebSocket (JSON-RPC 2.0), from shipped
+      binaries — session 0005 #3. Undocumented; treated as experimental
+- [x] `BobShell` implemented (`preflight()`, argv, result parsing, guarded write path);
+      `BobAdapter.investigate()` / `.diagnose()` return `models.diagnosis.Diagnosis` over either
+      transport — `tests/unit/test_bob_shell.py` (15), `tests/integration/test_bob_adapter.py` (12)
+- [x] Token usage per call is written to the outcome ledger — `cost_rollup` asserts 1920 tokens
+      against the fake host; `BobShell` carries `stats.total_tokens` natively
+- [x] No path in `BobAdapter` can write to a target repo — four enforced ways (session 0005 #6);
+      `BobShell.remediate()` raises `BobWriteRefused` without `allow_writes=True`
+- [ ] **Interface confirmed by a working call** — `python scripts/verify_bob.py` exits 0 and
+      writes a stamped artifact. Closes thread 0001#7. *Blocked: needs Bob Shell installed and
+      `BOB_API_KEY` set. Session 0005 marked this criterion done on the strength of a CLI
+      banner, a lockfile parse and a fake host; no real turn was exchanged with Bob, so it is
+      reopened here (session 0009).*
 
 ### S5 — Risk engine + approval gate
 - [x] `RiskClassifier` returns a level **plus its factor breakdown** (never a bare label)
@@ -140,7 +143,13 @@ Criteria are written as commands with expected results. "Engine works" is not a 
 - [ ] Rollback restores the checkpoint and sets the remediation to `ROLLED_BACK`
 
 ### S8 — ASMOS ownership routing + learning
-- [ ] Topic taxonomy derived from the target repo's structure
+
+> **Premise revised (session 0008).** Ownership is learned from the outcome ledger, NOT
+> bootstrapped from contribution history — measured, and git-derived asymmetry is
+> indistinguishable from chance. See [ASYMMETRY_FINDING.md](../architecture/ASYMMETRY_FINDING.md).
+
+- [x] Topic taxonomy derived from the target repo's structure — `connectors/git_history.py::default_topic_fn`
+- [ ] Ownership sourced from `OutcomeRecord` closures only, never from commit counts
 - [ ] Ownership updates **only** on a verification outcome (Invariant 3), asserted in test
 - [ ] Routing decision records its components: similarity, ownership, τ, action
 - [ ] τ tuned on the corpus, not hardcoded; the tuning run is a stamped artifact
@@ -165,3 +174,6 @@ Criteria are written as commands with expected results. "Engine works" is not a 
 | 2026-09-26 | S3 | NOT_STARTED → DONE — all five exit criteria closed by test evidence | 0004 |
 | 2026-09-26 | S4 | NOT_STARTED → DONE — all four exit criteria closed; darwin host gap documented as thread 0005#1 | 0005 |
 | 2026-09-26 | S5 | NOT_STARTED → DONE — all five exit criteria closed by test evidence; approval identity = API-key operator registry | 0006 |
+| 2026-09-17 | S4 | (thread-8 line) NOT_STARTED → BLOCKED — interface documented, adapter built; live call pending credentials | 0007 |
+| 2026-09-19 | S8 | premise revised — ownership from the ledger, not from git | 0008 |
+| 2026-09-27 | S4 | DONE → BLOCKED — reconcile: the "confirmed by a working call" criterion was met only against a fake host. S5 was started while S4 was DONE; it does not call Bob, so no S5 result depends on the reopening | 0009 |
