@@ -1,0 +1,25 @@
+============================= test session starts ==============================
+collected 2 items
+
+tests/test_dbpool.py .F                                                    [100%]
+
+=================================== FAILURES ===================================
+___________________________ test_pool_sized_from_config ________________________
+
+    def test_pool_sized_from_config():
+        """Production needs >= 10 concurrent connections; config sets 2."""
+        pool = ConnectionPool(size=2)
+        acquired = []
+        for _ in range(10):
+            try:
+                acquired.append(pool.acquire())
+            except ExhaustionError:
+                break
+>       assert len(acquired) >= 10, (
+E       AssertionError: connection pool exhausted after 2 acquisitions
+E       assert 2 >= 10
+
+tests/test_dbpool.py:20: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_dbpool.py::test_pool_sized_from_config - AssertionError: connection pool exhausted after 2 acquisitions
+========================= 1 failed, 1 passed in 0.04s ==========================

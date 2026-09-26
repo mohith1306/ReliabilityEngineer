@@ -1,0 +1,6 @@
+database:
+  host: db.internal
+  port: 5432
+  # lowered during load-shedding; suspected cause of connection pool exhaustion
+  pool_size: 2
+  max_overflow: 0

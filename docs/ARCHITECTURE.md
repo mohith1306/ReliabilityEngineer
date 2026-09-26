@@ -1941,54 +1941,65 @@ pip install -r requirements.txt
 uvicorn apps.api.main:app --port 8001
 ```
 
-## Phase 2 — Evidence Collection (Planned)
+## Phase 2 / S2 — Evidence Collection ✅ (Complete)
+
+### What Was Built
 
 ```text
-RepositoryConnector    — Read source files, detect structure
-GitConnector           — Commit history, blame, diffs
-TestConnector          — Discover and run tests
-CIConnector            — Parse CI failure output
-InvestigationEngine    — Orchestrate evidence collection
+RepositoryConnector    — List source files, detect project type, keyword match
+GitConnector           — Commit history, log-for-paths, blame, diffs (read-only)
+TestConnector          — Discover tests, run a scope, structured pass/fail
+CIConnector            — Parse CI failure logs into structured failure records
+TaskAnalyzer           — Classify incident, extract keywords and topics
+EvidenceCollector      — Pull from connectors, score relevance + confidence
+Investigator           — Orchestrate; persist evidence via injected store
 ```
 
-## Phase 3 — Context Intelligence (Planned)
+### API Endpoint
 
 ```text
-TaskAnalyzer           — Classify incident type
-ContextRouter          — Gather candidates from sources
-ContextRanker          — Score and rank relevance
-EngineeringMemory      — Basic keyword search storage
+POST /api/incidents/{id}/investigate
+     body: {"repo_path": "...", "run_tests": true}
+     → DETECTED → INVESTIGATING, evidence package returned
+GET  /api/investigations/{id}/evidence
 ```
 
-## Phase 4 — Bob Integration (Planned)
+### Evidence Sources (per item: source_type, source_reference, relevance, confidence)
+
+| Source | Example reference | Confidence |
+|---|---|---|
+| `repository` | `dbpool.py` | 0.70 |
+| `config` | `config/app.yaml` | 0.75 |
+| `git` | `commit:61db5ee` | 0.80 |
+| `test` | `tests/test_dbpool.py::test_pool_sized_from_config` | 0.85 |
+| `ci` | `ci/failure.log::tests/...::test_...` | 0.95 |
+
+### Verification
+
+- `pytest tests/unit/test_connectors.py` → 12 passed (S2 exit criteria per connector)
+- `pytest tests/integration/test_investigation.py` → 8 passed
+  (≥5 evidence items across ≥3 source types for the seeded failure)
+- Full suite → **40 passed, 3 xfailed**
+- Seeded failure fixture: `tests/fixtures/seeded_failure/` with runtime-built
+  git history (a nested `.git` cannot be committed)
+
+## Planned Phases — see docs/stages/STAGES.md for the authoritative order
+
+The stage tracker corrects §34's build order (ERRATA A2, ADR-0003): risk +
+approval precede remediation, and the outcome ledger precedes Bob integration.
 
 ```text
-BobAdapter             — REST client to IBM Bob
-RootCauseAnalyzer      — Structure Bob's diagnosis output
-RemediationOrchestrator — Send fix tasks to Bob
-```
-
-## Phase 5 — Risk + Approval (Planned)
-
-```text
-RiskClassifier         — 4-level risk assessment
-ApprovalWorkflow       — Human approval gate
-AuditTrail             — Decision logging
-```
-
-## Phase 6 — Verification + Feedback (Planned)
-
-```text
-Verifier               — Run targeted/component/regression tests
-FailureFeedbackLoop    — Re-investigate on failure
-Rollback               — Git-based rollback
-```
-
-## Phase 7 — Learning + Demo (Planned)
-
-```text
-MemoryConsolidation    — Store verified outcomes only
-Observability          — Structured logging
-DemoDashboard          — Visual workflow stages
-Metrics                — Resolution rate, time-to-diagnose
+S3  Outcome ledger      — OutcomeRecord model + table; prediction-time writes;
+                          ≥10-incident seeded corpus; evaluation harness
+S4  Bob adapter         — READ PATHS ONLY; investigate()/diagnose() structured
+                          output; token usage captured; mechanism must be
+                          confirmed by a working call (thread 0001#7)
+S5  Risk + approval     — RiskClassifier with factor breakdown; approval gate;
+                          verified identity; HIGH/CRITICAL cannot skip the gate
+S6  Remediation         — git checkpoint before patch; branch-only writes;
+                          repository allowlist
+S7  Verification        — targeted/component/regression levels; bounded
+                          re-investigation loop; rollback
+S8  ASMOS routing       — ownership routing updated only on verified outcomes
+S9  Metrics + demo      — baseline (Bob alone) vs BRE over the same corpus
 ```

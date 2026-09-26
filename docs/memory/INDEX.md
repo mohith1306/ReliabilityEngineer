@@ -10,6 +10,7 @@ One line per session, newest last. Append on close. See
 |---|---|---|---|---|---|---|
 | [0001](sessions/0001-asmos-alignment-and-workflow.md) | 2026-09-17 | ASMOS alignment + workflow | @dee | S0 | closed | ARCHITECTURE.md §8 describes ASMOS as a file-relevance ranker; the real ASMOS routes *agents* by verification-gated ownership. The doc understates the asset. |
 | [0002](sessions/0002-environment-verified.md) | 2026-09-17 | Environment verified | @dee | S1 | closed | The default `python` here is msys2 and cannot install anything (no root CA store) — use CPython 3.13. Suite is green: 20 passed, 3 xfailed. |
+| [0003](sessions/0003-evidence-collection-end-to-end.md) | 2026-09-26 | Evidence collection end to end | @opencode | S2 | closed | S2 is DONE: four read-only connectors + investigate endpoint return 9 evidence items across 5 source types; suite 40 passed, 3 xfailed. GitPython: stats.files is a dict, Diff.diff needs create_patch=True. |
 
 ---
 
@@ -26,5 +27,6 @@ grep -rn "Status:\*\* open" docs/memory/sessions/
 | 0001 | #7 | Bob integration mechanism is unverified — no confirmed programmatic interface | unassigned |
 | 0001 | #8 | Ownership asymmetry in a real repo is assumed, not measured | unassigned |
 | 0002 | #7 | `on_event` and `datetime.utcnow()` deprecations reproduce on 3.13; filtered, not fixed | unassigned |
+| 0003 | #7 | S1 xfail gaps (missing incident FK, unset started_at, no DETECTED→CLOSED edge) remain | unassigned |
 
 Closed since last update: 0001#10 (nothing runtime-verified) — closed by 0002#4 and 0002#5.

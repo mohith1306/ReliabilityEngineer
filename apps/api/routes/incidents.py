@@ -1,10 +1,39 @@
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
-from apps.api.database import get_db, generate_id, IncidentDB
+from apps.api.database import get_db, generate_id, EvidenceDB, IncidentDB, InvestigationDB
+from apps.api.services import investigation_service
 from models.incident import IncidentCreate, Incident, IncidentStatus
 
 router = APIRouter()
+
+
+class InvestigateRequest(BaseModel):
+    repo_path: str | None = Field(
+        default=None,
+        description="Filesystem root of the target repository. Overrides incident metadata.",
+    )
+    run_tests: bool = Field(
+        default=False,
+        description="Run the target's test suite as part of evidence collection.",
+    )
+
+
+class EvidenceOut(BaseModel):
+    id: str
+    investigation_id: str
+    source_type: str
+    source_reference: str
+    content: str
+    relevance_score: float
+    confidence: float
+
+
+class InvestigateResponse(BaseModel):
+    incident_id: str
+    investigation: dict
+    evidence: list[EvidenceOut]
 
 
 @router.post("", response_model=Incident, status_code=201)
@@ -70,6 +99,56 @@ def transition_incident(incident_id: str, new_status: str, db: Session = Depends
     db.commit()
     db.refresh(db_incident)
     return _to_model(db_incident)
+
+
+@router.post("/{incident_id}/investigate", response_model=InvestigateResponse)
+def investigate_incident(
+    incident_id: str,
+    body: InvestigateRequest | None = None,
+    db: Session = Depends(get_db),
+):
+    """Drive DETECTED -> INVESTIGATING, collect evidence, return the package."""
+    db_incident = db.query(IncidentDB).filter(IncidentDB.id == incident_id).first()
+    if not db_incident:
+        raise HTTPException(status_code=404, detail="Incident not found")
+
+    req = body or InvestigateRequest()
+    try:
+        investigation, evidence_rows, incident_row = investigation_service.run_investigation(
+            db, db_incident, repo_path=req.repo_path, run_tests=req.run_tests,
+        )
+    except investigation_service.RepoRootUnavailable as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
+
+    db.commit()
+    db.refresh(investigation)
+    db.refresh(incident_row)
+
+    return InvestigateResponse(
+        incident_id=incident_id,
+        investigation={
+            "id": investigation.id,
+            "incident_id": investigation.incident_id,
+            "status": investigation.status,
+            "summary": investigation.summary,
+            "started_at": investigation.started_at,
+            "completed_at": investigation.completed_at,
+        },
+        evidence=[
+            EvidenceOut(
+                id=e.id,
+                investigation_id=e.investigation_id,
+                source_type=e.source_type,
+                source_reference=e.source_reference,
+                content=e.content,
+                relevance_score=e.relevance_score,
+                confidence=e.confidence,
+            )
+            for e in evidence_rows
+        ],
+    )
 
 
 def _to_model(db_incident: IncidentDB) -> Incident:

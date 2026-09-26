@@ -13,10 +13,10 @@ the command output or session entry that proves it. No evidence, not done.
 
 | | |
 |---|---|
-| **Current stage** | S2 — Evidence Collection |
+| **Current stage** | S3 — Outcome ledger + evaluation harness |
 | **Blocked on** | nothing |
 | **Sharpest risk** | S4 (Bob integration mechanism is unverified — see thread 0001#7) |
-| **Environment** | CPython 3.13.7 venv; `venv/Scripts/python.exe -m pytest` → 20 passed, 3 xfailed |
+| **Environment** | CPython 3.14.7 venv (macOS dev box); `python -m pytest` → 40 passed, 3 xfailed |
 
 ---
 
@@ -26,7 +26,7 @@ the command output or session entry that proves it. No evidence, not done.
 |---|---|---|---|---|
 | S0 | Alignment + working agreement | — | `DONE` | session [0001](../memory/sessions/0001-asmos-alignment-and-workflow.md) |
 | S1 | Foundation — models, state machine, DB, API | S0 | `DONE` | `pytest` → 20 passed, 3 xfailed — session [0002](../memory/sessions/0002-environment-verified.md) #4, #5 |
-| S2 | Evidence collection — connectors + investigation engine | S1 | `NOT_STARTED` | — |
+| S2 | Evidence collection — connectors + investigation engine | S1 | `DONE` | `pytest` → 40 passed, 3 xfailed — session [0003](../memory/sessions/0003-evidence-collection-end-to-end.md) #5 |
 | S3 | Outcome ledger + evaluation harness | S1 | `NOT_STARTED` | — |
 | S4 | Bob adapter — **read paths only** | S2 | `NOT_STARTED` | — |
 | S5 | Risk engine + approval gate | S3, S4 | `NOT_STARTED` | — |
@@ -60,13 +60,20 @@ Two deliberate changes, both recorded in
 Criteria are written as commands with expected results. "Engine works" is not a criterion.
 
 ### S2 — Evidence collection
-- [ ] `RepositoryConnector` lists source files and detects project type for a target repo
-- [ ] `GitConnector` returns commit history, blame, and diffs for a named file
-- [ ] `TestConnector` discovers tests and returns a structured pass/fail result
-- [ ] `CIConnector` parses a real CI failure log into a structured failure record
-- [ ] `pytest tests/integration/test_investigation.py` passes and produces an evidence
+- [x] `RepositoryConnector` lists source files and detects project type for a target repo
+      — `tests/unit/test_connectors.py::test_repository_lists_source_files`,
+      `test_repository_detects_project_type`
+- [x] `GitConnector` returns commit history, blame, and diffs for a named file
+      — `test_git_recent_commits`, `test_git_blame`, `test_git_diff_for_commit_contains_pool_change`
+- [x] `TestConnector` discovers tests and returns a structured pass/fail result
+      — `test_test_discovery`, `test_test_run_returns_structured_result`
+- [x] `CIConnector` parses a real CI failure log into a structured failure record
+      — `test_ci_parses_real_failure_log`
+- [x] `pytest tests/integration/test_investigation.py` passes and produces an evidence
       set of **≥5 items across ≥3 source types** for the seeded failure
-- [ ] `POST /api/incidents/{id}/investigate` returns a populated evidence set end to end
+      — 8 passed; live run: 9 items across 5 source types
+- [x] `POST /api/incidents/{id}/investigate` returns a populated evidence set end to end
+      — `test_investigate_seeded_failure_produces_evidence_package`
 
 ### S3 — Outcome ledger + evaluation harness
 - [ ] `OutcomeRecord` model + table; every diagnosis, risk assessment, and routing decision
@@ -126,3 +133,4 @@ Criteria are written as commands with expected results. "Engine works" is not a 
 | 2026-09-17 | S0 | NOT_STARTED → DONE | 0001 |
 | 2026-09-17 | S1 | retroactively marked DONE (built before the tracker existed) | 0001 |
 | 2026-09-17 | S1 | evidence attached — DONE is now verified, not assumed | 0002 |
+| 2026-09-26 | S2 | NOT_STARTED → DONE — all six exit criteria closed by test evidence | 0003 |
