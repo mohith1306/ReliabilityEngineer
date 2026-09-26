@@ -13,10 +13,10 @@ the command output or session entry that proves it. No evidence, not done.
 
 | | |
 |---|---|
-| **Current stage** | S5 — Risk engine + approval gate |
+| **Current stage** | S6 — Remediation (the write path) |
 | **Blocked on** | nothing (S4's darwin host gap is documented, not blocking: thread 0005#1) |
-| **Sharpest risk** | S5 approval identity — how is "verified identity" sourced in this environment? |
-| **Environment** | CPython 3.14.7 venv (macOS dev box); `python -m pytest` → 72 passed, 3 xfailed |
+| **Sharpest risk** | S6 is the first mutation of a target repo — checkpoint-before-patch and branch-only writes must hold |
+| **Environment** | CPython 3.14.7 venv (macOS dev box); `python -m pytest` → 84 passed, 3 xfailed |
 
 ---
 
@@ -29,7 +29,7 @@ the command output or session entry that proves it. No evidence, not done.
 | S2 | Evidence collection — connectors + investigation engine | S1 | `DONE` | `pytest` → 40 passed, 3 xfailed — session [0003](../memory/sessions/0003-evidence-collection-end-to-end.md) #5 |
 | S3 | Outcome ledger + evaluation harness | S1 | `DONE` | `pytest` → 60 passed, 3 xfailed; harness `10 incidents: 10 confirmed, 0 refuted` — session [0004](../memory/sessions/0004-outcome-ledger-and-harness.md) #6 |
 | S4 | Bob adapter — **read paths only** | S2 | `DONE` | `pytest` → 72 passed, 3 xfailed; real CLI call `IBM Bob 1.126.0+bob2.1.0` — session [0005](../memory/sessions/0005-bob-interface-spike-and-adapter.md) #4, #7 |
-| S5 | Risk engine + approval gate | S3, S4 | `NOT_STARTED` | — |
+| S5 | Risk engine + approval gate | S3, S4 | `DONE` | `pytest` → 84 passed, 3 xfailed; gate denies + unblocks with approval — session [0006](../memory/sessions/0006-risk-engine-and-approval-gate.md) #8 |
 | S6 | Remediation — the write path | S5 | `NOT_STARTED` | — |
 | S7 | Verification + rollback + bounded feedback loop | S6 | `NOT_STARTED` | — |
 | S8 | ASMOS ownership routing + learning | S3, S7 | `NOT_STARTED` | — |
@@ -109,11 +109,23 @@ Criteria are written as commands with expected results. "Engine works" is not a 
       public-surface test (session 0005 #6)
 
 ### S5 — Risk engine + approval gate
-- [ ] `RiskClassifier` returns a level **plus its factor breakdown** (never a bare label)
-- [ ] Risk level is reproducible: same inputs → same level, asserted in tests
-- [ ] Approval records carry a verified identity, not a free-text `approved_by` string
-- [ ] `HIGH` and `CRITICAL` cannot reach `REMEDIATING` without an approval row
-- [ ] A test proves the gate cannot be bypassed by a direct state transition call
+- [x] `RiskClassifier` returns a level **plus its factor breakdown** (never a bare label)
+      — `tests/integration/test_risk_and_approval.py::test_classifier_returns_level_and_breakdown`
+      (`factors = {score, thresholds, rules}`; sum of rule points == score)
+- [x] Risk level is reproducible: same inputs → same level, asserted in tests
+      — `test_classifier_is_reproducible` (three dict orderings → identical level
+      and identical `factors`)
+- [x] Approval records carry a verified identity, not a free-text `approved_by` string
+      — `test_approval_records_identity_from_key_not_body` (body-spoofed fields
+      ignored; identity from bearer key), `test_approval_requires_bearer_key` (401)
+- [x] `HIGH` and `CRITICAL` cannot reach `REMEDIATING` without an approval row
+      — `test_high_risk_requires_approval_to_remediate` (403 → approval → 200),
+      `test_unknown_risk_denies_remediation`, `test_rejected_approval_does_not_qualify`
+- [x] A test proves the gate cannot be bypassed by a direct state transition call
+      — `test_direct_transition_cannot_bypass_the_gate` (legal
+      `RISK_ASSESSED → REMEDIATING` edge still 403s); smoke
+      `test_happy_path_transitions` walks the full path through the gate
+      (12 new tests; suite → 84 passed, 3 xfailed)
 
 ### S6 — Remediation (write path)
 - [ ] A git checkpoint is created before any patch is applied
@@ -152,3 +164,4 @@ Criteria are written as commands with expected results. "Engine works" is not a 
 | 2026-09-26 | S2 | NOT_STARTED → DONE — all six exit criteria closed by test evidence | 0003 |
 | 2026-09-26 | S3 | NOT_STARTED → DONE — all five exit criteria closed by test evidence | 0004 |
 | 2026-09-26 | S4 | NOT_STARTED → DONE — all four exit criteria closed; darwin host gap documented as thread 0005#1 | 0005 |
+| 2026-09-26 | S5 | NOT_STARTED → DONE — all five exit criteria closed by test evidence; approval identity = API-key operator registry | 0006 |

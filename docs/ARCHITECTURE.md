@@ -2012,14 +2012,34 @@ GET  /api/investigations/{id}/evidence
   ledger cost capture, four read-only guards)
 - Full suite at S4 close → **72 passed, 3 xfailed**
 
+### Risk engine + approval gate (S5)
+
+- Approval identity = **bearer API key → operators row** (`operator_id` +
+  `operator_name` written from the authenticated row; caller-supplied
+  `approved_by`/`operator_id` in the body are ignored — ERRATA A6).
+  Bootstrap: `BRE_OPERATOR_KEY`/`BRE_OPERATOR_NAME` env, hashed (sha256) at rest
+- `RiskClassifier.classify()` returns `RiskAssessment.factors =
+  {score, thresholds, rules}` — every rule records input and points
+  (severity/migration/api_surface/blast_radius/tests/low_confidence;
+  `THRESHOLDS = {CRITICAL: 7, HIGH: 4, MEDIUM: 2}`); deterministic: three
+  dict orderings → identical level and identical `factors`
+- Gate (`reliability/orchestration/gate.py`) runs on every transition:
+  `REMEDIATING` requires an `APPROVED` row with `operator_id`, matching the
+  current assessment's `risk_level`, `created_at >= assessment.created_at`.
+  **No assessment ⇒ treated as CRITICAL** (deny-by-default); violations → 403
+- `POST /api/incidents/{id}/assess-risk` persists the assessment and opens a
+  `risk_level` ledger prediction with `components = factors`
+- `pytest tests/integration/test_risk_and_approval.py` → 12 passed
+  (breakdown, reproducibility, 401/spoof tests, deny then unblock,
+  direct-transition bypass test, ledger prediction)
+- Full suite at S5 close → **84 passed, 3 xfailed**
+
 ## Planned Phases — see docs/stages/STAGES.md for the authoritative order
 
 The stage tracker corrects §34's build order (ERRATA A2, ADR-0003): risk +
 approval precede remediation, and the outcome ledger precedes Bob integration.
 
 ```text
-S5  Risk + approval     — RiskClassifier with factor breakdown; approval gate;
-                          verified identity; HIGH/CRITICAL cannot skip the gate
 S6  Remediation         — git checkpoint before patch; branch-only writes;
                           repository allowlist
 S7  Verification        — targeted/component/regression levels; bounded

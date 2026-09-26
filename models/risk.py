@@ -1,5 +1,7 @@
 from enum import Enum
-from datetime import datetime
+from datetime import datetime, timezone
+from uuid import uuid4
+
 from pydantic import BaseModel, Field
 
 
@@ -23,5 +25,5 @@ class RiskAssessmentCreate(BaseModel):
 
 
 class RiskAssessment(RiskAssessmentCreate):
-    id: str
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    id: str = Field(default_factory=lambda: uuid4().hex)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

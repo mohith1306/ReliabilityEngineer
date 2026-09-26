@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from apps.api.routes import incidents, investigations
+from apps.api.routes import approvals, incidents, investigations, risk
 from apps.api.database import init_db
 
 app = FastAPI(
@@ -9,6 +9,8 @@ app = FastAPI(
 )
 
 app.include_router(incidents.router, prefix="/api/incidents", tags=["incidents"])
+app.include_router(approvals.router, prefix="/api/incidents", tags=["approvals"])
+app.include_router(risk.router, prefix="/api/incidents", tags=["risk"])
 app.include_router(investigations.router, prefix="/api/investigations", tags=["investigations"])
 
 

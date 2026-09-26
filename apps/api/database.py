@@ -100,8 +100,19 @@ class ApprovalDB(Base):
     incident_id = Column(String, nullable=False)
     risk_level = Column(String, nullable=False)
     decision = Column(String, nullable=False)
-    approved_by = Column(String, nullable=False)
+    operator_id = Column(String, nullable=True)
+    operator_name = Column(String, nullable=True)
     reason = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class OperatorDB(Base):
+    __tablename__ = "operators"
+
+    id = Column(String, primary_key=True)
+    name = Column(String, nullable=False)
+    api_key_hash = Column(String, nullable=False, unique=True)
+    revoked_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 

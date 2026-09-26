@@ -14,9 +14,13 @@ from sqlalchemy.orm import sessionmaker
 from apps.api.database import Base, get_db
 from apps.api.main import app
 
+OPERATOR_KEY = "smoke-test-operator-key"
+
 
 @pytest.fixture
-def client(tmp_path):
+def client(tmp_path, monkeypatch):
+    monkeypatch.setenv("BRE_OPERATOR_KEY", OPERATOR_KEY)
+    monkeypatch.setenv("BRE_OPERATOR_NAME", "smoke-operator")
     engine = create_engine(
         f"sqlite:///{tmp_path / 'test.db'}", connect_args={"check_same_thread": False}
     )
@@ -81,12 +85,29 @@ def test_list_filters_by_repository(client):
 # ── state machine ─────────────────────────────────────────────────────────────
 
 def test_happy_path_transitions(client):
+    """Walk the full lifecycle. Since S5 the gate is part of the happy path:
+    risk must be assessed, and REMEDIATING needs a verified approval."""
     inc = _incident(client)
-    path = [
-        "INVESTIGATING", "DIAGNOSED", "RISK_ASSESSED", "AWAITING_APPROVAL",
-        "REMEDIATING", "VERIFYING", "RESOLVED", "CLOSED",
-    ]
+    path = ["INVESTIGATING", "DIAGNOSED", "RISK_ASSESSED", "AWAITING_APPROVAL"]
     for target in path:
+        r = client.post(
+            f"/api/incidents/{inc['id']}/transition", params={"new_status": target}
+        )
+        assert r.status_code == 200, f"{target}: {r.text}"
+        assert r.json()["status"] == target
+
+    assessed = client.post(f"/api/incidents/{inc['id']}/assess-risk", json={})
+    assert assessed.status_code == 201, assessed.text
+
+    approval = client.post(
+        f"/api/incidents/{inc['id']}/approvals",
+        json={"decision": "APPROVED", "reason": "smoke test"},
+        headers={"Authorization": f"Bearer {OPERATOR_KEY}"},
+    )
+    assert approval.status_code == 201, approval.text
+    assert approval.json()["operator_name"] == "smoke-operator"
+
+    for target in ["REMEDIATING", "VERIFYING", "RESOLVED", "CLOSED"]:
         r = client.post(
             f"/api/incidents/{inc['id']}/transition", params={"new_status": target}
         )

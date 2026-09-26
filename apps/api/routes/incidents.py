@@ -90,9 +90,20 @@ def transition_incident(incident_id: str, new_status: str, db: Session = Depends
     incident = _to_model(db_incident)
     try:
         target_status = IncidentStatus(new_status)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    try:
         incident.transition(target_status)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+    from reliability.orchestration import gate
+
+    try:
+        gate.assert_can_enter(db, incident_id, target_status)
+    except gate.GateViolation as e:
+        raise HTTPException(status_code=403, detail=str(e))
 
     db_incident.status = incident.status.value
     db_incident.updated_at = datetime.utcnow()
