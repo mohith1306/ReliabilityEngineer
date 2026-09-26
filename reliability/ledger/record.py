@@ -26,6 +26,7 @@ from sqlalchemy.orm import Session
 
 from apps.api.database import OutcomeRecordDB, VerificationDB, generate_id
 from models.outcome import (
+    ClaimClass,
     OutcomeRecord,
     OutcomeRecordCreate,
     OutcomeStatus,
@@ -304,6 +305,37 @@ def open_risk_prediction(
         topic=topic,
         prediction_type=PredictionType.RISK_LEVEL,
         prediction_payload={"risk_level": risk_level},
+        confidence=confidence,
+        components=components,
+        attempt_number=attempt_number,
+    )
+    return OutcomeLedger(db).open(
+        prediction, cost_tokens=cost_tokens, cost_wall_ms=cost_wall_ms
+    )
+
+
+def open_remediation_prediction(
+    db: Session,
+    *,
+    incident_id: str,
+    predictor_id: str,
+    topic: str,
+    summary: str,
+    changed_files: list,
+    confidence: float,
+    components: dict,
+    attempt_number: int = 1,
+    cost_tokens: int = 0,
+    cost_wall_ms: float = 0.0,
+) -> OutcomeRecord:
+    """A remediation plan: 'this patch fixes the incident'. Closed only by the test suite."""
+    prediction = OutcomeRecordCreate(
+        incident_id=incident_id,
+        predictor_id=predictor_id,
+        topic=topic,
+        prediction_type=PredictionType.REMEDIATION_PLAN,
+        prediction_payload={"summary": summary, "changed_files": list(changed_files)},
+        claim_class=ClaimClass.A,  # a test result is objective: reproduced-failure class
         confidence=confidence,
         components=components,
         attempt_number=attempt_number,

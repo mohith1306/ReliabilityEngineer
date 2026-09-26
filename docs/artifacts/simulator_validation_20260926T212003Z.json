@@ -1,0 +1,145 @@
+{
+  "artifact": "simulator_validation_20260926T212003Z.json",
+  "generated_at": "2026-09-26T21:20:03+00:00",
+  "corpus_sha256": "a96fcf892b75a696b6774f212e7469f5fb7305e19137248daeea0bb9075f49c9",
+  "agree": 9,
+  "of": 9,
+  "meaning": "the simulator reproduces the measured (memory-served, memory-refuted) counts of each end-to-end comparison run",
+  "runs": [
+    {
+      "artifact": "comparison_full_20260926T210746Z.json",
+      "slice": "full",
+      "ordering": 0,
+      "tau": 0.058,
+      "measured": {
+        "served": 13,
+        "refuted": 4
+      },
+      "simulated": {
+        "served": 13,
+        "refuted": 4
+      },
+      "agrees": true
+    },
+    {
+      "artifact": "comparison_full_20260926T210746Z.json",
+      "slice": "full",
+      "ordering": 1,
+      "tau": 0.058,
+      "measured": {
+        "served": 13,
+        "refuted": 4
+      },
+      "simulated": {
+        "served": 13,
+        "refuted": 4
+      },
+      "agrees": true
+    },
+    {
+      "artifact": "comparison_full_20260926T210746Z.json",
+      "slice": "full",
+      "ordering": 2,
+      "tau": 0.058,
+      "measured": {
+        "served": 13,
+        "refuted": 4
+      },
+      "simulated": {
+        "served": 13,
+        "refuted": 4
+      },
+      "agrees": true
+    },
+    {
+      "artifact": "comparison_full_tau_from_recurring_20260926T211646Z.json",
+      "slice": "full_tau_from_recurring",
+      "ordering": 0,
+      "tau": 0.2344,
+      "measured": {
+        "served": 13,
+        "refuted": 4
+      },
+      "simulated": {
+        "served": 13,
+        "refuted": 4
+      },
+      "agrees": true
+    },
+    {
+      "artifact": "comparison_full_tau_from_recurring_20260926T211646Z.json",
+      "slice": "full_tau_from_recurring",
+      "ordering": 1,
+      "tau": 0.2344,
+      "measured": {
+        "served": 13,
+        "refuted": 4
+      },
+      "simulated": {
+        "served": 13,
+        "refuted": 4
+      },
+      "agrees": true
+    },
+    {
+      "artifact": "comparison_full_tau_from_recurring_20260926T211646Z.json",
+      "slice": "full_tau_from_recurring",
+      "ordering": 2,
+      "tau": 0.2344,
+      "measured": {
+        "served": 13,
+        "refuted": 4
+      },
+      "simulated": {
+        "served": 13,
+        "refuted": 4
+      },
+      "agrees": true
+    },
+    {
+      "artifact": "comparison_recurring_20260926T205900Z.json",
+      "slice": "recurring",
+      "ordering": 0,
+      "tau": 0.2344,
+      "measured": {
+        "served": 6,
+        "refuted": 0
+      },
+      "simulated": {
+        "served": 6,
+        "refuted": 0
+      },
+      "agrees": true
+    },
+    {
+      "artifact": "comparison_recurring_20260926T205900Z.json",
+      "slice": "recurring",
+      "ordering": 1,
+      "tau": 0.2344,
+      "measured": {
+        "served": 6,
+        "refuted": 0
+      },
+      "simulated": {
+        "served": 6,
+        "refuted": 0
+      },
+      "agrees": true
+    },
+    {
+      "artifact": "comparison_recurring_20260926T205900Z.json",
+      "slice": "recurring",
+      "ordering": 2,
+      "tau": 0.2344,
+      "measured": {
+        "served": 6,
+        "refuted": 0
+      },
+      "simulated": {
+        "served": 6,
+        "refuted": 0
+      },
+      "agrees": true
+    }
+  ]
+}

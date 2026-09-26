@@ -1,0 +1,47 @@
+{
+  "scenario": "seeded_failure",
+  "provenance": "Hand-authored stand-in for the credential-free demo and CI. NOT recorded from IBM Bob and NOT evidence about Bob's diagnostic quality.",
+  "usage_is_simulated": true,
+  "match": {
+    "file": "config/app.yaml",
+    "pattern": "^\\s*pool_size:\\s*2\\s*$"
+  },
+  "cites": [
+    "config/app.yaml",
+    "dbpool.py",
+    "test_pool_sized_from_config",
+    "commit:"
+  ],
+  "diagnosis": {
+    "root_cause": "database.pool_size in config/app.yaml was lowered to 2 (a load-shedding change). ConnectionPool in dbpool.py sizes itself from that value, so the third concurrent acquire raises ExhaustionError; test_pool_sized_from_config asserts production needs at least 10 concurrent connections.",
+    "confidence": 0.86,
+    "affected_components": [
+      "config/app.yaml",
+      "dbpool.py"
+    ],
+    "assumptions": [
+      "The regression is the config change in config/app.yaml, not a code change in dbpool.py",
+      "Production concurrency of at least 10 connections is the intended requirement"
+    ],
+    "unresolved_uncertainty": [
+      "Whether the load-shedding motivation for lowering pool_size still applies"
+    ],
+    "usage_tokens": 4200
+  },
+  "remediation": {
+    "summary": "Restore database.pool_size to 20 in config/app.yaml.",
+    "edits": [
+      {
+        "file": "config/app.yaml",
+        "find": "pool_size: 2",
+        "replace": "pool_size: 20"
+      }
+    ],
+    "usage_tokens": 6100,
+    "when_misapplied": {
+      "file": "config/app.yaml",
+      "regex": "pool_size: \\d+",
+      "replace": "pool_size: 40"
+    }
+  }
+}

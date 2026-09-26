@@ -4,7 +4,19 @@ Regression under investigation: CI reports connection pool exhaustion
 in the pool-sized-from-config path.
 """
 
+import re
+from pathlib import Path
+
 DEFAULT_POOL_SIZE = 20
+
+
+def load_pool_size(config_path) -> int:
+    """Read `pool_size` from a YAML config without a YAML dependency."""
+    for line in Path(config_path).read_text(encoding="utf-8").splitlines():
+        match = re.match(r"\s*pool_size:\s*(\d+)", line)
+        if match:
+            return int(match.group(1))
+    return DEFAULT_POOL_SIZE
 
 
 class ExhaustionError(RuntimeError):

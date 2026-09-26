@@ -41,51 +41,18 @@ def assess_risk(
     if not incident:
         raise HTTPException(status_code=404, detail="Incident not found")
 
+    from apps.api.services.risk_service import assess_risk as assess
+
     ctx = body or RiskContext()
-    repo_context = {
-        "incident_id": incident_id,
-        "severity": incident.severity,
-        "blast_radius": ctx.blast_radius,
-        "api_surface_affected": ctx.api_surface_affected,
-        "database_migration": ctx.database_migration,
-        "tests_available": ctx.tests_available,
-        "affected_components": ctx.affected_components,
-    }
-    diagnosis = None
-    if ctx.diagnosis_confidence is not None or ctx.diagnosis_root_cause:
-        diagnosis = {
-            "incident_id": incident_id,
-            "root_cause": ctx.diagnosis_root_cause or "",
-            "confidence": ctx.diagnosis_confidence or 0.0,
-        }
-
-    assessment = RiskClassifier().classify(diagnosis, repo_context)
-
-    row = RiskAssessmentDB(
-        id=generate_id(),
-        incident_id=incident_id,
-        risk_level=assessment.risk_level.value,
-        confidence=assessment.confidence,
-        factors=assessment.factors,
-        blast_radius=assessment.blast_radius,
-        affected_components=assessment.affected_components,
-        api_surface_affected=assessment.api_surface_affected,
-        database_migration=assessment.database_migration,
-        tests_available=assessment.tests_available,
-        created_at=datetime.now(timezone.utc),
-    )
-    db.add(row)
-
-    from reliability.ledger.record import open_risk_prediction
-
-    open_risk_prediction(
-        db,
-        incident_id=incident_id,
-        predictor_id=PREDICTOR_ID,
-        topic=incident.type,
-        risk_level=assessment.risk_level.value,
-        confidence=assessment.confidence,
-        components=assessment.factors,
+    row = assess(
+        db, incident,
+        blast_radius=ctx.blast_radius,
+        api_surface_affected=ctx.api_surface_affected,
+        database_migration=ctx.database_migration,
+        tests_available=ctx.tests_available,
+        affected_components=ctx.affected_components,
+        diagnosis_confidence=ctx.diagnosis_confidence,
+        diagnosis_root_cause=ctx.diagnosis_root_cause,
     )
     db.commit()
     db.refresh(row)

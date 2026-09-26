@@ -7,8 +7,8 @@ tests/test_authservice.py F.                                              [100%]
 ____________________________ test_login_within_timeout _________________________
 
     def test_login_within_timeout():
-        """Config timeout (0.001s) must still admit a 0.05s backend round trip."""
-        service = AuthService(timeout_seconds=0.001)
+        """The configured timeout must still admit a 0.05s backend round trip."""
+        service = AuthService(timeout_seconds=load_timeout(CONFIG))
 >       session = service.login("alice", "s3cret", backend_latency=0.05)
 
 authservice.py:26: RequestTimeoutError

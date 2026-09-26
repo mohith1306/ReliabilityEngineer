@@ -3,13 +3,15 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
-from authservice import AuthService, RequestTimeoutError
+from authservice import AuthService, RequestTimeoutError, load_timeout
 import pytest
+
+CONFIG = pathlib.Path(__file__).resolve().parent.parent / "config" / "auth.yaml"
 
 
 def test_login_within_timeout():
-    """Config timeout (0.001s) must still admit a 0.05s backend round trip."""
-    service = AuthService(timeout_seconds=0.001)
+    """The configured timeout must still admit a 0.05s backend round trip."""
+    service = AuthService(timeout_seconds=load_timeout(CONFIG))
     session = service.login("alice", "s3cret", backend_latency=0.05)
     assert session["user"] == "alice"
 

@@ -1,0 +1,639 @@
+{
+  "provenance": {
+    "source": "ASMOS src/asmos/ownership/{trust,reputation}.py, loaded directly (no install)",
+    "asmos_path": "C:\\Users\\csdee\\PESU\\CDSAML\\ASMOS",
+    "asmos_git_sha": "ee072ea162aed089c4e12a153544d9a2bd0c7a70",
+    "generated_at": "2026-09-26T20:01:05+00:00",
+    "note": "Regenerate with scripts/gen_asmos_parity_vectors.py; a diff here is the drift alarm."
+  },
+  "constants": {
+    "alpha": 7,
+    "beta": 3
+  },
+  "vectors": {
+    "trust": [
+      {
+        "vc": 0,
+        "vt": 0,
+        "expected": 0.7
+      },
+      {
+        "vc": 0,
+        "vt": 1,
+        "expected": 0.6363636363636364
+      },
+      {
+        "vc": 0,
+        "vt": 2,
+        "expected": 0.5833333333333334
+      },
+      {
+        "vc": 0,
+        "vt": 5,
+        "expected": 0.4666666666666667
+      },
+      {
+        "vc": 0,
+        "vt": 10,
+        "expected": 0.35
+      },
+      {
+        "vc": 0,
+        "vt": 50,
+        "expected": 0.11666666666666667
+      },
+      {
+        "vc": 0,
+        "vt": 200,
+        "expected": 0.03333333333333333
+      },
+      {
+        "vc": 1,
+        "vt": 1,
+        "expected": 0.7272727272727273
+      },
+      {
+        "vc": 1,
+        "vt": 2,
+        "expected": 0.6666666666666666
+      },
+      {
+        "vc": 1,
+        "vt": 5,
+        "expected": 0.5333333333333333
+      },
+      {
+        "vc": 1,
+        "vt": 10,
+        "expected": 0.4
+      },
+      {
+        "vc": 1,
+        "vt": 50,
+        "expected": 0.13333333333333333
+      },
+      {
+        "vc": 1,
+        "vt": 200,
+        "expected": 0.0380952380952381
+      },
+      {
+        "vc": 2,
+        "vt": 2,
+        "expected": 0.75
+      },
+      {
+        "vc": 2,
+        "vt": 5,
+        "expected": 0.6
+      },
+      {
+        "vc": 2,
+        "vt": 10,
+        "expected": 0.45
+      },
+      {
+        "vc": 2,
+        "vt": 50,
+        "expected": 0.15
+      },
+      {
+        "vc": 2,
+        "vt": 200,
+        "expected": 0.04285714285714286
+      },
+      {
+        "vc": 5,
+        "vt": 5,
+        "expected": 0.8
+      },
+      {
+        "vc": 5,
+        "vt": 10,
+        "expected": 0.6
+      },
+      {
+        "vc": 5,
+        "vt": 50,
+        "expected": 0.2
+      },
+      {
+        "vc": 5,
+        "vt": 200,
+        "expected": 0.05714285714285714
+      },
+      {
+        "vc": 10,
+        "vt": 10,
+        "expected": 0.85
+      },
+      {
+        "vc": 10,
+        "vt": 50,
+        "expected": 0.2833333333333333
+      },
+      {
+        "vc": 10,
+        "vt": 200,
+        "expected": 0.08095238095238096
+      },
+      {
+        "vc": 50,
+        "vt": 50,
+        "expected": 0.95
+      },
+      {
+        "vc": 50,
+        "vt": 200,
+        "expected": 0.2714285714285714
+      }
+    ],
+    "ownership": [
+      {
+        "expertise": 0.0,
+        "share": 0.0,
+        "expected": 0.0
+      },
+      {
+        "expertise": 0.0,
+        "share": 0.25,
+        "expected": 0.1
+      },
+      {
+        "expertise": 0.0,
+        "share": 0.5,
+        "expected": 0.2
+      },
+      {
+        "expertise": 0.0,
+        "share": 1.0,
+        "expected": 0.4
+      },
+      {
+        "expertise": 0.3,
+        "share": 0.0,
+        "expected": 0.18
+      },
+      {
+        "expertise": 0.3,
+        "share": 0.25,
+        "expected": 0.28
+      },
+      {
+        "expertise": 0.3,
+        "share": 0.5,
+        "expected": 0.38
+      },
+      {
+        "expertise": 0.3,
+        "share": 1.0,
+        "expected": 0.5800000000000001
+      },
+      {
+        "expertise": 0.7,
+        "share": 0.0,
+        "expected": 0.42
+      },
+      {
+        "expertise": 0.7,
+        "share": 0.25,
+        "expected": 0.52
+      },
+      {
+        "expertise": 0.7,
+        "share": 0.5,
+        "expected": 0.62
+      },
+      {
+        "expertise": 0.7,
+        "share": 1.0,
+        "expected": 0.8200000000000001
+      },
+      {
+        "expertise": 1.0,
+        "share": 0.0,
+        "expected": 0.6
+      },
+      {
+        "expertise": 1.0,
+        "share": 0.25,
+        "expected": 0.7
+      },
+      {
+        "expertise": 1.0,
+        "share": 0.5,
+        "expected": 0.8
+      },
+      {
+        "expertise": 1.0,
+        "share": 1.0,
+        "expected": 1.0
+      }
+    ],
+    "routing_score": [
+      {
+        "sim": 0.0,
+        "ownership": 0.0,
+        "expected": 0.0
+      },
+      {
+        "sim": 0.0,
+        "ownership": 0.42,
+        "expected": 0.0
+      },
+      {
+        "sim": 0.0,
+        "ownership": 0.7,
+        "expected": 0.0
+      },
+      {
+        "sim": 0.0,
+        "ownership": 1.0,
+        "expected": 0.0
+      },
+      {
+        "sim": 0.2,
+        "ownership": 0.0,
+        "expected": 0.0
+      },
+      {
+        "sim": 0.2,
+        "ownership": 0.42,
+        "expected": 0.084
+      },
+      {
+        "sim": 0.2,
+        "ownership": 0.7,
+        "expected": 0.13999999999999999
+      },
+      {
+        "sim": 0.2,
+        "ownership": 1.0,
+        "expected": 0.2
+      },
+      {
+        "sim": 0.5,
+        "ownership": 0.0,
+        "expected": 0.0
+      },
+      {
+        "sim": 0.5,
+        "ownership": 0.42,
+        "expected": 0.21
+      },
+      {
+        "sim": 0.5,
+        "ownership": 0.7,
+        "expected": 0.35
+      },
+      {
+        "sim": 0.5,
+        "ownership": 1.0,
+        "expected": 0.5
+      },
+      {
+        "sim": 0.9,
+        "ownership": 0.0,
+        "expected": 0.0
+      },
+      {
+        "sim": 0.9,
+        "ownership": 0.42,
+        "expected": 0.378
+      },
+      {
+        "sim": 0.9,
+        "ownership": 0.7,
+        "expected": 0.63
+      },
+      {
+        "sim": 0.9,
+        "ownership": 1.0,
+        "expected": 0.9
+      },
+      {
+        "sim": 1.0,
+        "ownership": 0.0,
+        "expected": 0.0
+      },
+      {
+        "sim": 1.0,
+        "ownership": 0.42,
+        "expected": 0.42
+      },
+      {
+        "sim": 1.0,
+        "ownership": 0.7,
+        "expected": 0.7
+      },
+      {
+        "sim": 1.0,
+        "ownership": 1.0,
+        "expected": 1.0
+      }
+    ],
+    "routing_decision": [
+      {
+        "owners": [],
+        "tau": 0.35,
+        "k": 2,
+        "expected": {
+          "action": "GLOBAL_SEARCH",
+          "owners": [],
+          "top_score": null,
+          "tau": 0.35
+        }
+      },
+      {
+        "owners": [
+          [
+            "a",
+            0.2
+          ]
+        ],
+        "tau": 0.35,
+        "k": 2,
+        "expected": {
+          "action": "GLOBAL_SEARCH",
+          "owners": [],
+          "top_score": 0.2,
+          "tau": 0.35
+        }
+      },
+      {
+        "owners": [
+          [
+            "a",
+            0.35
+          ]
+        ],
+        "tau": 0.35,
+        "k": 2,
+        "expected": {
+          "action": "ROUTE",
+          "owners": [
+            [
+              "a",
+              0.35
+            ]
+          ],
+          "top_score": 0.35,
+          "tau": 0.35
+        }
+      },
+      {
+        "owners": [
+          [
+            "a",
+            0.9
+          ],
+          [
+            "b",
+            0.5
+          ],
+          [
+            "c",
+            0.4
+          ]
+        ],
+        "tau": 0.35,
+        "k": 2,
+        "expected": {
+          "action": "ROUTE",
+          "owners": [
+            [
+              "a",
+              0.9
+            ],
+            [
+              "b",
+              0.5
+            ]
+          ],
+          "top_score": 0.9,
+          "tau": 0.35
+        }
+      },
+      {
+        "owners": [
+          [
+            "a",
+            0.9
+          ],
+          [
+            "b",
+            0.5
+          ],
+          [
+            "c",
+            0.4
+          ]
+        ],
+        "tau": 0.6,
+        "k": 1,
+        "expected": {
+          "action": "ROUTE",
+          "owners": [
+            [
+              "a",
+              0.9
+            ]
+          ],
+          "top_score": 0.9,
+          "tau": 0.6
+        }
+      },
+      {
+        "owners": [
+          [
+            "x",
+            0.41
+          ],
+          [
+            "y",
+            0.41
+          ]
+        ],
+        "tau": 0.41,
+        "k": 2,
+        "expected": {
+          "action": "ROUTE",
+          "owners": [
+            [
+              "x",
+              0.41
+            ],
+            [
+              "y",
+              0.41
+            ]
+          ],
+          "top_score": 0.41,
+          "tau": 0.41
+        }
+      }
+    ],
+    "reputation": [
+      {
+        "claim_class": "A",
+        "status": "verified",
+        "expected": [
+          1.0,
+          1.0
+        ]
+      },
+      {
+        "claim_class": "A",
+        "status": "refuted",
+        "expected": [
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "claim_class": "A",
+        "status": "pending",
+        "expected": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "claim_class": "A",
+        "status": "abandoned",
+        "expected": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "claim_class": "B",
+        "status": "verified",
+        "expected": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "claim_class": "B",
+        "status": "refuted",
+        "expected": [
+          0.0,
+          0.5
+        ]
+      },
+      {
+        "claim_class": "B",
+        "status": "pending",
+        "expected": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "claim_class": "B",
+        "status": "abandoned",
+        "expected": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "claim_class": "C",
+        "status": "verified",
+        "expected": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "claim_class": "C",
+        "status": "refuted",
+        "expected": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "claim_class": "C",
+        "status": "pending",
+        "expected": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "claim_class": "C",
+        "status": "abandoned",
+        "expected": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "claim_class": "a",
+        "status": "verified",
+        "expected": [
+          1.0,
+          1.0
+        ]
+      },
+      {
+        "claim_class": "a",
+        "status": "refuted",
+        "expected": [
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "claim_class": "a",
+        "status": "pending",
+        "expected": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "claim_class": "a",
+        "status": "abandoned",
+        "expected": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "claim_class": "X",
+        "status": "verified",
+        "expected": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "claim_class": "X",
+        "status": "refuted",
+        "expected": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "claim_class": "X",
+        "status": "pending",
+        "expected": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "claim_class": "X",
+        "status": "abandoned",
+        "expected": [
+          0.0,
+          0.0
+        ]
+      }
+    ]
+  }
+}

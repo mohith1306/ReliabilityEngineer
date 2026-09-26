@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bob Reliability Engineer</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --panel-2: #f0f2f5; --line: #dfe3e8; --text: #1b2430; --muted: #5d6b7c;
+    --accent: #0f62fe; --accent-2: #edf3ff; --ok: #14804a; --ok-bg: #e4f6ec; --warn: #a15c00; --warn-bg: #fff3dd;
+    --bad: #b4232c; --bad-bg: #fde8ea; --info: #6a3fd1; --info-bg: #efe9fb; --code: #f3f5f8;
+    --add: #e6f6ea; --del: #fdeaec; --shadow: 0 1px 2px rgba(16,24,40,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e1116; --panel: #161b22; --panel-2: #1c232c; --line: #2b3440; --text: #e6ebf1; --muted: #93a1b3;
+      --accent: #6ea0ff; --accent-2: #172033; --ok: #4cc38a; --ok-bg: #12291e; --warn: #f0b04a; --warn-bg: #2d2412;
+      --bad: #ff8a92; --bad-bg: #331a1d; --info: #b394ff; --info-bg: #241b3d; --code: #10151b; --add: #10291a; --del: #33191c;
+      --shadow: none;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e1116; --panel: #161b22; --panel-2: #1c232c; --line: #2b3440; --text: #e6ebf1; --muted: #93a1b3;
+    --accent: #6ea0ff; --accent-2: #172033; --ok: #4cc38a; --ok-bg: #12291e; --warn: #f0b04a; --warn-bg: #2d2412;
+    --bad: #ff8a92; --bad-bg: #331a1d; --info: #b394ff; --info-bg: #241b3d; --code: #10151b; --add: #10291a; --del: #33191c; --shadow: none;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  code, pre, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; }
+  button { font: inherit; cursor: pointer; }
+  a { color: var(--accent); }
+
+  header.top { display: flex; align-items: center; gap: 16px; padding: 10px 20px; background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; flex-wrap: wrap; }
+  .brand { font-weight: 700; letter-spacing: -.01em; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+  .brand .logo { width: 22px; height: 22px; border-radius: 6px; background: linear-gradient(135deg, var(--accent), #8a3ffc); display: inline-block; }
+  .brand small { color: var(--muted); font-weight: 500; }
+  nav.tabs { display: flex; gap: 4px; margin-left: 8px; }
+  nav.tabs button { background: transparent; border: 0; padding: 6px 12px; border-radius: 8px; color: var(--muted); font-weight: 600; }
+  nav.tabs button[aria-selected="true"] { background: var(--accent-2); color: var(--accent); }
+  .spacer { flex: 1; }
+  .mode { padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: .02em; border: 1px solid transparent; }
+  .mode.sim { background: var(--warn-bg); color: var(--warn); border-color: color-mix(in srgb, var(--warn) 30%, transparent); }
+  .mode.live { background: var(--ok-bg); color: var(--ok); border-color: color-mix(in srgb, var(--ok) 30%, transparent); }
+  .mode.none { background: var(--bad-bg); color: var(--bad); }
+  .iconbtn { background: var(--panel-2); border: 1px solid var(--line); color: var(--text); border-radius: 8px; padding: 5px 9px; }
+
+  main { display: grid; grid-template-columns: 320px 1fr; gap: 16px; padding: 16px 20px; max-width: 1500px; margin: 0 auto; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; padding: 12px 16px; } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); }
+  .card h2, .card h3 { margin: 0; }
+  .pad { padding: 14px 16px; }
+  .sub { color: var(--muted); font-size: 12.5px; }
+
+  /* sidebar */
+  .side .head { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .side .head h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .newbox { padding: 12px 14px; border-bottom: 1px solid var(--line); display: grid; gap: 8px; }
+  .newbox select, .field { width: 100%; padding: 7px 9px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); color: var(--text); font: inherit; }
+  .btn { border: 1px solid var(--line); background: var(--panel-2); color: var(--text); border-radius: 8px; padding: 7px 12px; font-weight: 600; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.ok { background: var(--ok); border-color: var(--ok); color: #fff; }
+  .btn.danger { background: transparent; border-color: var(--bad); color: var(--bad); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .list { max-height: 60vh; overflow: auto; }
+  .row { display: block; width: 100%; text-align: left; background: transparent; border: 0; border-bottom: 1px solid var(--line); padding: 10px 14px; color: inherit; }
+  .row:hover { background: var(--panel-2); }
+  .row[aria-current="true"] { background: var(--accent-2); box-shadow: inset 3px 0 0 var(--accent); }
+  .row .t { font-weight: 600; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row .m { display: flex; gap: 6px; align-items: center; margin-top: 4px; }
+
+  .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; background: var(--panel-2); color: var(--muted); white-space: nowrap; }
+  .pill.ok { background: var(--ok-bg); color: var(--ok); } .pill.bad { background: var(--bad-bg); color: var(--bad); }
+  .pill.warn { background: var(--warn-bg); color: var(--warn); } .pill.info { background: var(--info-bg); color: var(--info); }
+  .pill.acc { background: var(--accent-2); color: var(--accent); }
+
+  /* incident */
+  .title { padding: 16px; border-bottom: 1px solid var(--line); }
+  .title h2 { font-size: 17px; letter-spacing: -.01em; }
+  .stepper { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 12px; }
+  .step { padding: 3px 9px; border-radius: 6px; background: var(--panel-2); color: var(--muted); font-size: 11.5px; font-weight: 700; }
+  .step.done { background: var(--ok-bg); color: var(--ok); } .step.now { background: var(--accent); color: #fff; }
+  .step.bad { background: var(--bad); color: #fff; }
+  .actions { padding: 12px 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; border-bottom: 1px solid var(--line); background: var(--panel-2); border-radius: 0; }
+  .approve { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 10px 12px; border: 1px dashed var(--warn); border-radius: 10px; background: var(--warn-bg); }
+  .approve .field { width: 220px; }
+  .notice { padding: 10px 16px; font-size: 13px; }
+  .notice.warn { background: var(--warn-bg); color: var(--warn); } .notice.bad { background: var(--bad-bg); color: var(--bad); } .notice.ok { background: var(--ok-bg); color: var(--ok); }
+  .tabs2 { display: flex; gap: 2px; padding: 8px 12px 0; border-bottom: 1px solid var(--line); overflow: auto; }
+  .tabs2 button { background: transparent; border: 0; padding: 8px 12px; border-bottom: 2px solid transparent; color: var(--muted); font-weight: 600; white-space: nowrap; }
+  .tabs2 button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+  .panel { padding: 16px; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+  .kv { display: grid; grid-template-columns: 150px 1fr; gap: 6px 12px; }
+  .kv dt { color: var(--muted); } .kv dd { margin: 0; overflow-wrap: anywhere; }
+
+  .tl { list-style: none; margin: 0; padding: 0 0 0 14px; border-left: 2px solid var(--line); }
+  .tl li { position: relative; padding: 0 0 14px 14px; }
+  .tl li::before { content: ""; position: absolute; left: -22px; top: 5px; width: 10px; height: 10px; border-radius: 50%; background: var(--line); border: 2px solid var(--panel); }
+  .tl li.ok::before { background: var(--ok); } .tl li.bad::before { background: var(--bad); } .tl li.acc::before { background: var(--accent); } .tl li.warn::before { background: var(--warn); }
+  .tl .who { color: var(--muted); font-size: 12px; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  .bar { height: 8px; border-radius: 4px; background: var(--panel-2); overflow: hidden; min-width: 90px; }
+  .bar > span { display: block; height: 100%; background: var(--accent); }
+  pre.code { background: var(--code); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; overflow: auto; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .diff { background: var(--code); border: 1px solid var(--line); border-radius: 8px; overflow: auto; }
+  .diff div { padding: 0 10px; white-space: pre; } .diff .a { background: var(--add); } .diff .d { background: var(--del); } .diff .h { color: var(--muted); }
+  details { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; background: var(--panel); }
+  details + details { margin-top: 8px; } summary { cursor: pointer; font-weight: 600; }
+  .empty { padding: 40px 16px; text-align: center; color: var(--muted); }
+  .spin { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: sp .8s linear infinite; vertical-align: -2px; }
+  @keyframes sp { to { transform: rotate(360deg); } }
+  .lvl { display: grid; grid-template-columns: 110px 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .banner { padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; }
+  .banner.sim { background: var(--warn-bg); color: var(--warn); }
+  .finding { padding: 6px 0; } .stat { font-size: 22px; font-weight: 700; letter-spacing: -.02em; }
+  .visually-hidden { position: absolute; left: -9999px; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo"></span>Bob Reliability Engineer <small>verification-gated reliability loop</small></div>
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" data-view="incidents" aria-selected="true">Incidents</button>
+    <button role="tab" data-view="learning" aria-selected="false">What BRE has learned</button>
+    <button role="tab" data-view="evaluation" aria-selected="false">Evaluation</button>
+  </nav>
+  <span class="spacer"></span>
+  <span id="mode" class="mode none" title="How Bob is being reached">…</span>
+  <button class="iconbtn" id="theme" title="Toggle light / dark" aria-label="Toggle theme">◐</button>
+</header>
+
+<main>
+  <aside class="card side" id="side">
+    <div class="head"><h2>Incidents</h2><button class="btn" id="refresh" title="Reload">↻</button></div>
+    <div class="newbox" id="newbox" hidden>
+      <select id="scenario" aria-label="Demo scenario"></select>
+      <div class="sub" id="scenario-help"></div>
+      <div style="display:flex;gap:8px"><button class="btn primary" id="create" style="flex:1">Create demo incident</button>
+      <button class="btn danger" id="reset" title="Wipe all demo data">Reset</button></div>
+    </div>
+    <div class="list" id="list"><div class="empty">Loading…</div></div>
+  </aside>
+  <section id="content"></section>
+</main>
+
+<script>
+"use strict";
+const $ = (s, r = document) => r.querySelector(s);
+const el = (tag, attrs = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") n.className = v; else if (k === "text") n.textContent = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v); else if (v !== false && v != null) n.setAttribute(k, v === true ? "" : v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) n.append(k.nodeType ? k : document.createTextNode(String(k)));
+  return n;
+};
+const api = async (path, opts = {}) => {
+  const r = await fetch(path, { headers: { "Content-Type": "application/json", ...(opts.headers || {}) }, ...opts });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.detail || `${r.status} ${r.statusText}`);
+  return body;
+};
+
+const STATES = ["DETECTED","INVESTIGATING","DIAGNOSED","RISK_ASSESSED","AWAITING_APPROVAL","REMEDIATING","VERIFYING","RESOLVED"];
+const STATUS_CLASS = { RESOLVED: "ok", CLOSED: "", FAILED: "bad", ABANDONED: "bad", AWAITING_APPROVAL: "warn", REINVESTIGATING: "info",
+                       REMEDIATING: "acc", VERIFYING: "acc", INVESTIGATING: "acc", DIAGNOSED: "acc", RISK_ASSESSED: "acc", DETECTED: "" };
+const pill = (text, cls = "") => el("span", { class: "pill " + cls, text });
+const state = { view: "incidents", selected: null, tab: "story", system: null, busy: false, key: "", detail: null, notice: null };
+
+/* ---------- system / mode ---------- */
+async function loadSystem() {
+  state.system = await api("/api/system");
+  const b = state.system.bob, m = $("#mode");
+  m.textContent = b.label;
+  m.className = "mode " + (b.simulated ? "sim" : b.mode === "unavailable" ? "none" : "live");
+  m.title = b.detail;
+  $("#newbox").hidden = !state.system.demo;
+  if (state.system.demo) {
+    const sc = await api("/api/demo/scenarios");
+    const sel = $("#scenario"); sel.replaceChildren(...sc.map(s => el("option", { value: s.scenario, text: s.title })));
+    const help = () => { $("#scenario-help").textContent = (sc.find(s => s.scenario === sel.value) || {}).teaches || ""; };
+    sel.onchange = help; help();
+  }
+}
+
+/* ---------- incident list ---------- */
+async function loadList() {
+  const rows = await api("/api/incidents?limit=100");
+  const list = $("#list");
+  if (!rows.length) { list.replaceChildren(el("div", { class: "empty" }, state.system?.demo ? "No incidents yet. Create a demo incident above." : "No incidents yet.")); return; }
+  list.replaceChildren(...rows.map(i => el("button", { class: "row", "aria-current": String(i.id === state.selected), onclick: () => select(i.id) },
+    el("span", { class: "t", text: i.description }),
+    el("span", { class: "m" }, pill(i.status.replaceAll("_", " "), STATUS_CLASS[i.status] || ""), pill(i.severity), el("span", { class: "sub mono", text: i.id })))));
+}
+
+async function select(id) { state.selected = id; state.tab = "story"; state.notice = null; await loadList(); await loadDetail(); render(); }
+async function loadDetail() { state.detail = state.selected ? await api(`/api/incidents/${state.selected}/detail`) : null; }
+
+/* ---------- views ---------- */
+function render() {
+  document.querySelectorAll("nav.tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.view === state.view)));
+  $("#side").hidden = state.view !== "incidents";
+  document.querySelector("main").style.gridTemplateColumns = state.view === "incidents" ? "" : "1fr";
+  const c = $("#content"); c.replaceChildren();
+  if (state.view === "incidents") c.append(incidentView());
+  else if (state.view === "learning") learningView(c);
+  else evaluationView(c);
+}
+
+function modeBanner() {
+  const b = state.system?.bob;
+  if (!b?.simulated) return null;
+  return el("div", { class: "banner sim" }, el("strong", { text: "Simulated Bob. " }),
+    "The diagnosing and fixing agent here is a labelled replay stand-in, not IBM Bob. Everything else is real: the git checkpoint and branch, the pytest runs, the verification levels, the rollback and the outcome ledger.");
+}
+
+function incidentView() {
+  const d = state.detail;
+  if (!d) return el("div", { class: "card" }, el("div", { class: "empty" }, "Select an incident, or create a demo incident."));
+  const inc = d.incident, wrap = el("div", { class: "card" });
+  const ended = ["RESOLVED","FAILED","ABANDONED","CLOSED"].includes(inc.status);
+
+  const stepper = el("div", { class: "stepper" }, STATES.map(s => {
+    const idx = STATES.indexOf(s), cur = STATES.indexOf(inc.status);
+    let cls = "step";
+    if (inc.status === s) cls += " now"; else if (cur > idx && inc.status !== "REINVESTIGATING") cls += " done";
+    return el("span", { class: cls, text: s.replaceAll("_", " ") });
+  }));
+  if (["REINVESTIGATING","FAILED","ABANDONED","CLOSED"].includes(inc.status)) stepper.append(el("span", { class: "step " + (inc.status === "CLOSED" ? "" : inc.status === "REINVESTIGATING" ? "now" : "bad"), text: inc.status }));
+
+  wrap.append(el("div", { class: "title" },
+    el("div", { style: "display:flex;gap:10px;align-items:center;flex-wrap:wrap" }, el("h2", { text: inc.description }),
+      pill("attempt " + inc.attempt + " / " + inc.max_attempts, inc.attempt > 1 ? "info" : ""), pill(inc.severity)),
+    el("div", { class: "sub" }, `${inc.repository} · ${inc.type} · `, el("span", { class: "mono", text: inc.id })), stepper));
+
+  wrap.append(actionBar(d, inc, ended));
+  if (state.notice) wrap.append(el("div", { class: "notice " + state.notice.kind, text: state.notice.text }));
+
+  const tabs = [["story","Story"],["evidence","Evidence"],["diagnosis","Diagnosis"],["risk","Risk & approval"],["patch","Patch"],["verify","Verification"],["ledger","Ledger"]];
+  wrap.append(el("div", { class: "tabs2", role: "tablist" }, tabs.map(([k, l]) =>
+    el("button", { role: "tab", "aria-selected": String(state.tab === k), onclick: () => { state.tab = k; render(); } }, l))));
+  const body = el("div", { class: "panel" }, modeBanner());
+  ({ story: storyTab, evidence: evidenceTab, diagnosis: diagnosisTab, risk: riskTab, patch: patchTab, verify: verifyTab, ledger: ledgerTab })[state.tab](body, d);
+  wrap.append(body);
+  return wrap;
+}
+
+function actionBar(d, inc, ended) {
+  const bar = el("div", { class: "actions" });
+  bar.append(el("button", { class: "btn primary", disabled: state.busy || ended || inc.status === "AWAITING_APPROVAL" && !d.gate.satisfied, onclick: () => run() },
+    state.busy ? [el("span", { class: "spin" }), " Working…"] : ended ? "Finished" : "▶ Run the loop"));
+  if (inc.status === "AWAITING_APPROVAL" && !d.gate.satisfied) {
+    const key = el("input", { class: "field mono", type: "password", placeholder: "operator API key", value: state.key, autocomplete: "off",
+                              oninput: e => { state.key = e.target.value; } });
+    bar.append(el("div", { class: "approve" },
+      el("strong", { text: `${d.gate.risk_level} risk: a human must approve` }), key,
+      el("button", { class: "btn ok", onclick: () => decide("APPROVED") }, "Approve"),
+      el("button", { class: "btn danger", onclick: () => decide("REJECTED") }, "Reject")));
+    if (state.system?.demo_operator_key) bar.append(el("span", { class: "sub" }, "demo key: ", el("code", { text: state.system.demo_operator_key })));
+  } else if (inc.status === "AWAITING_APPROVAL") {
+    bar.append(pill("approved — run the loop to continue", "ok"));
+  }
+  return bar;
+}
+
+async function run() {
+  state.busy = true; state.notice = null; render();
+  try {
+    const r = await api(`/api/incidents/${state.selected}/advance`, { method: "POST", body: "{}" });
+    const kind = r.blocked_on === "approval" ? "warn" : r.blocked_on === "terminal" ? (r.status === "RESOLVED" ? "ok" : "bad") : r.blocked_on ? "warn" : "ok";
+    state.notice = { kind, text: `${r.steps.length} step(s): ${r.steps.map(s => s.action).join(" → ") || "none"}.` + (r.message ? " " + r.message : "") };
+  } catch (e) { state.notice = { kind: "bad", text: e.message }; }
+  state.busy = false;
+  await loadList(); await loadDetail(); render();
+}
+
+async function decide(decision) {
+  if (!state.key) { state.notice = { kind: "warn", text: "Enter an operator API key. The approval records WHO decided, from the key — never from free text." }; render(); return; }
+  try {
+    await api(`/api/incidents/${state.selected}/approvals`, { method: "POST", headers: { Authorization: "Bearer " + state.key },
+      body: JSON.stringify({ decision, reason: decision === "REJECTED" ? "rejected from the dashboard" : "approved from the dashboard" }) });
+    state.notice = { kind: "ok", text: `${decision === "APPROVED" ? "Approved" : "Rejected"}. Run the loop to continue.` };
+  } catch (e) { state.notice = { kind: "bad", text: e.message }; }
+  await loadDetail(); render();
+}
+
+/* ---------- tabs ---------- */
+const kindText = e => {
+  const d = e.detail || {}, t = e.kind;
+  if (t === "transition") return [`${e.from || "—"} → ${e.to}`, e.to === "RESOLVED" ? "ok" : ["FAILED","ABANDONED"].includes(e.to) ? "bad" : e.to === "REINVESTIGATING" ? "warn" : "acc"];
+  if (t === "diagnosis") return [`Diagnosis by ${e.actor}: confidence ${(d.confidence ?? 0).toFixed(2)}` + (d.routing ? ` — routing: ${d.routing.reason}` : ""), "acc"];
+  if (t === "risk") return [`Risk assessed: ${d.level} (score ${d.score})`, "acc"];
+  if (t === "remediation") return [d.phase === "checkpoint" ? `Checkpoint ${String(d.base_sha).slice(0, 8)} on ${d.base_branch}; working on ${d.branch}`
+    : d.phase === "patched" ? `Patch committed ${String(d.commit).slice(0, 8)}: ${(d.files || []).join(", ")}${d.simulated ? " [simulated agent]" : ""}`
+    : `Rolled back: ${d.reason}`, d.phase === "rolled_back" ? "bad" : "acc"];
+  if (t === "verification") return [d.passed ? "Verification PASSED" : `Verification FAILED: ${d.reason}`, d.passed ? "ok" : "bad"];
+  if (t === "memory") return [`Verified diagnosis promoted to memory (${d.topic})`, "ok"];
+  return [t, ""];
+};
+function storyTab(b, d) {
+  if (!d.timeline.length) { b.append(el("div", { class: "empty" }, "Nothing has happened yet. Press “Run the loop”.")); return; }
+  b.append(el("ul", { class: "tl" }, d.timeline.map(e => { const [text, cls] = kindText(e);
+    return el("li", { class: cls }, el("div", { text }), el("div", { class: "who" }, `${e.actor} · ${new Date(e.at + "Z").toLocaleTimeString()}`)); })));
+}
+function evidenceTab(b, d) {
+  if (!d.evidence.length) { b.append(el("div", { class: "empty" }, "No evidence yet.")); return; }
+  b.append(el("div", { class: "sub", style: "margin-bottom:10px" }, d.investigation?.summary || ""),
+    ...d.evidence.map(e => el("details", {}, el("summary", {}, pill(e.source_type, "acc"), " ", el("span", { class: "mono", text: e.reference }), " ", el("span", { class: "sub", text: `relevance ${e.relevance.toFixed(2)}` })),
+      el("pre", { class: "code", text: e.content }))));
+}
+function diagnosisTab(b, d) {
+  if (!d.diagnoses.length) { b.append(el("div", { class: "empty" }, "No diagnosis yet.")); return; }
+  d.diagnoses.forEach((x, i) => {
+    const out = d.outcomes.find(o => o.type === "diagnosis" && o.attempt === (i + 1));
+    const routing = d.outcomes.filter(o => o.type === "routing")[i];
+    const src = out ? out.predictor : "?";
+    b.append(el("div", { class: "card pad", style: "margin-bottom:12px" },
+      el("div", { style: "display:flex;gap:8px;align-items:center;flex-wrap:wrap" }, el("h3", { text: `Attempt ${i + 1}` }),
+        pill("source: " + src, src === "memory" ? "info" : "acc"), pill("confidence " + x.confidence.toFixed(2)),
+        out ? pill(out.status, out.status === "confirmed" ? "ok" : out.status === "refuted" ? "bad" : "") : null,
+        out ? pill(out.cost_tokens + " tokens" + (out.components?.simulated ? " (nominal)" : ""), "") : null),
+      el("p", { text: x.root_cause }),
+      routing ? el("div", { class: "sub" }, el("strong", { text: "Routing: " }), routing.components.reason || "",
+        ` (τ ${Number(routing.components.tau).toFixed(3)}, ${routing.components.tau_source})`) : null,
+      el("div", { class: "grid2" },
+        el("div", {}, el("strong", { text: "Affected" }), el("div", { class: "mono", text: (x.affected_components || []).join(", ") || "—" })),
+        el("div", {}, el("strong", { text: "Assumptions" }), el("ul", {}, (x.assumptions || []).map(a => el("li", { text: a })))),
+        el("div", {}, el("strong", { text: "Unresolved uncertainty" }), el("ul", {}, (x.unresolved_uncertainty || []).map(a => el("li", { text: a })))))));
+  });
+}
+function riskTab(b, d) {
+  if (!d.risks.length) { b.append(el("div", { class: "empty" }, "No risk assessment yet.")); return; }
+  const r = d.risks[d.risks.length - 1], rules = r.factors?.rules || {}, score = r.factors?.score ?? 0, max = 11;
+  b.append(el("div", { style: "display:flex;gap:10px;align-items:center;margin-bottom:10px" }, el("h3", { text: "Risk " + r.level }),
+    pill(`score ${score}`, r.level === "LOW" ? "ok" : r.level === "MEDIUM" ? "warn" : "bad"),
+    pill(d.gate.approval_required ? (d.gate.satisfied ? "approved" : "approval required") : "no approval required", d.gate.satisfied ? "ok" : "warn")),
+    el("div", { class: "sub", style: "margin-bottom:10px" }, "Every score stores its components (ASMOS Invariant 8): a level without its breakdown is unauditable."),
+    el("table", {}, el("tr", {}, ...["Factor", "Input", "Points", ""].map(h => el("th", { text: h }))),
+      ...Object.entries(rules).map(([k, v]) => el("tr", {}, el("td", { text: k.replaceAll("_", " ") }), el("td", { class: "mono", text: String(v.input) }),
+        el("td", { text: v.points }), el("td", {}, el("div", { class: "bar" }, el("span", { style: `width:${Math.min(100, v.points / 3 * 100)}%` })))))),
+    el("div", { class: "sub", style: "margin-top:8px", text: "Thresholds: " + JSON.stringify(r.factors?.thresholds || {}) }));
+  if (d.approvals.length) b.append(el("h3", { style: "margin:16px 0 6px", text: "Approvals" }), el("table", {}, el("tr", {}, ...["Decision", "Operator", "Risk", "Reason"].map(h => el("th", { text: h }))),
+    ...d.approvals.map(a => el("tr", {}, el("td", {}, pill(a.decision, a.decision === "APPROVED" ? "ok" : "bad")), el("td", { text: a.operator }), el("td", { text: a.risk_level }), el("td", { text: a.reason || "" })))));
+}
+async function patchTab(b, d) {
+  if (!d.remediations.length) { b.append(el("div", { class: "empty" }, "No patch yet. Nothing is written to a repository until a human approves.")); return; }
+  for (const r of d.remediations) {
+    const card = el("div", { class: "card pad", style: "margin-bottom:12px" },
+      el("div", { style: "display:flex;gap:8px;flex-wrap:wrap;align-items:center" }, el("h3", { text: `Attempt ${r.attempt}` }),
+        pill(r.status, r.status === "completed" ? "ok" : "bad"), pill("executor: " + r.executor, r.executor === "replay" ? "warn" : "acc")),
+      el("dl", { class: "kv", style: "margin:10px 0" },
+        el("dt", { text: "Branch" }), el("dd", { class: "mono", text: r.branch || "—" }),
+        el("dt", { text: "Checkpoint" }), el("dd", { class: "mono", text: (r.checkpoint_sha || "").slice(0, 12) + " on " + (r.base_branch || "?") }),
+        el("dt", { text: "Changed (from git)" }), el("dd", { class: "mono", text: (r.changed_files || []).join(", ") || "—" }),
+        el("dt", { text: "Was already failing" }), el("dd", { class: "mono", text: (r.baseline_failures || []).join(", ") || "—" }),
+        el("dt", { text: "Summary" }), el("dd", { text: r.summary || "—" })));
+    const slot = el("div", {}, r.commit_sha ? el("span", { class: "sub" }, el("span", { class: "spin" }), " loading diff…") : null);
+    card.append(slot); b.append(card);
+    if (r.commit_sha) api(`/api/incidents/${d.incident.id}/remediations/${r.id}/diff`).then(x => slot.replaceChildren(diffView(x.diff)))
+      .catch(e => slot.replaceChildren(el("div", { class: "sub", text: "Diff unavailable: " + e.message })));
+  }
+}
+function diffView(text) {
+  const box = el("div", { class: "diff mono" });
+  for (const line of (text || "").split("\n")) box.append(el("div", { class: line.startsWith("+") && !line.startsWith("+++") ? "a" : line.startsWith("-") && !line.startsWith("---") ? "d" : line.startsWith("@@") || line.startsWith("diff") ? "h" : "", text: line || " " }));
+  return box;
+}
+function verifyTab(b, d) {
+  if (!d.verifications.length) { b.append(el("div", { class: "empty" }, "Not verified yet. A fix is only a claim until the tests say otherwise.")); return; }
+  for (const v of d.verifications) {
+    const card = el("div", { class: "card pad", style: "margin-bottom:12px" },
+      el("div", { style: "display:flex;gap:8px;align-items:center" }, el("h3", { text: "Verification" }), pill(v.status, v.status === "passed" ? "ok" : "bad")));
+    const verdict = v.levels?.verdict;
+    if (verdict && !verdict.passed) card.append(el("div", { class: "notice bad", text: verdict.reason }));
+    for (const name of ["targeted", "component", "regression"]) {
+      const l = v.levels?.[name]; if (!l) continue;
+      card.append(el("div", { class: "lvl" }, el("div", {}, el("strong", { text: name }), el("div", { class: "sub", text: name === "targeted" ? "the tests that were red" : name === "component" ? "their whole files" : "the entire suite" })),
+        el("div", {}, l.skipped ? pill("skipped — " + l.reason) : pill(l.ok ? "passed" : "FAILED", l.ok ? "ok" : "bad"),
+          l.skipped ? null : el("span", { class: "sub", text: `  ${l.ran ?? 0} ran · ${l.passed ?? 0} passed · ${l.failed ?? 0} failed · ${l.duration_ms ?? 0} ms` }),
+          l.selectors?.length ? el("div", { class: "mono sub", text: l.selectors.join("  ") }) : null,
+          l.regressions?.length ? el("div", { class: "mono", style: "color:var(--bad)", text: "newly failing: " + l.regressions.join(", ") }) : null)));
+    }
+    b.append(card);
+  }
+}
+function ledgerTab(b, d) {
+  if (!d.outcomes.length) { b.append(el("div", { class: "empty" }, "The ledger is empty.")); return; }
+  b.append(el("div", { class: "sub", style: "margin-bottom:10px" }, "Every prediction is written here when it is made, as pending. Only a verification run may close it — confirmed or refuted. An attempt that never reached verification is abandoned, and moves no reputation."),
+    el("table", {}, el("tr", {}, ...["Attempt", "Type", "Source", "Status", "Conf.", "Tokens", "Closed by"].map(h => el("th", { text: h }))),
+      ...d.outcomes.map(o => el("tr", {}, el("td", { text: o.attempt }), el("td", { text: o.type.replaceAll("_", " ") }), el("td", { class: "mono", text: o.predictor }),
+        el("td", {}, pill(o.status, o.status === "confirmed" ? "ok" : o.status === "refuted" ? "bad" : o.status === "pending" ? "warn" : "")),
+        el("td", { text: o.confidence.toFixed(2) }), el("td", { text: o.cost_tokens + (o.components?.simulated ? "*" : "") }), el("td", { class: "sub mono", text: o.closed_by || "—" })))),
+    el("div", { class: "sub", style: "margin-top:6px", text: "* nominal (simulated agent). Only measured when Bob is live." }));
+}
+
+/* ---------- learning ---------- */
+async function learningView(c) {
+  const [own, led] = await Promise.all([api("/api/ownership"), api("/api/ledger")]);
+  const wrap = el("div", { class: "card" });
+  wrap.append(el("div", { class: "title" }, el("h2", { text: "What BRE has learned" }), el("div", { class: "sub", text: own.explanation })));
+  const p = el("div", { class: "panel" }, modeBanner());
+  p.append(el("h3", { text: "Ownership by source and topic" }));
+  p.append(own.standings.length ? el("table", {}, el("tr", {}, ...["Source", "Topic", "Verified ✓ / total", "Trust", "Share", "Ownership", ""].map(h => el("th", { text: h }))),
+    ...own.standings.map(s => el("tr", {}, el("td", { text: s.source }), el("td", { text: s.topic }), el("td", { class: "mono", text: `${s.verified_correct} / ${s.verified_total}` }),
+      el("td", { text: s.trust.toFixed(3) }), el("td", { text: s.contribution_share.toFixed(2) }), el("td", { text: s.ownership.toFixed(3) }),
+      el("td", {}, el("div", { class: "bar" }, el("span", { style: `width:${Math.round(s.ownership * 100)}%` })))))) :
+    el("div", { class: "empty" }, "Nothing learned yet. Ownership only moves when a verification run confirms or refutes a diagnosis."));
+  p.append(el("h3", { style: "margin:20px 0 8px", text: "Verified memory" }),
+    own.memory.length ? el("div", {}, own.memory.map(m => el("details", {}, el("summary", {}, pill(m.topic, "acc"), " ", m.root_cause.slice(0, 110), m.status !== "active" ? [" ", pill(m.status)] : null),
+      el("div", { class: "sub", style: "margin-top:6px", text: `from incident ${m.source_incident} (source ${m.source}), backed by verification run ${m.verification_run}. Components: ${m.components.join(", ")}` })))) :
+      el("div", { class: "empty" }, "No verified memory yet. A diagnosis becomes memory only after a passing verification run."));
+  p.append(el("h3", { style: "margin:20px 0 8px", text: "Ledger accuracy (confirmed ÷ graded)" }),
+    el("table", {}, el("tr", {}, ...["Predictor", "Confirmed", "Refuted", "Abandoned", "Accuracy"].map(h => el("th", { text: h }))),
+      ...led.accuracy_by_predictor.map(a => el("tr", {}, el("td", { class: "mono", text: a.predictor_id }), el("td", { text: a.confirmed }), el("td", { text: a.refuted }), el("td", { text: a.abandoned }), el("td", { text: a.accuracy == null ? "—" : (a.accuracy * 100).toFixed(0) + "%" })))),
+    el("div", { class: "sub", style: "margin-top:8px", text: `Total recorded cost: ${led.cost.total_tokens} tokens${state.system?.bob?.simulated ? " (nominal — simulated agent)" : ""}. Routing threshold τ = ${state.system.tau.value} (${state.system.tau.source}).` }));
+  wrap.append(p); c.replaceChildren(wrap);
+}
+
+/* ---------- evaluation ---------- */
+async function evaluationView(c) {
+  const r = await api("/api/results");
+  const wrap = el("div", { class: "card" });
+  wrap.append(el("div", { class: "title" }, el("h2", { text: "BRE vs Bob alone" }),
+    el("div", { class: "sub", text: "Same incidents, same order, real git + pytest verification. Findings are generated from the numbers, including the unflattering ones." })));
+  const p = el("div", { class: "panel" });
+  if (!r.slices.length) p.append(el("div", { class: "empty" }, "No evaluation artifacts found. Run python -m reliability.evaluation.compare."));
+  for (const s of r.slices) {
+    const card = el("div", { class: "card pad", style: "margin-bottom:16px" },
+      el("div", { style: "display:flex;gap:8px;align-items:center;flex-wrap:wrap" }, el("h3", { text: `Slice: ${s.slice}` }),
+        pill(`${s.corpus_size} incidents`), pill(`${s.look_alikes} look-alikes`, s.look_alikes ? "warn" : ""), pill(`${s.orderings} orderings`), pill(`τ ${Number(s.tau).toFixed(3)}`), pill("Bob: " + s.bob_mode, s.bob_mode === "replay" ? "warn" : "ok")),
+      el("ul", {}, (s.findings || []).map(f => el("li", { class: "finding", text: f.replace(/^- /, "") }))),
+      el("table", {}, el("tr", {}, ...["Arm", "Resolution", "Tokens / incident (nominal)", "Bob diagnoses", "From memory", "Refuted reuses", "Wasted attempts"].map(h => el("th", { text: h }))),
+        ...Object.entries(s.aggregate || {}).map(([arm, a]) => el("tr", {}, el("td", { text: arm }), el("td", { text: (a.resolution_rate.mean * 100).toFixed(0) + "%" }),
+          el("td", { text: a.tokens_per_incident.mean.toFixed(0) }), el("td", { text: a.bob_diagnoses.mean.toFixed(1) }), el("td", { text: a.memory_diagnoses.mean.toFixed(1) }),
+          el("td", { text: a.memory_refuted.mean.toFixed(1) }), el("td", { text: a.wasted_attempts.mean.toFixed(1) })))),
+      el("div", { class: "sub", style: "margin-top:8px", text: "Artifact: " + s.artifact }));
+    p.append(card);
+  }
+  wrap.append(p); c.replaceChildren(wrap);
+}
+
+/* ---------- wiring ---------- */
+document.querySelectorAll("nav.tabs button").forEach(b => b.addEventListener("click", async () => { state.view = b.dataset.view; render(); }));
+$("#refresh").onclick = async () => { await loadList(); await loadDetail(); render(); };
+$("#theme").onclick = () => { const r = document.documentElement; r.dataset.theme = r.dataset.theme === "dark" ? "light" : "dark"; };
+$("#create").onclick = async () => {
+  try { const r = await api("/api/demo/incidents", { method: "POST", body: JSON.stringify({ scenario: $("#scenario").value }) }); await select(r.id); }
+  catch (e) { state.notice = { kind: "bad", text: e.message }; render(); }
+};
+$("#reset").onclick = async () => {
+  if (!confirm("Wipe all demo incidents, memory and repositories?")) return;
+  await api("/api/demo/reset", { method: "POST" }); state.selected = null; state.detail = null; await loadList(); render();
+};
+(async () => {
+  try { await loadSystem(); await loadList(); render(); }
+  catch (e) { $("#content").replaceChildren(el("div", { class: "card" }, el("div", { class: "empty", text: "Could not reach the API: " + e.message }))); }
+})();
+</script>
+</body>
+</html>

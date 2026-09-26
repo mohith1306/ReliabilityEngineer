@@ -62,18 +62,60 @@ def evidence_block(evidence: Iterable[Any]) -> str:
     return "\n".join(lines) if lines else "(no evidence collected)"
 
 
-def investigate_prompt(incident: Any, evidence: Iterable[Any]) -> str:
+def prior_attempts_block(prior: Iterable[dict]) -> str:
+    """What already failed verification for THIS incident. Without it a re-investigation would
+    cheerfully re-propose the same fix; with it the model is told that hypothesis was tested and lost."""
+    lines = [
+        f"- attempt {p.get('attempt')}: tried \"{str(p.get('summary', ''))[:240]}\" -> "
+        f"verification FAILED ({str(p.get('why_failed', 'unknown'))[:240]})"
+        for p in prior
+    ]
+    if not lines:
+        return ""
+    return ("PREVIOUS ATTEMPTS ON THIS INCIDENT (each was applied, tested, and rolled back -- do not "
+            "propose the same fix again):\n" + "\n".join(lines) + "\n\n")
+
+
+def investigate_prompt(incident: Any, evidence: Iterable[Any], prior_attempts: Iterable[dict] = ()) -> str:
     return (
         "TASK: diagnose the root cause of this incident from the evidence.\n\n"
         f"INCIDENT:\n{_dump(incident)}\n\n"
         f"EVIDENCE:\n{evidence_block(evidence)}\n\n"
+        f"{prior_attempts_block(prior_attempts)}"
         f"{CONSTRAINTS}\n\n{OUTPUT_CONTRACT}\n\n{VERIFICATION_REQUIREMENTS}"
     )
 
 
-def diagnose_prompt(incident: Any, evidence: Iterable[Any]) -> str:
-    return investigate_prompt(incident, evidence)
+def diagnose_prompt(incident: Any, evidence: Iterable[Any], prior_attempts: Iterable[dict] = ()) -> str:
+    return investigate_prompt(incident, evidence, prior_attempts)
 
 
 def prompt_fingerprint(prompt: str) -> str:
     return hashlib.sha256(prompt.encode()).hexdigest()[:16]
+
+
+REMEDIATION_CONSTRAINTS = """\
+CONSTRAINTS (binding -- BRE checks the resulting diff and rolls the patch back if it breaks any):
+- Make the smallest change that fixes the diagnosed root cause. Modify only necessary files.
+- No unrelated refactoring, renaming, or reformatting.
+- NEVER delete, skip, xfail, or weaken a test to make it pass. If a test is wrong, say so in
+  your summary instead of editing it away.
+- Do not touch CI / workflow configuration.
+- Do not run git commands that create commits or branches: BRE owns the branch and the commit.
+- Do not install packages or change dependency manifests unless the diagnosis requires it."""
+
+
+def remediate_prompt(incident: Any, diagnosis: Any, evidence: Iterable[Any]) -> str:
+    """The write-path prompt. Carries the diagnosis as a *claim under test*, not as truth."""
+    return (
+        "TASK: fix the root cause of this incident in the repository at your working directory.\n\n"
+        f"INCIDENT:\n{_dump(incident)}\n\n"
+        f"DIAGNOSIS (a hypothesis nobody has verified yet):\n{_dump(diagnosis)}\n\n"
+        f"EVIDENCE:\n{evidence_block(evidence)}\n\n"
+        f"{REMEDIATION_CONSTRAINTS}\n\n"
+        "EXPECTED OUTPUT: two or three plain sentences: what you changed, and why that fixes it.\n\n"
+        "VERIFICATION REQUIREMENTS:\n"
+        "BRE will run the previously failing tests, then the test files they live in, then the whole\n"
+        "suite. If any of them fail, or anything that used to pass now fails, your patch is rolled\n"
+        "back and the diagnosis is recorded as refuted."
+    )

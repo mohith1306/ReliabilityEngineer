@@ -71,7 +71,9 @@ class RepositoryConnector:
                     stat = full.stat()
                 except OSError:
                     continue
-                rel = str(full.relative_to(root_path))
+                # POSIX separators on every OS: paths are evidence refs, compared and
+                # stored as strings, and must not depend on who ran the investigation.
+                rel = full.relative_to(root_path).as_posix()
                 results.append(SourceFile(path=rel, size=stat.st_size, suffix=full.suffix))
         results.sort(key=lambda f: f.path)
         return results

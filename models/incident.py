@@ -22,21 +22,35 @@ class IncidentStatus(str, Enum):
     VERIFYING = "VERIFYING"
     RESOLVED = "RESOLVED"
     REINVESTIGATING = "REINVESTIGATING"
+    FAILED = "FAILED"          # an engine broke; retrying the same step will not help
+    ABANDONED = "ABANDONED"    # the reliability loop hit its attempt cap (ERRATA A4)
     CLOSED = "CLOSED"
 
 
+# ERRATA A5: the original table had one happy path and no way out. Every non-terminal
+# state now has an exit that is not "succeed", and a false alarm can be closed.
 VALID_TRANSITIONS = {
-    IncidentStatus.DETECTED: [IncidentStatus.INVESTIGATING],
-    IncidentStatus.INVESTIGATING: [IncidentStatus.DIAGNOSED],
-    IncidentStatus.DIAGNOSED: [IncidentStatus.RISK_ASSESSED],
+    IncidentStatus.DETECTED: [IncidentStatus.INVESTIGATING, IncidentStatus.CLOSED],
+    IncidentStatus.INVESTIGATING: [IncidentStatus.DIAGNOSED, IncidentStatus.FAILED],
+    IncidentStatus.DIAGNOSED: [IncidentStatus.RISK_ASSESSED, IncidentStatus.FAILED],
     IncidentStatus.RISK_ASSESSED: [IncidentStatus.AWAITING_APPROVAL, IncidentStatus.REMEDIATING],
     IncidentStatus.AWAITING_APPROVAL: [IncidentStatus.REMEDIATING, IncidentStatus.CLOSED],
-    IncidentStatus.REMEDIATING: [IncidentStatus.VERIFYING],
-    IncidentStatus.VERIFYING: [IncidentStatus.RESOLVED, IncidentStatus.REINVESTIGATING],
-    IncidentStatus.REINVESTIGATING: [IncidentStatus.INVESTIGATING],
+    IncidentStatus.REMEDIATING: [
+        IncidentStatus.VERIFYING, IncidentStatus.REINVESTIGATING, IncidentStatus.FAILED,
+    ],
+    IncidentStatus.VERIFYING: [
+        IncidentStatus.RESOLVED, IncidentStatus.REINVESTIGATING, IncidentStatus.ABANDONED,
+    ],
+    IncidentStatus.REINVESTIGATING: [IncidentStatus.INVESTIGATING, IncidentStatus.ABANDONED],
     IncidentStatus.RESOLVED: [IncidentStatus.CLOSED],
+    IncidentStatus.FAILED: [IncidentStatus.CLOSED],
+    IncidentStatus.ABANDONED: [IncidentStatus.CLOSED],
     IncidentStatus.CLOSED: [],
 }
+
+TERMINAL_STATUSES = frozenset({
+    IncidentStatus.RESOLVED, IncidentStatus.FAILED, IncidentStatus.ABANDONED, IncidentStatus.CLOSED,
+})
 
 
 class IncidentBase(BaseModel):
@@ -55,6 +69,7 @@ class IncidentCreate(IncidentBase):
 class Incident(IncidentBase):
     id: str
     status: IncidentStatus = IncidentStatus.DETECTED
+    attempt: int = 1  # which pass through the reliability loop; capped (ERRATA A4)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 

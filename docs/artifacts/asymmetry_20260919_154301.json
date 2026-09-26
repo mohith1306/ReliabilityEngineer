@@ -1,0 +1,1072 @@
+{
+  "measured_at": "2026-09-19T15:43:01.005052+00:00",
+  "thread": "0001#8",
+  "metrics_source": "asmos.e6.asymmetry (unmodified)",
+  "criterion": {
+    "oci_min": 0.7,
+    "p_max": 0.001
+  },
+  "results": {
+    "ASMOS": {
+      "path": "C:/Users/csdee/PESU/CDSAML/ASMOS",
+      "note": "4 contributors, 226 commits",
+      "normalized": {
+        "oci": {
+          "oci": 0.862478,
+          "per_topic_top_share": {
+            "checkpoints": 1.0,
+            "docs": 0.7586206896551724,
+            "evaluation": 1.0,
+            "lifecycle": 1.0,
+            "ownership": 0.75,
+            "routing": 1.0,
+            "scoring": 0.6666666666666666,
+            "tests": 0.6666666666666666,
+            "utils": 1.0,
+            "experiments": 1.0,
+            "member3": 0.5,
+            "asmos": 1.0,
+            "asmos/memory": 1.0,
+            "Dhrithi": 0.5,
+            "asmos/evaluation": 0.7142857142857143,
+            "asmos/lifecycle": 1.0,
+            "asmos/ownership": 0.8,
+            "asmos/routing": 0.7142857142857143,
+            "asmos/scoring": 1.0,
+            "asmos/utils": 1.0,
+            "asmos/agents": 1.0,
+            "asmos/synthetic_injection": 0.8333333333333334,
+            "data": 0.7916666666666666,
+            "scripts": 0.8163265306122449,
+            "random_files": 1.0,
+            "results": 0.5,
+            "asmos/e6": 1.0,
+            "docker": 1.0,
+            "asmos/prototypes": 1.0
+          }
+        },
+        "agent_entropy": {
+          "mean_entropy": 0.538509,
+          "gini": 0.539174,
+          "per_agent": {
+            "dhrithikiran26@gmail.com": 0.44233,
+            "146485921+csdeepak@users.noreply.github.com": 0.654445,
+            "bhavithyarava@gmail.com": 0.663198,
+            "chandrashekar200a@gmail.com": 0.394061
+          }
+        },
+        "permutation_null": {
+          "observed_oci": 0.862478,
+          "null_mean": 0.813081,
+          "null_std": 0.028292,
+          "z_score": 1.746,
+          "p_value": 0.033,
+          "B": 1000,
+          "criterion_met": false,
+          "pre_registered_threshold": {
+            "oci_min": 0.7,
+            "p_max": 0.001
+          }
+        },
+        "pilot_decision": "NO-GO",
+        "n_topics": 29,
+        "n_agents": 4,
+        "n_verified_claims": 351,
+        "matrix": {
+          "checkpoints": {
+            "146485921+csdeepak@users.noreply.github.com": 2
+          },
+          "docs": {
+            "146485921+csdeepak@users.noreply.github.com": 88,
+            "dhrithikiran26@gmail.com": 17,
+            "bhavithyarava@gmail.com": 10,
+            "chandrashekar200a@gmail.com": 1
+          },
+          "evaluation": {
+            "146485921+csdeepak@users.noreply.github.com": 2
+          },
+          "lifecycle": {
+            "146485921+csdeepak@users.noreply.github.com": 2
+          },
+          "ownership": {
+            "146485921+csdeepak@users.noreply.github.com": 3,
+            "bhavithyarava@gmail.com": 1
+          },
+          "routing": {
+            "146485921+csdeepak@users.noreply.github.com": 2
+          },
+          "scoring": {
+            "146485921+csdeepak@users.noreply.github.com": 2,
+            "bhavithyarava@gmail.com": 1
+          },
+          "tests": {
+            "146485921+csdeepak@users.noreply.github.com": 24,
+            "bhavithyarava@gmail.com": 7,
+            "chandrashekar200a@gmail.com": 5
+          },
+          "utils": {
+            "146485921+csdeepak@users.noreply.github.com": 2
+          },
+          "experiments": {
+            "bhavithyarava@gmail.com": 1
+          },
+          "member3": {
+            "bhavithyarava@gmail.com": 1,
+            "146485921+csdeepak@users.noreply.github.com": 1
+          },
+          "asmos": {
+            "146485921+csdeepak@users.noreply.github.com": 2
+          },
+          "asmos/memory": {
+            "146485921+csdeepak@users.noreply.github.com": 7
+          },
+          "Dhrithi": {
+            "dhrithikiran26@gmail.com": 1,
+            "146485921+csdeepak@users.noreply.github.com": 1
+          },
+          "asmos/evaluation": {
+            "146485921+csdeepak@users.noreply.github.com": 25,
+            "dhrithikiran26@gmail.com": 5,
+            "bhavithyarava@gmail.com": 5
+          },
+          "asmos/lifecycle": {
+            "146485921+csdeepak@users.noreply.github.com": 4
+          },
+          "asmos/ownership": {
+            "146485921+csdeepak@users.noreply.github.com": 4,
+            "bhavithyarava@gmail.com": 1
+          },
+          "asmos/routing": {
+            "146485921+csdeepak@users.noreply.github.com": 5,
+            "dhrithikiran26@gmail.com": 1,
+            "bhavithyarava@gmail.com": 1
+          },
+          "asmos/scoring": {
+            "146485921+csdeepak@users.noreply.github.com": 3
+          },
+          "asmos/utils": {
+            "146485921+csdeepak@users.noreply.github.com": 3
+          },
+          "asmos/agents": {
+            "146485921+csdeepak@users.noreply.github.com": 2
+          },
+          "asmos/synthetic_injection": {
+            "chandrashekar200a@gmail.com": 5,
+            "bhavithyarava@gmail.com": 1
+          },
+          "data": {
+            "146485921+csdeepak@users.noreply.github.com": 38,
+            "dhrithikiran26@gmail.com": 5,
+            "chandrashekar200a@gmail.com": 1,
+            "bhavithyarava@gmail.com": 4
+          },
+          "scripts": {
+            "146485921+csdeepak@users.noreply.github.com": 40,
+            "dhrithikiran26@gmail.com": 5,
+            "bhavithyarava@gmail.com": 4
+          },
+          "random_files": {
+            "bhavithyarava@gmail.com": 1
+          },
+          "results": {
+            "dhrithikiran26@gmail.com": 1,
+            "chandrashekar200a@gmail.com": 1
+          },
+          "asmos/e6": {
+            "146485921+csdeepak@users.noreply.github.com": 1
+          },
+          "docker": {
+            "bhavithyarava@gmail.com": 1
+          },
+          "asmos/prototypes": {
+            "146485921+csdeepak@users.noreply.github.com": 1
+          }
+        },
+        "n_events": 351,
+        "n_refutations": 0
+      },
+      "raw": {
+        "oci": {
+          "oci": 0.862478,
+          "per_topic_top_share": {
+            "checkpoints": 1.0,
+            "docs": 0.7586206896551724,
+            "evaluation": 1.0,
+            "lifecycle": 1.0,
+            "ownership": 0.75,
+            "routing": 1.0,
+            "scoring": 0.6666666666666666,
+            "tests": 0.6666666666666666,
+            "utils": 1.0,
+            "experiments": 1.0,
+            "member3": 0.5,
+            "asmos": 1.0,
+            "asmos/memory": 1.0,
+            "Dhrithi": 0.5,
+            "asmos/evaluation": 0.7142857142857143,
+            "asmos/lifecycle": 1.0,
+            "asmos/ownership": 0.8,
+            "asmos/routing": 0.7142857142857143,
+            "asmos/scoring": 1.0,
+            "asmos/utils": 1.0,
+            "asmos/agents": 1.0,
+            "asmos/synthetic_injection": 0.8333333333333334,
+            "data": 0.7916666666666666,
+            "scripts": 0.8163265306122449,
+            "random_files": 1.0,
+            "results": 0.5,
+            "asmos/e6": 1.0,
+            "docker": 1.0,
+            "asmos/prototypes": 1.0
+          }
+        },
+        "agent_entropy": {
+          "mean_entropy": 0.510771,
+          "gini": 0.615385,
+          "per_agent": {
+            "csdeepak": 0.654445,
+            "Dhrithi Kiran": 0.44233,
+            "Bhavith Kumar Yarava": 0.477962,
+            "bhavithyarava567": 0.585059,
+            "\u201cChandra-sand\u201d": 0.394061
+          }
+        },
+        "permutation_null": {
+          "observed_oci": 0.862478,
+          "null_mean": 0.812223,
+          "null_std": 0.028434,
+          "z_score": 1.7674,
+          "p_value": 0.032,
+          "B": 1000,
+          "criterion_met": false,
+          "pre_registered_threshold": {
+            "oci_min": 0.7,
+            "p_max": 0.001
+          }
+        },
+        "pilot_decision": "NO-GO",
+        "n_topics": 29,
+        "n_agents": 5,
+        "n_verified_claims": 351,
+        "matrix": {
+          "checkpoints": {
+            "csdeepak": 2
+          },
+          "docs": {
+            "csdeepak": 88,
+            "Dhrithi Kiran": 17,
+            "bhavithyarava567": 10,
+            "\u201cChandra-sand\u201d": 1
+          },
+          "evaluation": {
+            "csdeepak": 2
+          },
+          "lifecycle": {
+            "csdeepak": 2
+          },
+          "ownership": {
+            "csdeepak": 3,
+            "Bhavith Kumar Yarava": 1
+          },
+          "routing": {
+            "csdeepak": 2
+          },
+          "scoring": {
+            "csdeepak": 2,
+            "Bhavith Kumar Yarava": 1
+          },
+          "tests": {
+            "csdeepak": 24,
+            "Bhavith Kumar Yarava": 1,
+            "\u201cChandra-sand\u201d": 5,
+            "bhavithyarava567": 6
+          },
+          "utils": {
+            "csdeepak": 2
+          },
+          "experiments": {
+            "Bhavith Kumar Yarava": 1
+          },
+          "member3": {
+            "Bhavith Kumar Yarava": 1,
+            "csdeepak": 1
+          },
+          "asmos": {
+            "csdeepak": 2
+          },
+          "asmos/memory": {
+            "csdeepak": 7
+          },
+          "Dhrithi": {
+            "Dhrithi Kiran": 1,
+            "csdeepak": 1
+          },
+          "asmos/evaluation": {
+            "csdeepak": 25,
+            "Dhrithi Kiran": 5,
+            "bhavithyarava567": 5
+          },
+          "asmos/lifecycle": {
+            "csdeepak": 4
+          },
+          "asmos/ownership": {
+            "csdeepak": 4,
+            "bhavithyarava567": 1
+          },
+          "asmos/routing": {
+            "csdeepak": 5,
+            "Dhrithi Kiran": 1,
+            "bhavithyarava567": 1
+          },
+          "asmos/scoring": {
+            "csdeepak": 3
+          },
+          "asmos/utils": {
+            "csdeepak": 3
+          },
+          "asmos/agents": {
+            "csdeepak": 2
+          },
+          "asmos/synthetic_injection": {
+            "\u201cChandra-sand\u201d": 5,
+            "bhavithyarava567": 1
+          },
+          "data": {
+            "csdeepak": 38,
+            "Dhrithi Kiran": 5,
+            "\u201cChandra-sand\u201d": 1,
+            "bhavithyarava567": 4
+          },
+          "scripts": {
+            "csdeepak": 40,
+            "Dhrithi Kiran": 5,
+            "bhavithyarava567": 4
+          },
+          "random_files": {
+            "bhavithyarava567": 1
+          },
+          "results": {
+            "Dhrithi Kiran": 1,
+            "\u201cChandra-sand\u201d": 1
+          },
+          "asmos/e6": {
+            "csdeepak": 1
+          },
+          "docker": {
+            "bhavithyarava567": 1
+          },
+          "asmos/prototypes": {
+            "csdeepak": 1
+          }
+        },
+        "n_events": 351,
+        "n_refutations": 0
+      }
+    },
+    "Dental": {
+      "path": "C:/Users/csdee/PESU/capstone/An-Intelligent-Dental-Assisting-System-for-Dentists-in-Cavity-and-Periodontal-Disease-Detection",
+      "note": "2 contributors, 249 commits",
+      "normalized": {
+        "oci": {
+          "oci": 0.766599,
+          "per_topic_top_share": {
+            "\"REVIEWED_Research_Papers": 1.0,
+            "REVIEWED_Research_Papers": 1.0,
+            "__init__.py": 1.0,
+            "configs": 1.0,
+            "crop_generator.py": 1.0,
+            "data": 0.5294117647058824,
+            "data_loader.py": 1.0,
+            "docs": 0.503030303030303,
+            "label_assigner.py": 1.0,
+            "models": 0.5555555555555556,
+            "notebooks": 0.5833333333333334,
+            "scripts": 0.5188679245283019,
+            "tests": 0.5454545454545454,
+            "utils": 0.6666666666666666,
+            "pes_capstone_report": 0.5,
+            "Survey Paper Latex folder": 0.5,
+            "_repo_archive": 0.5714285714285714,
+            "fdi_assignment.py": 1.0,
+            "orientation.py": 1.0,
+            "README.md": 0.9,
+            "fdi_head_inference.py": 0.6666666666666666,
+            "classifiers.py": 0.6,
+            "paper": 0.8666666666666667,
+            "outputs": 0.6578947368421053,
+            "fdi_structural_repair.py": 1.0
+          }
+        },
+        "agent_entropy": {
+          "mean_entropy": 0.636618,
+          "gini": 0.004274,
+          "per_agent": {
+            "gunadeep19082005@gmail.com": 0.615244,
+            "146485921+csdeepak@users.noreply.github.com": 0.657991
+          }
+        },
+        "permutation_null": {
+          "observed_oci": 0.766599,
+          "null_mean": 0.73116,
+          "null_std": 0.028507,
+          "z_score": 1.2432,
+          "p_value": 0.103,
+          "B": 1000,
+          "criterion_met": false,
+          "pre_registered_threshold": {
+            "oci_min": 0.7,
+            "p_max": 0.001
+          }
+        },
+        "pilot_decision": "NO-GO",
+        "n_topics": 25,
+        "n_agents": 2,
+        "n_verified_claims": 468,
+        "matrix": {
+          "\"REVIEWED_Research_Papers": {
+            "146485921+csdeepak@users.noreply.github.com": 2
+          },
+          "REVIEWED_Research_Papers": {
+            "146485921+csdeepak@users.noreply.github.com": 2
+          },
+          "__init__.py": {
+            "146485921+csdeepak@users.noreply.github.com": 1
+          },
+          "configs": {
+            "146485921+csdeepak@users.noreply.github.com": 2
+          },
+          "crop_generator.py": {
+            "146485921+csdeepak@users.noreply.github.com": 2
+          },
+          "data": {
+            "146485921+csdeepak@users.noreply.github.com": 8,
+            "gunadeep19082005@gmail.com": 9
+          },
+          "data_loader.py": {
+            "146485921+csdeepak@users.noreply.github.com": 1
+          },
+          "docs": {
+            "146485921+csdeepak@users.noreply.github.com": 83,
+            "gunadeep19082005@gmail.com": 82
+          },
+          "label_assigner.py": {
+            "146485921+csdeepak@users.noreply.github.com": 1
+          },
+          "models": {
+            "146485921+csdeepak@users.noreply.github.com": 20,
+            "gunadeep19082005@gmail.com": 25
+          },
+          "notebooks": {
+            "146485921+csdeepak@users.noreply.github.com": 7,
+            "gunadeep19082005@gmail.com": 5
+          },
+          "scripts": {
+            "146485921+csdeepak@users.noreply.github.com": 55,
+            "gunadeep19082005@gmail.com": 51
+          },
+          "tests": {
+            "146485921+csdeepak@users.noreply.github.com": 12,
+            "gunadeep19082005@gmail.com": 10
+          },
+          "utils": {
+            "146485921+csdeepak@users.noreply.github.com": 2,
+            "gunadeep19082005@gmail.com": 1
+          },
+          "pes_capstone_report": {
+            "146485921+csdeepak@users.noreply.github.com": 1,
+            "gunadeep19082005@gmail.com": 1
+          },
+          "Survey Paper Latex folder": {
+            "gunadeep19082005@gmail.com": 1,
+            "146485921+csdeepak@users.noreply.github.com": 1
+          },
+          "_repo_archive": {
+            "gunadeep19082005@gmail.com": 3,
+            "146485921+csdeepak@users.noreply.github.com": 4
+          },
+          "fdi_assignment.py": {
+            "gunadeep19082005@gmail.com": 1
+          },
+          "orientation.py": {
+            "gunadeep19082005@gmail.com": 3
+          },
+          "README.md": {
+            "gunadeep19082005@gmail.com": 9,
+            "146485921+csdeepak@users.noreply.github.com": 1
+          },
+          "fdi_head_inference.py": {
+            "gunadeep19082005@gmail.com": 2,
+            "146485921+csdeepak@users.noreply.github.com": 1
+          },
+          "classifiers.py": {
+            "gunadeep19082005@gmail.com": 2,
+            "146485921+csdeepak@users.noreply.github.com": 3
+          },
+          "paper": {
+            "146485921+csdeepak@users.noreply.github.com": 13,
+            "gunadeep19082005@gmail.com": 2
+          },
+          "outputs": {
+            "146485921+csdeepak@users.noreply.github.com": 13,
+            "gunadeep19082005@gmail.com": 25
+          },
+          "fdi_structural_repair.py": {
+            "146485921+csdeepak@users.noreply.github.com": 1
+          }
+        },
+        "n_events": 468,
+        "n_refutations": 0
+      },
+      "raw": {
+        "oci": {
+          "oci": 0.76571,
+          "per_topic_top_share": {
+            "\"REVIEWED_Research_Papers": 1.0,
+            "REVIEWED_Research_Papers": 1.0,
+            "__init__.py": 1.0,
+            "configs": 1.0,
+            "crop_generator.py": 1.0,
+            "data": 0.5294117647058824,
+            "data_loader.py": 1.0,
+            "docs": 0.503030303030303,
+            "label_assigner.py": 1.0,
+            "models": 0.5333333333333333,
+            "notebooks": 0.5833333333333334,
+            "scripts": 0.5188679245283019,
+            "tests": 0.5454545454545454,
+            "utils": 0.6666666666666666,
+            "pes_capstone_report": 0.5,
+            "Survey Paper Latex folder": 0.5,
+            "_repo_archive": 0.5714285714285714,
+            "fdi_assignment.py": 1.0,
+            "orientation.py": 1.0,
+            "README.md": 0.9,
+            "fdi_head_inference.py": 0.6666666666666666,
+            "classifiers.py": 0.6,
+            "paper": 0.8666666666666667,
+            "outputs": 0.6578947368421053,
+            "fdi_structural_repair.py": 1.0
+          }
+        },
+        "agent_entropy": {
+          "mean_entropy": 0.580117,
+          "gini": 0.320513,
+          "per_agent": {
+            "csdeepak": 0.657991,
+            "GUNADEEP19": 0.478523,
+            "gunadeep19": 0.603837
+          }
+        },
+        "permutation_null": {
+          "observed_oci": 0.76571,
+          "null_mean": 0.721234,
+          "null_std": 0.028852,
+          "z_score": 1.5415,
+          "p_value": 0.06,
+          "B": 1000,
+          "criterion_met": false,
+          "pre_registered_threshold": {
+            "oci_min": 0.7,
+            "p_max": 0.001
+          }
+        },
+        "pilot_decision": "NO-GO",
+        "n_topics": 25,
+        "n_agents": 3,
+        "n_verified_claims": 468,
+        "matrix": {
+          "\"REVIEWED_Research_Papers": {
+            "csdeepak": 2
+          },
+          "REVIEWED_Research_Papers": {
+            "csdeepak": 2
+          },
+          "__init__.py": {
+            "csdeepak": 1
+          },
+          "configs": {
+            "csdeepak": 2
+          },
+          "crop_generator.py": {
+            "csdeepak": 2
+          },
+          "data": {
+            "csdeepak": 8,
+            "gunadeep19": 9
+          },
+          "data_loader.py": {
+            "csdeepak": 1
+          },
+          "docs": {
+            "csdeepak": 83,
+            "GUNADEEP19": 5,
+            "gunadeep19": 77
+          },
+          "label_assigner.py": {
+            "csdeepak": 1
+          },
+          "models": {
+            "csdeepak": 20,
+            "GUNADEEP19": 1,
+            "gunadeep19": 24
+          },
+          "notebooks": {
+            "csdeepak": 7,
+            "GUNADEEP19": 2,
+            "gunadeep19": 3
+          },
+          "scripts": {
+            "csdeepak": 55,
+            "GUNADEEP19": 1,
+            "gunadeep19": 50
+          },
+          "tests": {
+            "csdeepak": 12,
+            "gunadeep19": 10
+          },
+          "utils": {
+            "csdeepak": 2,
+            "gunadeep19": 1
+          },
+          "pes_capstone_report": {
+            "csdeepak": 1,
+            "GUNADEEP19": 1
+          },
+          "Survey Paper Latex folder": {
+            "GUNADEEP19": 1,
+            "csdeepak": 1
+          },
+          "_repo_archive": {
+            "gunadeep19": 3,
+            "csdeepak": 4
+          },
+          "fdi_assignment.py": {
+            "gunadeep19": 1
+          },
+          "orientation.py": {
+            "gunadeep19": 3
+          },
+          "README.md": {
+            "gunadeep19": 9,
+            "csdeepak": 1
+          },
+          "fdi_head_inference.py": {
+            "gunadeep19": 2,
+            "csdeepak": 1
+          },
+          "classifiers.py": {
+            "gunadeep19": 2,
+            "csdeepak": 3
+          },
+          "paper": {
+            "csdeepak": 13,
+            "gunadeep19": 2
+          },
+          "outputs": {
+            "csdeepak": 13,
+            "gunadeep19": 25
+          },
+          "fdi_structural_repair.py": {
+            "csdeepak": 1
+          }
+        },
+        "n_events": 468,
+        "n_refutations": 0
+      }
+    },
+    "PAY": {
+      "path": "C:/Users/csdee/PESU/PAY",
+      "note": "1 contributor -- negative control",
+      "normalized": {
+        "oci": {
+          "oci": 1.0,
+          "per_topic_top_share": {
+            "README.md": 1.0,
+            "agent": 1.0,
+            "audit": 1.0,
+            "docs": 1.0,
+            "eval": 1.0,
+            "memory": 1.0,
+            "outreach": 1.0,
+            "safety": 1.0,
+            "submission": 1.0,
+            "tool": 1.0,
+            "verification": 1.0,
+            "__init__.py": 1.0,
+            "cli.py": 1.0,
+            "models.py": 1.0,
+            "pipeline.py": 1.0,
+            "scenarios.py": 1.0,
+            "tests": 1.0,
+            "scripts": 1.0,
+            "demo": 1.0
+          }
+        },
+        "agent_entropy": {
+          "mean_entropy": 0.817565,
+          "gini": 0.0,
+          "per_agent": {
+            "146485921+csdeepak@users.noreply.github.com": 0.817565
+          }
+        },
+        "permutation_null": {
+          "observed_oci": 1.0,
+          "null_mean": 1.0,
+          "null_std": 0.0,
+          "z_score": Infinity,
+          "p_value": 1.0,
+          "B": 1000,
+          "criterion_met": false,
+          "pre_registered_threshold": {
+            "oci_min": 0.7,
+            "p_max": 0.001
+          }
+        },
+        "pilot_decision": "NO-GO",
+        "n_topics": 19,
+        "n_agents": 1,
+        "n_verified_claims": 150,
+        "matrix": {
+          "README.md": {
+            "146485921+csdeepak@users.noreply.github.com": 5
+          },
+          "agent": {
+            "146485921+csdeepak@users.noreply.github.com": 4
+          },
+          "audit": {
+            "146485921+csdeepak@users.noreply.github.com": 3
+          },
+          "docs": {
+            "146485921+csdeepak@users.noreply.github.com": 38
+          },
+          "eval": {
+            "146485921+csdeepak@users.noreply.github.com": 20
+          },
+          "memory": {
+            "146485921+csdeepak@users.noreply.github.com": 3
+          },
+          "outreach": {
+            "146485921+csdeepak@users.noreply.github.com": 3
+          },
+          "safety": {
+            "146485921+csdeepak@users.noreply.github.com": 5
+          },
+          "submission": {
+            "146485921+csdeepak@users.noreply.github.com": 30
+          },
+          "tool": {
+            "146485921+csdeepak@users.noreply.github.com": 4
+          },
+          "verification": {
+            "146485921+csdeepak@users.noreply.github.com": 4
+          },
+          "__init__.py": {
+            "146485921+csdeepak@users.noreply.github.com": 1
+          },
+          "cli.py": {
+            "146485921+csdeepak@users.noreply.github.com": 5
+          },
+          "models.py": {
+            "146485921+csdeepak@users.noreply.github.com": 5
+          },
+          "pipeline.py": {
+            "146485921+csdeepak@users.noreply.github.com": 4
+          },
+          "scenarios.py": {
+            "146485921+csdeepak@users.noreply.github.com": 2
+          },
+          "tests": {
+            "146485921+csdeepak@users.noreply.github.com": 8
+          },
+          "scripts": {
+            "146485921+csdeepak@users.noreply.github.com": 5
+          },
+          "demo": {
+            "146485921+csdeepak@users.noreply.github.com": 1
+          }
+        },
+        "n_events": 150,
+        "n_refutations": 0
+      },
+      "raw": {
+        "oci": {
+          "oci": 1.0,
+          "per_topic_top_share": {
+            "README.md": 1.0,
+            "agent": 1.0,
+            "audit": 1.0,
+            "docs": 1.0,
+            "eval": 1.0,
+            "memory": 1.0,
+            "outreach": 1.0,
+            "safety": 1.0,
+            "submission": 1.0,
+            "tool": 1.0,
+            "verification": 1.0,
+            "__init__.py": 1.0,
+            "cli.py": 1.0,
+            "models.py": 1.0,
+            "pipeline.py": 1.0,
+            "scenarios.py": 1.0,
+            "tests": 1.0,
+            "scripts": 1.0,
+            "demo": 1.0
+          }
+        },
+        "agent_entropy": {
+          "mean_entropy": 0.817565,
+          "gini": 0.0,
+          "per_agent": {
+            "csdeepak": 0.817565
+          }
+        },
+        "permutation_null": {
+          "observed_oci": 1.0,
+          "null_mean": 1.0,
+          "null_std": 0.0,
+          "z_score": Infinity,
+          "p_value": 1.0,
+          "B": 1000,
+          "criterion_met": false,
+          "pre_registered_threshold": {
+            "oci_min": 0.7,
+            "p_max": 0.001
+          }
+        },
+        "pilot_decision": "NO-GO",
+        "n_topics": 19,
+        "n_agents": 1,
+        "n_verified_claims": 150,
+        "matrix": {
+          "README.md": {
+            "csdeepak": 5
+          },
+          "agent": {
+            "csdeepak": 4
+          },
+          "audit": {
+            "csdeepak": 3
+          },
+          "docs": {
+            "csdeepak": 38
+          },
+          "eval": {
+            "csdeepak": 20
+          },
+          "memory": {
+            "csdeepak": 3
+          },
+          "outreach": {
+            "csdeepak": 3
+          },
+          "safety": {
+            "csdeepak": 5
+          },
+          "submission": {
+            "csdeepak": 30
+          },
+          "tool": {
+            "csdeepak": 4
+          },
+          "verification": {
+            "csdeepak": 4
+          },
+          "__init__.py": {
+            "csdeepak": 1
+          },
+          "cli.py": {
+            "csdeepak": 5
+          },
+          "models.py": {
+            "csdeepak": 5
+          },
+          "pipeline.py": {
+            "csdeepak": 4
+          },
+          "scenarios.py": {
+            "csdeepak": 2
+          },
+          "tests": {
+            "csdeepak": 8
+          },
+          "scripts": {
+            "csdeepak": 5
+          },
+          "demo": {
+            "csdeepak": 1
+          }
+        },
+        "n_events": 150,
+        "n_refutations": 0
+      }
+    },
+    "BRE": {
+      "path": "C:\\Users\\csdee\\PESU\\IBM BOB\\ReliabilityEngineer",
+      "note": "this repo, very short history",
+      "normalized": {
+        "oci": {
+          "oci": 0.924242,
+          "per_topic_top_share": {
+            "__init__.py": 1.0,
+            "api": 1.0,
+            "api/routes": 1.0,
+            "api/services": 1.0,
+            "models": 0.5,
+            "docs": 0.6666666666666666,
+            "asmos_bridge": 1.0,
+            "bob": 1.0,
+            "connectors": 1.0,
+            "reliability": 1.0,
+            "tests": 1.0
+          }
+        },
+        "agent_entropy": {
+          "mean_entropy": 0.767532,
+          "gini": 0.1,
+          "per_agent": {
+            "tatinenimohith@gmail.com": 0.747222,
+            "146485921+csdeepak@users.noreply.github.com": 0.787841
+          }
+        },
+        "permutation_null": {
+          "observed_oci": 0.924242,
+          "null_mean": 0.929045,
+          "null_std": 0.0351,
+          "z_score": -0.1368,
+          "p_value": 0.715,
+          "B": 1000,
+          "criterion_met": false,
+          "pre_registered_threshold": {
+            "oci_min": 0.7,
+            "p_max": 0.001
+          }
+        },
+        "pilot_decision": "NO-GO",
+        "n_topics": 11,
+        "n_agents": 2,
+        "n_verified_claims": 15,
+        "matrix": {
+          "__init__.py": {
+            "tatinenimohith@gmail.com": 1
+          },
+          "api": {
+            "tatinenimohith@gmail.com": 1
+          },
+          "api/routes": {
+            "tatinenimohith@gmail.com": 1
+          },
+          "api/services": {
+            "tatinenimohith@gmail.com": 1
+          },
+          "models": {
+            "tatinenimohith@gmail.com": 1,
+            "146485921+csdeepak@users.noreply.github.com": 1
+          },
+          "docs": {
+            "tatinenimohith@gmail.com": 1,
+            "146485921+csdeepak@users.noreply.github.com": 2
+          },
+          "asmos_bridge": {
+            "146485921+csdeepak@users.noreply.github.com": 1
+          },
+          "bob": {
+            "146485921+csdeepak@users.noreply.github.com": 1
+          },
+          "connectors": {
+            "146485921+csdeepak@users.noreply.github.com": 1
+          },
+          "reliability": {
+            "146485921+csdeepak@users.noreply.github.com": 1
+          },
+          "tests": {
+            "146485921+csdeepak@users.noreply.github.com": 2
+          }
+        },
+        "n_events": 15,
+        "n_refutations": 0
+      },
+      "raw": {
+        "oci": {
+          "oci": 0.924242,
+          "per_topic_top_share": {
+            "__init__.py": 1.0,
+            "api": 1.0,
+            "api/routes": 1.0,
+            "api/services": 1.0,
+            "models": 0.5,
+            "docs": 0.6666666666666666,
+            "asmos_bridge": 1.0,
+            "bob": 1.0,
+            "connectors": 1.0,
+            "reliability": 1.0,
+            "tests": 1.0
+          }
+        },
+        "agent_entropy": {
+          "mean_entropy": 0.767532,
+          "gini": 0.1,
+          "per_agent": {
+            "csdeepak": 0.787841,
+            "mohith1306": 0.747222
+          }
+        },
+        "permutation_null": {
+          "observed_oci": 0.924242,
+          "null_mean": 0.929045,
+          "null_std": 0.0351,
+          "z_score": -0.1368,
+          "p_value": 0.715,
+          "B": 1000,
+          "criterion_met": false,
+          "pre_registered_threshold": {
+            "oci_min": 0.7,
+            "p_max": 0.001
+          }
+        },
+        "pilot_decision": "NO-GO",
+        "n_topics": 11,
+        "n_agents": 2,
+        "n_verified_claims": 15,
+        "matrix": {
+          "__init__.py": {
+            "mohith1306": 1
+          },
+          "api": {
+            "mohith1306": 1
+          },
+          "api/routes": {
+            "mohith1306": 1
+          },
+          "api/services": {
+            "mohith1306": 1
+          },
+          "models": {
+            "mohith1306": 1,
+            "csdeepak": 1
+          },
+          "docs": {
+            "mohith1306": 1,
+            "csdeepak": 2
+          },
+          "asmos_bridge": {
+            "csdeepak": 1
+          },
+          "bob": {
+            "csdeepak": 1
+          },
+          "connectors": {
+            "csdeepak": 1
+          },
+          "reliability": {
+            "csdeepak": 1
+          },
+          "tests": {
+            "csdeepak": 2
+          }
+        },
+        "n_events": 15,
+        "n_refutations": 0
+      }
+    }
+  }
+}
