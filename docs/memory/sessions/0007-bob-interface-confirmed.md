@@ -75,7 +75,7 @@ wrong in a good way.
   The direction of the call is the product thesis, not plumbing. **Rejected:** MCP as
   primary (inverts the product); UI automation of the IDE (fragile, unusable in CI,
   which is where incidents originate); waiting for a REST API (none is documented).
-- **Evidence:** [ADR-0004](../decisions/ADR-0004-bob-invocation-surface.md).
+- **Evidence:** [ADR-0004](../../decisions/ADR-0004-bob-invocation-surface.md).
 - **Status:** resolved
 
 ### 6. The mode flag gives a structural read/write boundary
