@@ -228,6 +228,13 @@ class EvidenceCollector:
                 record = self._ci.parse_file(str(p))
             except FileNotFoundError as exc:
                 logger.info("ci log unavailable: %s", exc)
+            else:
+                # Store the ref repo-relative with POSIX separators: an absolute path
+                # embeds a per-run temp dir (non-reproducible) and, on Windows, "\\".
+                try:
+                    record.source = p.resolve().relative_to(_Path(root).resolve()).as_posix()
+                except ValueError:
+                    record.source = p.resolve().as_posix()
 
         if record is None:
             return out

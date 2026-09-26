@@ -6,6 +6,7 @@ no branch is created, no ref is moved, nothing is committed.
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -56,6 +57,20 @@ class GitConnector:
         except git.exc.InvalidGitRepositoryError as exc:
             raise ValueError(f"Not a git repository: {root}") from exc
 
+    @contextmanager
+    def _open(self, root: str):
+        """Yield a Repo and always close it.
+
+        GitPython spawns long-lived `git cat-file` helper processes per Repo. Left open
+        they pin the working directory on Windows, so the caller's tempdir cleanup dies
+        with WinError 32/5. Close-on-exit costs nothing on POSIX.
+        """
+        repo = self._repo(root)
+        try:
+            yield repo
+        finally:
+            repo.close()
+
     @staticmethod
     def _to_info(commit) -> GitCommitInfo:
         files = list(commit.stats.files)  # stats.files is a {path: counts} dict
@@ -69,51 +84,51 @@ class GitConnector:
         )
 
     def recent_commits(self, root: str, *, limit: int = 10) -> list[GitCommitInfo]:
-        repo = self._repo(root)
-        commits = list(repo.iter_commits(max_count=limit))
-        return [self._to_info(c) for c in commits]
+        with self._open(root) as repo:
+            commits = list(repo.iter_commits(max_count=limit))
+            return [self._to_info(c) for c in commits]
 
     def log_for_paths(self, root: str, paths: list[str], *, limit: int = 5) -> list[GitCommitInfo]:
         """Commits touching any of the given paths, newest first."""
         if not paths:
             return []
-        repo = self._repo(root)
-        commits = list(repo.iter_commits(paths=paths, max_count=limit))
-        return [self._to_info(c) for c in commits]
+        with self._open(root) as repo:
+            commits = list(repo.iter_commits(paths=paths, max_count=limit))
+            return [self._to_info(c) for c in commits]
 
     def blame(self, root: str, rel_path: str) -> list[dict]:
         """Line-level blame for one file: [{line, sha, author}, ...]."""
-        repo = self._repo(root)
         rows: list[dict] = []
         lineno = 0
-        # Repo.blame yields (commit, [line_text, ...]) groups, not per-line pairs.
-        for commit, lines in repo.blame("HEAD", rel_path):
-            for _text in lines:
-                lineno += 1
-                rows.append({
-                    "line": lineno,
-                    "sha": commit.hexsha[:7],
-                    "author": str(commit.author),
-                })
+        with self._open(root) as repo:
+            # Repo.blame yields (commit, [line_text, ...]) groups, not per-line pairs.
+            for commit, lines in repo.blame("HEAD", rel_path):
+                for _text in lines:
+                    lineno += 1
+                    rows.append({
+                        "line": lineno,
+                        "sha": commit.hexsha[:7],
+                        "author": str(commit.author),
+                    })
         return rows
 
     def diff_for_commit(self, root: str, sha: str) -> list[GitDiffInfo]:
-        repo = self._repo(root)
-        commit = repo.commit(sha)
         diffs: list[GitDiffInfo] = []
-        if commit.parents:
-            parent = commit.parents[0]
-            diff_index = parent.diff(commit, create_patch=True)
-        else:
-            diff_index = commit.diff(git.NULL_TREE, create_patch=True)
-        for d in diff_index:
-            path = d.a_path or d.b_path
-            raw = d.diff
-            if isinstance(raw, bytes):
-                raw = raw.decode("utf-8", errors="replace")
-            diffs.append(GitDiffInfo(path=path, commit_sha=sha, diff=raw))
+        with self._open(root) as repo:
+            commit = repo.commit(sha)
+            if commit.parents:
+                parent = commit.parents[0]
+                diff_index = parent.diff(commit, create_patch=True)
+            else:
+                diff_index = commit.diff(git.NULL_TREE, create_patch=True)
+            for d in diff_index:
+                path = d.a_path or d.b_path
+                raw = d.diff
+                if isinstance(raw, bytes):
+                    raw = raw.decode("utf-8", errors="replace")
+                diffs.append(GitDiffInfo(path=path, commit_sha=sha, diff=raw))
         return diffs
 
     def working_tree_dirty(self, root: str) -> bool:
-        repo = self._repo(root)
-        return bool(repo.is_dirty())
+        with self._open(root) as repo:
+            return bool(repo.is_dirty())
