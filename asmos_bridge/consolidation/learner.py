@@ -26,15 +26,18 @@ from apps.api.database import DiagnosisDB, IncidentDB, OutcomeRecordDB, Verifica
 from asmos_bridge.memory.store import MemoryEntry, MemoryStore
 from asmos_bridge.ownership.ledger import source_name
 from models.outcome import PredictionType
-from reliability.investigator.analyzer import TaskAnalyzer
-from reliability.orchestration.lifecycle import to_model
+from asmos_bridge.memory.signature import failure_signature
+from reliability.orchestration.lifecycle import latest_evidence, to_model
 
 MEMORY_SOURCE = "memory"
 
 
-def incident_keywords(incident: IncidentDB) -> list[str]:
-    """The similarity basis: the incident's own analysed keywords (description + error text)."""
-    return TaskAnalyzer().analyze(to_model(incident)).keywords
+def incident_keywords(incident: IncidentDB, evidence: list[dict] | None = None, db: Session | None = None) -> list[str]:
+    """The similarity basis: the failure signature -- the incident's analysed keywords plus the tokens of
+    the failing test ids in its evidence (see asmos_bridge/memory/signature.py)."""
+    if evidence is None:
+        evidence = latest_evidence(db, incident.id) if db is not None else []
+    return failure_signature(to_model(incident), evidence)
 
 
 def consolidate(db: Session, incident: IncidentDB, verification: VerificationDB) -> Optional[MemoryEntry]:
@@ -65,10 +68,10 @@ def consolidate(db: Session, incident: IncidentDB, verification: VerificationDB)
         return None
 
     topic = confirmed.topic
-    # Similarity is symptom-to-symptom ("this looks like that earlier incident"), so the memory's
-    # keywords are the incident's own vocabulary. Adding the diagnosis's component names would dilute
-    # the cosine even for a duplicate incident and push cold-start reuse up against tau.
-    keywords = set(incident_keywords(incident))
+    # Similarity is failure-to-failure ("this looks like that earlier incident"), so the memory's keywords
+    # are the incident's own failure signature. Adding the diagnosis's component names would dilute the
+    # cosine even for a duplicate incident and push cold-start reuse up against tau.
+    keywords = set(incident_keywords(incident, db=db))
     return MemoryStore(db).put_verified(
         topic=topic,
         root_cause=diagnosis.root_cause,

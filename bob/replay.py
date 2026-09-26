@@ -84,6 +84,19 @@ def match_cassette(repo_root: str | Path, cassettes: Optional[list[Cassette]] = 
     return None
 
 
+def find_by_root_cause(root_cause: str, cassettes: Optional[list[Cassette]] = None) -> Optional[Cassette]:
+    """The cassette whose scripted diagnosis IS this root cause.
+
+    A remediating agent acts on the diagnosis it is given, not on some other knowledge of the repo.
+    Replay honours that: it looks the diagnosis up, so a wrong diagnosis (a memory that does not fit
+    this incident) leads to a wrong fix, and the test suite -- not the stand-in -- decides.
+    """
+    for cassette in cassettes if cassettes is not None else load_cassettes():
+        if cassette.diagnosis.get("root_cause") == root_cause:
+            return cassette
+    return None
+
+
 _EVIDENCE_LINE = re.compile(r"^- \[[^\]]+\]\s+(\S+)", re.M)
 
 

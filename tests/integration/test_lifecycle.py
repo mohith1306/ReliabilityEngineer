@@ -134,3 +134,33 @@ def test_ensure_columns_upgrades_a_database_that_predates_new_columns():
         assert database.ensure_columns(engine) == []  # idempotent
     finally:
         engine.dispose()
+
+
+def test_a_pre_s5_database_with_a_required_approved_by_column_is_rebuilt_not_broken():
+    """The exact failure a teammate hits on an old bre.db: `NOT NULL constraint failed: approvals.approved_by`.
+    create_all never alters a table and SQLite cannot drop a NOT NULL constraint, so the table is rebuilt."""
+    path = os.path.join(tempfile.mkdtemp(), "old.db")
+    con = sqlite3.connect(path)
+    con.execute("CREATE TABLE approvals (id TEXT PRIMARY KEY, incident_id TEXT NOT NULL, risk_level TEXT NOT NULL,"
+                " decision TEXT NOT NULL, approved_by TEXT NOT NULL, reason TEXT, created_at DATETIME)")
+    con.execute("INSERT INTO approvals VALUES ('a1','inc1','HIGH','APPROVED','someone typed this name','ok','2026-01-01')")
+    con.commit()
+    con.close()
+
+    engine = create_engine(f"sqlite:///{path}")
+    try:
+        assert database.rebuild_legacy_tables(engine) == ["approvals"]
+        database.ensure_columns(engine)
+        with engine.connect() as conn:
+            row = conn.exec_driver_sql("select id, operator_name, operator_id, reason from approvals").fetchone()
+            assert tuple(row) == ("a1", "someone typed this name", None, "ok")  # carried over, but NOT as an identity
+        # ...and the current code can write to it again
+        from sqlalchemy.orm import sessionmaker
+        session = sessionmaker(bind=engine)()
+        session.add(database.ApprovalDB(id="a2", incident_id="inc1", risk_level="HIGH", decision="APPROVED",
+                                        operator_id="op1", operator_name="Dana"))
+        session.commit()
+        session.close()
+        assert database.rebuild_legacy_tables(engine) == []  # idempotent
+    finally:
+        engine.dispose()

@@ -32,6 +32,7 @@ from .execution import (
     chat_channel_for,
     discover_agent_host,
 )
+from .recording import record_turn
 from .shell import BobShell
 
 DEFAULT_PROVIDER = "copilot"
@@ -87,6 +88,9 @@ class ShellTransport:
             raise BobError(
                 f"bob run finished with status {result.status!r}: {result.last_message[:300]}"
             )
+        record_turn("diagnosis", prompt=prompt, response=result.last_message, tokens=result.usage.total_tokens,
+                    wall_ms=result.wall_ms, provider="bob-shell", workspace=working_directory,
+                    meta={"task_id": result.task_id, "usage": result.usage.__dict__})
         return TurnOutcome(
             text=result.last_message,
             tokens=result.usage.total_tokens,

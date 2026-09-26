@@ -40,6 +40,16 @@ REGRESSION_STORIES: dict[str, RegressionStory] = {
         import_message="import dataforge connection pool",
         regression_message="lower database pool_size to 2 under memory pressure",
     ),
+    # The look-alike: same symptom as seeded_failure ("connection pool exhaustion", same test), but the
+    # cause is a hard-coded cap in CODE while the config is healthy. Similarity cannot tell them apart;
+    # only running the tests can -- which is the point of verification-gated routing.
+    "connection_cap": RegressionStory(
+        file="dbpool.py",
+        failing="self.size = min(size, 2)  # cap: protect the shared database during load-shedding",
+        healthy="self.size = size",
+        import_message="import dataforge connection pool",
+        regression_message="cap pool at 2 in code to protect the shared database",
+    ),
     "auth_timeout": RegressionStory(
         file="config/auth.yaml",
         failing="request_timeout_seconds: 0.001",
@@ -75,16 +85,18 @@ def build_fixture_repo(name: str, dest: Path) -> Path:
         return dest
 
     target = dest / story.file
-    original = target.read_text()
-    if story.failing not in original:
+    # Bytes, not text: text mode would rewrite line endings (CRLF on Windows) and the committed
+    # history would differ by platform.
+    original = target.read_bytes()
+    if story.failing.encode() not in original:
         raise ValueError(
             f"fixture {name}: {story.file} does not contain {story.failing!r}"
         )
-    target.write_text(original.replace(story.failing, story.healthy))
+    target.write_bytes(original.replace(story.failing.encode(), story.healthy.encode()))
     _git(dest, "add", "-A")
     _git(dest, "commit", "-q", "-m", story.import_message)
 
-    target.write_text(original)
+    target.write_bytes(original)
     _git(dest, "add", "-A")
     _git(dest, "commit", "-q", "-m", story.regression_message)
     return dest

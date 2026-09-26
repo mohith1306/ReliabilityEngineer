@@ -44,11 +44,12 @@ def _tried_memories(req: DiagnoseRequest) -> list[str]:
     return [r.components.get("memory_id") for r in rows if r.components.get("memory_id")]
 
 
-def make_routed_diagnoser(fallback: Callable[[DiagnoseRequest], DiagnoseResult] = bob_diagnoser):
+def make_routed_diagnoser(fallback: Callable[[DiagnoseRequest], DiagnoseResult] = bob_diagnoser,
+                          *, frozen_ownership: bool = False):
     def routed_diagnoser(req: DiagnoseRequest) -> DiagnoseResult:
-        router = TransactiveRouter(req.db)
+        router = TransactiveRouter(req.db, frozen_ownership=frozen_ownership)
         decision = router.route(
-            topic=req.topic, keywords=incident_keywords(req.incident),
+            topic=req.topic, keywords=incident_keywords(req.incident, req.evidence),
             exclude_memory_ids=_tried_memories(req),
         )
         open_routing_prediction(

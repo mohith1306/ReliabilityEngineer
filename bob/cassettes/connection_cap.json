@@ -1,0 +1,46 @@
+{
+  "scenario": "connection_cap",
+  "provenance": "Hand-authored stand-in for the credential-free demo and CI. NOT recorded from IBM Bob and NOT evidence about Bob's diagnostic quality.",
+  "usage_is_simulated": true,
+  "match": {
+    "file": "dbpool.py",
+    "pattern": "^\\s*self\\.size = min\\(size, 2\\)"
+  },
+  "cites": [
+    "dbpool.py",
+    "test_pool_sized_from_config",
+    "commit:",
+    "ci/failure.log"
+  ],
+  "diagnosis": {
+    "root_cause": "ConnectionPool.__init__ in dbpool.py clamps the pool with min(size, 2), so the pool is capped at 2 slots no matter what config/app.yaml asks for (it asks for 20). The third concurrent acquire raises ExhaustionError; test_pool_sized_from_config needs at least 10 concurrent connections.",
+    "confidence": 0.83,
+    "affected_components": [
+      "dbpool.py"
+    ],
+    "assumptions": [
+      "The cap in code is unintentional leftover load-shedding, not a deliberate limit",
+      "config/app.yaml is correct and should be honoured"
+    ],
+    "unresolved_uncertainty": [
+      "Whether the cap was meant to protect the shared database and needs a different mitigation"
+    ],
+    "usage_tokens": 4600
+  },
+  "remediation": {
+    "summary": "Remove the min(size, 2) clamp so the pool honours the configured size.",
+    "edits": [
+      {
+        "file": "dbpool.py",
+        "find": "self.size = min(size, 2)  # cap: protect the shared database during load-shedding",
+        "replace": "self.size = size"
+      }
+    ],
+    "usage_tokens": 5900,
+    "when_misapplied": {
+      "file": "dbpool.py",
+      "regex": "DEFAULT_POOL_SIZE = \\d+",
+      "replace": "DEFAULT_POOL_SIZE = 40"
+    }
+  }
+}

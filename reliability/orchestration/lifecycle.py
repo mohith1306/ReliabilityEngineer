@@ -62,6 +62,22 @@ def incident_view(row: IncidentDB) -> dict:
     }
 
 
+def latest_evidence(db: Session, incident_id: str) -> list[dict]:
+    """The most relevant-first evidence of the incident's latest investigation, as plain dicts."""
+    from apps.api.database import EvidenceDB, InvestigationDB
+
+    inv = (db.query(InvestigationDB).filter(InvestigationDB.incident_id == incident_id)
+           .order_by(InvestigationDB.created_at.desc(), InvestigationDB.id.desc()).first())
+    if inv is None:
+        return []
+    rows = db.query(EvidenceDB).filter(EvidenceDB.investigation_id == inv.id).all()
+    return [
+        {"source_type": e.source_type, "source_reference": e.source_reference, "content": e.content,
+         "relevance_score": e.relevance_score, "confidence": e.confidence}
+        for e in sorted(rows, key=lambda e: -e.relevance_score)
+    ]
+
+
 class Lifecycle:
     def __init__(self, db: Session) -> None:
         self._db = db

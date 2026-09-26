@@ -36,13 +36,14 @@ from typing import Iterable, Optional
 from sqlalchemy.orm import Session
 
 from asmos_bridge.memory.store import MemoryEntry, MemoryStore, cosine
-from asmos_bridge.ownership.ledger import OwnershipTable
-from asmos_bridge.ownership.trust import GLOBAL_SEARCH, ROUTE, routing_decision, routing_score
+from asmos_bridge.ownership.ledger import OwnershipTable, Standing
+from asmos_bridge.ownership.trust import GLOBAL_SEARCH, ROUTE, ownership_score, routing_decision, routing_score, trust
 
 MEMORY_SOURCE = "memory"
 BOB_SOURCE = "bob"
 DEFAULT_TAU = 0.35  # ASMOS's stated default; used ONLY when no tuning artifact exists
 ENV_TAU = "BRE_TAU"
+ENV_TAU_FILE = "BRE_TAU_FILE"
 TUNED_TAU_FILE = Path(__file__).resolve().parents[2] / "docs" / "artifacts" / "tau_tuning_latest.json"
 
 
@@ -54,9 +55,10 @@ def resolve_tau() -> tuple[float, str]:
             return float(raw), f"env:{ENV_TAU}"
         except ValueError:
             pass
+    path = Path(os.environ[ENV_TAU_FILE]) if os.environ.get(ENV_TAU_FILE) else TUNED_TAU_FILE
     try:
-        data = json.loads(TUNED_TAU_FILE.read_text(encoding="utf-8"))
-        return float(data["tau"]), f"tuned:{data.get('artifact', TUNED_TAU_FILE.name)}"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return float(data["tau"]), f"tuned:{data.get('artifact', path.name)}"
     except (OSError, ValueError, KeyError):
         return DEFAULT_TAU, "default:asmos"
 
@@ -75,8 +77,12 @@ class RoutingDecision:
 
 
 class TransactiveRouter:
-    def __init__(self, db: Session, *, tau: Optional[float] = None) -> None:
+    def __init__(self, db: Session, *, tau: Optional[float] = None, frozen_ownership: bool = False) -> None:
         self.db = db
+        # ABLATION ONLY. With ownership frozen at its cold-start prior, verified outcomes stop moving
+        # the score -- the single-variable ablation ASMOS itself uses to show that the benefit comes
+        # from ownership EVOLUTION, not from the prior. Never enabled outside evaluation.
+        self.frozen_ownership = frozen_ownership
         if tau is not None:
             self.tau, self.tau_source = tau, "explicit"
         else:
@@ -87,8 +93,9 @@ class TransactiveRouter:
         keywords = list(keywords)
         excluded = set(exclude_memory_ids)
         entries = [e for e in MemoryStore(self.db).active(topic) if e.id not in excluded]
-        table = OwnershipTable.from_ledger(self.db)
-        standing = table.standing(MEMORY_SOURCE, topic)
+        table = None if self.frozen_ownership else OwnershipTable.from_ledger(self.db)
+        standing = (table.standing(MEMORY_SOURCE, topic) if table is not None
+                    else Standing(MEMORY_SOURCE, topic, 0.0, 0.0, 0.0, trust(0, 0), ownership_score(trust(0, 0), 0.0)))
 
         base = {"topic": topic, "tau": self.tau, "tau_source": self.tau_source,
                 "ownership": standing.as_dict(), "excluded_memory": sorted(excluded)}

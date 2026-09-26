@@ -37,6 +37,11 @@
         "replace": "pool_size: 20"
       }
     ],
-    "usage_tokens": 6100
+    "usage_tokens": 6100,
+    "when_misapplied": {
+      "file": "config/app.yaml",
+      "regex": "pool_size: \\d+",
+      "replace": "pool_size: 40"
+    }
   }
 }

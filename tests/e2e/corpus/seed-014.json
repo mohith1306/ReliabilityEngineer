@@ -1,0 +1,23 @@
+{
+  "id": "seed-014",
+  "repo": "connection_cap",
+  "topic": "database",
+  "incident": {
+    "type": "test_failure",
+    "severity": "high",
+    "branch": "main",
+    "description": "AssertionError: connection pool exhausted after 2 acquisitions in the dataforge database layer",
+    "metadata": {
+      "ci_log": "ci/failure.log"
+    }
+  },
+  "expected": {
+    "must_surface": [
+      "dbpool.py",
+      "test_pool_sized_from_config"
+    ],
+    "min_evidence": 5,
+    "min_source_types": 3
+  },
+  "rationale": "LOOK-ALIKE of seed-006: the '2 acquisitions' message is identical, and misleading -- 2 is the code cap, not the config."
+}

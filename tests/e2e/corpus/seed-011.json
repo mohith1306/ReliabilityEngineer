@@ -1,0 +1,24 @@
+{
+  "id": "seed-011",
+  "repo": "connection_cap",
+  "topic": "database",
+  "incident": {
+    "type": "test_failure",
+    "severity": "high",
+    "branch": "main",
+    "description": "DatabaseConnector test failed: connection pool exhaustion in tests/test_dbpool.py",
+    "metadata": {
+      "error": "AssertionError: connection pool exhausted after 2 acquisitions",
+      "ci_log": "ci/failure.log"
+    }
+  },
+  "expected": {
+    "must_surface": [
+      "dbpool.py",
+      "test_pool_sized_from_config"
+    ],
+    "min_evidence": 5,
+    "min_source_types": 3
+  },
+  "rationale": "LOOK-ALIKE of seed-001: identical symptom text, but the cause is a hard-coded min(size, 2) in code while config is healthy."
+}

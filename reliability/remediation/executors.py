@@ -16,14 +16,17 @@ a test, so the write path stays grep-able rather than implicit.
 
 from __future__ import annotations
 
+import json
 import os
+import re
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, Protocol
 
 from bob.errors import BobError, BobNotAvailable
-from bob.replay import ENV_VALUE as REPLAY, match_cassette
+from bob.replay import ENV_VALUE as REPLAY, find_by_root_cause, match_cassette
+from bob.recording import record_turn
 from bob.shell import BobShell
 from bob.transport import ENV_TRANSPORT
 
@@ -77,6 +80,9 @@ class BobShellExecutor:
             raise ExecutorError(
                 f"bob run finished with status {result.status!r}: {result.last_message[:300]}"
             )
+        record_turn("remediation", prompt=prompt, response=result.last_message, tokens=result.usage.total_tokens,
+                    wall_ms=result.wall_ms, provider="bob-shell", workspace=repo_root,
+                    meta={"task_id": result.task_id, "usage": result.usage.__dict__})
         return ExecutorResult(
             summary=result.last_message.strip(),
             tokens=result.usage.total_tokens,
@@ -87,39 +93,79 @@ class BobShellExecutor:
         )
 
 
+_DIAGNOSIS_BLOCK = re.compile(
+    r"DIAGNOSIS \(a hypothesis nobody has verified yet\):\n(\{.*?\n\})\n\nEVIDENCE:", re.DOTALL)
+
+
+def _diagnosis_root_cause(prompt: str) -> Optional[str]:
+    match = _DIAGNOSIS_BLOCK.search(prompt)
+    if not match:
+        return None
+    try:
+        return json.loads(match.group(1)).get("root_cause")
+    except ValueError:
+        return None
+
+
 class ReplayExecutor:
-    """Applies a cassette's edits: exact find/replace, each `find` must occur exactly once."""
+    """Applies a cassette's edits: exact find/replace, each `find` must occur exactly once.
+
+    Like a real agent it FOLLOWS THE DIAGNOSIS IT IS GIVEN: the cassette is chosen by the diagnosis in
+    the prompt, and only falls back to the repository's failure signature when the diagnosis is not a
+    scripted one. If the diagnosed fix does not fit the repository (the value it would change is not
+    there), the cassette's `when_misapplied` edit runs instead -- a plausible-but-wrong change, which
+    is what an agent misled by a wrong diagnosis produces. Whether the result works is then decided by
+    the test suite, not by this stand-in.
+    """
 
     name = "replay"
 
     def apply(self, prompt: str, *, repo_root: str) -> ExecutorResult:
-        cassette = match_cassette(repo_root)
+        root_cause = _diagnosis_root_cause(prompt)
+        cassette = (find_by_root_cause(root_cause) if root_cause else None) or match_cassette(repo_root)
         if cassette is None:
             raise ExecutorError(
-                f"no recorded remediation matches the failure in {repo_root}; replay only answers "
-                "scenarios it has a cassette for"
+                f"no recorded remediation matches the diagnosis or the failure in {repo_root}; replay only "
+                "answers scenarios it has a cassette for"
             )
         root = Path(repo_root).resolve()
         started = time.perf_counter()
-        for edit in cassette.remediation["edits"]:
-            target = (root / edit["file"]).resolve()
+        misapplied = False
+
+        def path_of(rel: str) -> Path:
+            target = (root / rel).resolve()
             if root not in target.parents:
-                raise ExecutorError(f"cassette edit escapes the repository: {edit['file']}")
+                raise ExecutorError(f"cassette edit escapes the repository: {rel}")
+            return target
+
+        for edit in cassette.remediation["edits"]:
+            target = path_of(edit["file"])
             # Bytes, not text: text mode would normalise a CRLF file to LF and turn a
             # one-line patch into a whole-file diff.
-            text = target.read_bytes().decode("utf-8")
-            if text.count(edit["find"]) != 1:
-                raise ExecutorError(
-                    f"{edit['file']}: expected exactly one occurrence of {edit['find']!r}, "
-                    f"found {text.count(edit['find'])}"
-                )
-            target.write_bytes(text.replace(edit["find"], edit["replace"]).encode("utf-8"))
+            text = target.read_bytes().decode("utf-8") if target.is_file() else ""
+            n = text.count(edit["find"])
+            if n == 1:
+                target.write_bytes(text.replace(edit["find"], edit["replace"]).encode("utf-8"))
+                continue
+            wrong = cassette.remediation.get("when_misapplied")
+            if n == 0 and wrong:
+                target = path_of(wrong["file"])
+                text = target.read_bytes().decode("utf-8")
+                changed, hits = re.subn(wrong["regex"], wrong["replace"], text, count=1)
+                if hits:
+                    target.write_bytes(changed.encode("utf-8"))
+                    misapplied = True
+                    continue
+            raise ExecutorError(
+                f"{edit['file']}: expected exactly one occurrence of {edit['find']!r}, found {n}"
+            )
         return ExecutorResult(
-            summary=cassette.remediation["summary"],
+            summary=cassette.remediation["summary"] + (" (applied to a repository it does not fit)" if misapplied else ""),
             tokens=int(cassette.remediation.get("usage_tokens", 0)),
             wall_ms=(time.perf_counter() - started) * 1000.0,
             provider="replay-bob",
-            meta={"simulated": True, "scenario": cassette.scenario,
+            meta={"simulated": True, "scenario": cassette.scenario, "misapplied": misapplied,
+                  "followed": "diagnosis" if root_cause and find_by_root_cause(root_cause) else "repo_signature",
                   "usage_is_simulated": cassette.usage_is_simulated},
         )
 

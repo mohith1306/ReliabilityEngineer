@@ -38,6 +38,11 @@
         "replace": "request_timeout_seconds: 5"
       }
     ],
-    "usage_tokens": 5400
+    "usage_tokens": 5400,
+    "when_misapplied": {
+      "file": "config/auth.yaml",
+      "regex": "request_timeout_seconds: [0-9.]+",
+      "replace": "request_timeout_seconds: 30"
+    }
   }
 }

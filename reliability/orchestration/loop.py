@@ -48,7 +48,7 @@ from models.diagnosis import Diagnosis
 from models.incident import IncidentStatus
 from reliability.ledger.record import OutcomeLedger
 from reliability.orchestration import gate
-from reliability.orchestration.lifecycle import Lifecycle, incident_view
+from reliability.orchestration.lifecycle import Lifecycle, incident_view, latest_evidence
 from reliability.remediation.allowlist import RepoAllowlist, RepositoryNotAllowed
 from reliability.remediation.engine import RemediationEngine, RemediationRefused
 from reliability.remediation.executors import Executor, select_executor
@@ -205,12 +205,7 @@ class ReliabilityLoop:
                     {"investigation_id": inv.id, "attempt": row.attempt or 1})
 
     def _latest_evidence(self, row) -> list[dict]:
-        inv = (self.db.query(InvestigationDB).filter(InvestigationDB.incident_id == row.id)
-               .order_by(InvestigationDB.created_at.desc(), InvestigationDB.id.desc()).first())
-        if inv is None:
-            return []
-        rows = self.db.query(EvidenceDB).filter(EvidenceDB.investigation_id == inv.id).all()
-        return _evidence_dicts(sorted(rows, key=lambda e: -e.relevance_score))
+        return latest_evidence(self.db, row.id)
 
     def _prior_attempts(self, row) -> list[dict]:
         prior = []

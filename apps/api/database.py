@@ -232,6 +232,53 @@ class OutcomeRecordDB(Base):
     cost_wall_ms = Column(Float, nullable=False, default=0.0)
 
 
+# (table, legacy column) -> the current column its value should be carried into. Anything not listed
+# here is dropped with the rebuilt table.
+LEGACY_COLUMN_MAP = {("approvals", "approved_by"): "operator_name"}
+
+
+def rebuild_legacy_tables(bind=None) -> list[str]:
+    """Rebuild tables that still carry an obsolete NOT NULL column the current model no longer writes.
+
+    SQLite cannot drop a NOT NULL constraint in place, and `create_all` never alters an existing table,
+    so a `bre.db` from before a rename (S5: approvals.approved_by -> operator_id/operator_name) makes every
+    INSERT fail with "NOT NULL constraint failed". The one safe fix is rename -> create -> copy -> drop.
+
+    Data carried across is deliberately conservative: a legacy free-text `approved_by` becomes
+    `operator_name` but `operator_id` stays NULL, so an approval that was never authenticated can never
+    satisfy the gate after the migration (ERRATA A6). Returns the tables it rebuilt.
+    """
+    from sqlalchemy import inspect, text
+
+    bind = bind or engine
+    inspector = inspect(bind)
+    rebuilt: list[str] = []
+    for table in Base.metadata.sorted_tables:
+        if not inspector.has_table(table.name):
+            continue
+        model_cols = {c.name for c in table.columns}
+        info = inspector.get_columns(table.name)
+        obsolete_required = [c for c in info if c["name"] not in model_cols and not c["nullable"] and c.get("default") is None]
+        if not obsolete_required:
+            continue
+        legacy = f"{table.name}__legacy"
+        old_cols = {c["name"] for c in info}
+        copy: list[tuple[str, str]] = [(c, c) for c in old_cols & model_cols]
+        for (t, old_name), new_name in LEGACY_COLUMN_MAP.items():
+            if t == table.name and old_name in old_cols and new_name not in {n for _, n in copy}:
+                copy.append((old_name, new_name))
+        with bind.begin() as conn:
+            conn.execute(text(f"ALTER TABLE {table.name} RENAME TO {legacy}"))
+            table.create(bind=conn)
+            if copy:
+                dst = ", ".join(n for _, n in copy)
+                src = ", ".join(o for o, _ in copy)
+                conn.execute(text(f"INSERT INTO {table.name} ({dst}) SELECT {src} FROM {legacy}"))
+            conn.execute(text(f"DROP TABLE {legacy}"))
+        rebuilt.append(table.name)
+    return rebuilt
+
+
 def ensure_columns(bind=None) -> list[str]:
     """Add columns that exist on the models but not in an already-created database.
 
@@ -265,4 +312,5 @@ def ensure_columns(bind=None) -> list[str]:
 
 def init_db():
     Base.metadata.create_all(bind=engine)
+    rebuild_legacy_tables(engine)
     ensure_columns(engine)
