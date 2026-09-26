@@ -1,17 +1,27 @@
+from pathlib import Path
+
 from fastapi import FastAPI
-from apps.api.routes import approvals, incidents, investigations, risk
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+
+from apps.api.routes import approvals, demo, incidents, insights, investigations, loop, risk
 from apps.api.database import init_db
+
+WEB = Path(__file__).resolve().parents[1] / "web"
 
 app = FastAPI(
     title="Bob Reliability Engineer",
     description="Software Reliability Intelligence Layer for IBM Bob",
-    version="0.1.0",
+    version="0.2.0",
 )
 
 app.include_router(incidents.router, prefix="/api/incidents", tags=["incidents"])
+app.include_router(loop.router, prefix="/api/incidents", tags=["loop"])
 app.include_router(approvals.router, prefix="/api/incidents", tags=["approvals"])
 app.include_router(risk.router, prefix="/api/incidents", tags=["risk"])
 app.include_router(investigations.router, prefix="/api/investigations", tags=["investigations"])
+app.include_router(insights.router, prefix="/api", tags=["insights"])
+app.include_router(demo.router, prefix="/api/demo", tags=["demo"])
 
 
 @app.on_event("startup")
@@ -19,9 +29,14 @@ def startup():
     init_db()
 
 
-@app.get("/")
-def root():
-    return {"message": "Bob Reliability Engineer API", "version": "0.1.0"}
+@app.get("/", include_in_schema=False)
+def dashboard():
+    """The dashboard. The JSON API lives under /api and is documented at /docs."""
+    return FileResponse(WEB / "index.html")
+
+
+if (WEB / "static").is_dir():
+    app.mount("/static", StaticFiles(directory=WEB / "static"), name="static")
 
 
 @app.get("/health")

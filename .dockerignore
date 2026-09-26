@@ -1,0 +1,12 @@
+.git
+.gitignore
+venv
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+*.db
+runs
+docs/memory
+.claude
+tests/e2e/corpus_tmp

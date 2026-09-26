@@ -270,6 +270,12 @@ def check_integrity(stages: list[dict], ledger: dict, git: dict) -> list[dict]:
     local = [f for f in tracked.splitlines()
              if f.endswith((".db", ".sqlite3")) or f == ".env" or f.startswith("runs/")]
     add("no local state tracked (*.db, .env, runs/)", not local, ", ".join(local))
+
+    # 7. line endings: blobs must be LF (a Windows editor writing CRLF makes every diff a whole-file rewrite)
+    _, eol = sh("git", "ls-files", "--eol")
+    crlf = [ln.split("	")[-1] for ln in eol.splitlines() if ln.startswith("i/crlf")]
+    add("no CRLF blobs in the index (LF everywhere)", not crlf, f"{len(crlf)} file(s), e.g. {', '.join(crlf[:3])}")
+    add(".gitattributes enforces LF", (ROOT / ".gitattributes").is_file(), "missing .gitattributes")
     return checks
 
 

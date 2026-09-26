@@ -1,0 +1,10 @@
+# Render blueprint: New + > Blueprint > pick this repository. Free plan is enough for a demo.
+# The instance runs the simulated-Bob demo image (see Dockerfile); storage is ephemeral, which is fine --
+# the demo builds its own throwaway repositories and has a Reset button.
+services:
+  - type: web
+    name: bob-reliability-engineer
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: false
