@@ -1,0 +1,20 @@
+{
+  "id": "seed-005",
+  "repo": "seeded_failure",
+  "topic": "database",
+  "incident": {
+    "type": "test_failure",
+    "severity": "high",
+    "branch": "main",
+    "description": "pool exhaustion started yesterday: something in recent git history lowered the connection pool size",
+    "metadata": {
+      "error": "connection pool exhausted after 2 acquisitions"
+    }
+  },
+  "expected": {
+    "must_surface": ["commit:", "config/app.yaml"],
+    "min_evidence": 5,
+    "min_source_types": 3
+  },
+  "rationale": "Report points at history: git evidence and the regression commit must surface."
+}

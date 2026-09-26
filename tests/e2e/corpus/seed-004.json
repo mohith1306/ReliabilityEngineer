@@ -1,0 +1,20 @@
+{
+  "id": "seed-004",
+  "repo": "seeded_failure",
+  "topic": "database",
+  "incident": {
+    "type": "test_failure",
+    "severity": "medium",
+    "branch": "main",
+    "description": "test_pool_sized_from_config fails: pool exhaustion assertion in the dataforge test suite",
+    "metadata": {
+      "error": "assert 2 >= 10"
+    }
+  },
+  "expected": {
+    "must_surface": ["tests/test_dbpool.py::test_pool_sized_from_config"],
+    "min_evidence": 5,
+    "min_source_types": 3
+  },
+  "rationale": "A single named failing test: discovery must return that exact test id."
+}

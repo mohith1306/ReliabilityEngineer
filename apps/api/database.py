@@ -149,5 +149,36 @@ class EngineeringMemoryDB(Base):
     updated_at = Column(DateTime, default=datetime.utcnow)
 
 
+class OutcomeRecordDB(Base):
+    """Prediction in, verified outcome out. ADR-0003.
+
+    Opened at prediction time with status='pending'. Only reliability.verification
+    (or the evaluation harness, via an `eval:`-prefixed run id) may close it.
+    tenant_id and cost_* exist from the first write -- neither can be backfilled
+    (ERRATA A7, A8).
+    """
+
+    __tablename__ = "outcome_records"
+
+    id = Column(String, primary_key=True)
+    tenant_id = Column(String, nullable=False, default="default")
+    incident_id = Column(String, nullable=False, index=True)
+    predictor_id = Column(String, nullable=False)
+    topic = Column(String, nullable=False)
+    prediction_type = Column(String, nullable=False)
+    prediction_payload = Column(JSON, default=dict)
+    claim_class = Column(String, nullable=False, default="B")
+    predicted_at = Column(DateTime, nullable=False)
+    confidence = Column(Float, nullable=False, default=0.0)
+    components = Column(JSON, default=dict)
+    attempt_number = Column(Integer, nullable=False, default=1)
+    status = Column(String, nullable=False, default="pending", index=True)
+    closed_at = Column(DateTime, nullable=True)
+    closed_by = Column(String, nullable=True)
+    verification_run_id = Column(String, nullable=True)
+    cost_tokens = Column(Integer, nullable=False, default=0)
+    cost_wall_ms = Column(Float, nullable=False, default=0.0)
+
+
 def init_db():
     Base.metadata.create_all(bind=engine)

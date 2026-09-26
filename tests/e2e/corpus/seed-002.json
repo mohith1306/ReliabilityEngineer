@@ -1,0 +1,20 @@
+{
+  "id": "seed-002",
+  "repo": "seeded_failure",
+  "topic": "database",
+  "incident": {
+    "type": "ci_failure",
+    "severity": "high",
+    "branch": "main",
+    "description": "CI job failed on main: connection pool exhausted during database test suite",
+    "metadata": {
+      "ci_log": "ci/failure.log"
+    }
+  },
+  "expected": {
+    "must_surface": ["ci/failure.log", "dbpool.py"],
+    "min_evidence": 5,
+    "min_source_types": 3
+  },
+  "rationale": "Reported only as a CI job failure: the parsed log must surface alongside source."
+}

@@ -1,0 +1,20 @@
+{
+  "id": "seed-010",
+  "repo": "auth_timeout",
+  "topic": "config",
+  "incident": {
+    "type": "runtime_error",
+    "severity": "medium",
+    "branch": "main",
+    "description": "auth request timeout in production: authentication login exceeds configured request_timeout_seconds",
+    "metadata": {
+      "error": "RequestTimeoutError: login request timed out after 0.001s"
+    }
+  },
+  "expected": {
+    "must_surface": ["config/auth.yaml", "authservice.py"],
+    "min_evidence": 5,
+    "min_source_types": 3
+  },
+  "rationale": "Config-shaped report without CI: source and config evidence must both surface."
+}

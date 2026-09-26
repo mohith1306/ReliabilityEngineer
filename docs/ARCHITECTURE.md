@@ -1979,9 +1979,21 @@ GET  /api/investigations/{id}/evidence
 - `pytest tests/unit/test_connectors.py` → 12 passed (S2 exit criteria per connector)
 - `pytest tests/integration/test_investigation.py` → 8 passed
   (≥5 evidence items across ≥3 source types for the seeded failure)
-- Full suite → **40 passed, 3 xfailed**
+- Full suite at S2 close → **40 passed, 3 xfailed**
 - Seeded failure fixture: `tests/fixtures/seeded_failure/` with runtime-built
   git history (a nested `.git` cannot be committed)
+
+### Outcome ledger + evaluation harness (S3)
+
+- `pytest tests/integration/test_ledger.py` → 14 passed (all three prediction
+  types open pending; verification closes them; `eval:`-prefixed run ids accepted)
+- `pytest tests/e2e/` → 6 passed (10-incident corpus; literal CLI command;
+  determinism via `stable_view`)
+- `python -m reliability.evaluation.run --corpus tests/e2e/corpus` →
+  `10 incidents: 10 confirmed, 0 refuted | 0 tokens | 425ms`
+- Full suite at S3 close → **60 passed, 3 xfailed**
+- Corpus: `tests/e2e/corpus/seed-001..010.json` across two fixture repos;
+  artifacts stamped under the `--out` directory (`evaluation_<utc>.json`)
 
 ## Planned Phases — see docs/stages/STAGES.md for the authoritative order
 
@@ -1989,8 +2001,6 @@ The stage tracker corrects §34's build order (ERRATA A2, ADR-0003): risk +
 approval precede remediation, and the outcome ledger precedes Bob integration.
 
 ```text
-S3  Outcome ledger      — OutcomeRecord model + table; prediction-time writes;
-                          ≥10-incident seeded corpus; evaluation harness
 S4  Bob adapter         — READ PATHS ONLY; investigate()/diagnose() structured
                           output; token usage captured; mechanism must be
                           confirmed by a working call (thread 0001#7)

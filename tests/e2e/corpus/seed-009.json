@@ -1,0 +1,20 @@
+{
+  "id": "seed-009",
+  "repo": "auth_timeout",
+  "topic": "auth",
+  "incident": {
+    "type": "test_failure",
+    "severity": "medium",
+    "branch": "main",
+    "description": "test_login_within_timeout fails: authentication login timing out against the auth backend",
+    "metadata": {
+      "error": "RequestTimeoutError: login request timed out after 0.001s"
+    }
+  },
+  "expected": {
+    "must_surface": ["tests/test_authservice.py::test_login_within_timeout"],
+    "min_evidence": 5,
+    "min_source_types": 3
+  },
+  "rationale": "Named auth test: discovery must return that exact test id."
+}

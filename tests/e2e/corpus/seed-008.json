@@ -1,0 +1,20 @@
+{
+  "id": "seed-008",
+  "repo": "auth_timeout",
+  "topic": "auth",
+  "incident": {
+    "type": "ci_failure",
+    "severity": "high",
+    "branch": "main",
+    "description": "CI pipeline red on main: auth login request timeout during authentication test suite",
+    "metadata": {
+      "ci_log": "ci/failure.log"
+    }
+  },
+  "expected": {
+    "must_surface": ["ci/failure.log", "authservice.py"],
+    "min_evidence": 5,
+    "min_source_types": 3
+  },
+  "rationale": "CI-only report on the auth fixture: parsed log plus source must both appear."
+}

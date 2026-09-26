@@ -1,0 +1,21 @@
+{
+  "id": "seed-001",
+  "repo": "seeded_failure",
+  "topic": "database",
+  "incident": {
+    "type": "test_failure",
+    "severity": "high",
+    "branch": "main",
+    "description": "DatabaseConnector test failed: connection pool exhaustion in tests/test_dbpool.py",
+    "metadata": {
+      "error": "AssertionError: connection pool exhausted after 2 acquisitions",
+      "ci_log": "ci/failure.log"
+    }
+  },
+  "expected": {
+    "must_surface": ["dbpool.py", "config/app.yaml", "test_pool_sized_from_config"],
+    "min_evidence": 5,
+    "min_source_types": 3
+  },
+  "rationale": "The canonical seeded failure: config lowered pool_size to 2; the test proves it."
+}

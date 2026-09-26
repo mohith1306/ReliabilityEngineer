@@ -13,10 +13,10 @@ the command output or session entry that proves it. No evidence, not done.
 
 | | |
 |---|---|
-| **Current stage** | S3 — Outcome ledger + evaluation harness |
+| **Current stage** | S4 — Bob adapter (read paths only) |
 | **Blocked on** | nothing |
 | **Sharpest risk** | S4 (Bob integration mechanism is unverified — see thread 0001#7) |
-| **Environment** | CPython 3.14.7 venv (macOS dev box); `python -m pytest` → 40 passed, 3 xfailed |
+| **Environment** | CPython 3.14.7 venv (macOS dev box); `python -m pytest` → 60 passed, 3 xfailed |
 
 ---
 
@@ -27,7 +27,7 @@ the command output or session entry that proves it. No evidence, not done.
 | S0 | Alignment + working agreement | — | `DONE` | session [0001](../memory/sessions/0001-asmos-alignment-and-workflow.md) |
 | S1 | Foundation — models, state machine, DB, API | S0 | `DONE` | `pytest` → 20 passed, 3 xfailed — session [0002](../memory/sessions/0002-environment-verified.md) #4, #5 |
 | S2 | Evidence collection — connectors + investigation engine | S1 | `DONE` | `pytest` → 40 passed, 3 xfailed — session [0003](../memory/sessions/0003-evidence-collection-end-to-end.md) #5 |
-| S3 | Outcome ledger + evaluation harness | S1 | `NOT_STARTED` | — |
+| S3 | Outcome ledger + evaluation harness | S1 | `DONE` | `pytest` → 60 passed, 3 xfailed; harness `10 incidents: 10 confirmed, 0 refuted` — session [0004](../memory/sessions/0004-outcome-ledger-and-harness.md) #6 |
 | S4 | Bob adapter — **read paths only** | S2 | `NOT_STARTED` | — |
 | S5 | Risk engine + approval gate | S3, S4 | `NOT_STARTED` | — |
 | S6 | Remediation — the write path | S5 | `NOT_STARTED` | — |
@@ -76,13 +76,21 @@ Criteria are written as commands with expected results. "Engine works" is not a 
       — `test_investigate_seeded_failure_produces_evidence_package`
 
 ### S3 — Outcome ledger + evaluation harness
-- [ ] `OutcomeRecord` model + table; every diagnosis, risk assessment, and routing decision
+- [x] `OutcomeRecord` model + table; every diagnosis, risk assessment, and routing decision
       writes one at prediction time with `status=pending`
-- [ ] Verification result closes the matching records to `confirmed` / `refuted`
-- [ ] A seeded-failure corpus of **≥10 reproducible incidents** exists under `tests/e2e/corpus/`
-- [ ] `python -m reliability.evaluation.run --corpus tests/e2e/corpus` emits a stamped
+      — `tests/integration/test_ledger.py::test_diagnosis_risk_and_routing_all_open_pending`
+- [x] Verification result closes the matching records to `confirmed` / `refuted`
+      — `test_verification_pass_closes_all_pending_as_confirmed`,
+      `test_verification_failure_refutes` (14 passed)
+- [x] A seeded-failure corpus of **≥10 reproducible incidents** exists under `tests/e2e/corpus/`
+      — 10 seeds across 2 fixture repos;
+      `test_corpus_has_at_least_ten_reproducible_incidents`
+- [x] `python -m reliability.evaluation.run --corpus tests/e2e/corpus` emits a stamped
       JSON artifact with per-incident outcome, token count, and wall time
-- [ ] Re-running the harness on an unchanged corpus reproduces the artifact (determinism)
+      — live run: `10 incidents: 10 confirmed, 0 refuted | 0 tokens | 425ms`;
+      `test_cli_emits_a_stamped_artifact`
+- [x] Re-running the harness on an unchanged corpus reproduces the artifact (determinism)
+      — `test_rerun_reproduces_the_artifact` (`stable_view` equality, two runs)
 
 ### S4 — Bob adapter (read paths only)
 - [ ] The actual Bob interface is **confirmed by a working call**, not assumed — closes
@@ -134,3 +142,4 @@ Criteria are written as commands with expected results. "Engine works" is not a 
 | 2026-09-17 | S1 | retroactively marked DONE (built before the tracker existed) | 0001 |
 | 2026-09-17 | S1 | evidence attached — DONE is now verified, not assumed | 0002 |
 | 2026-09-26 | S2 | NOT_STARTED → DONE — all six exit criteria closed by test evidence | 0003 |
+| 2026-09-26 | S3 | NOT_STARTED → DONE — all five exit criteria closed by test evidence | 0004 |

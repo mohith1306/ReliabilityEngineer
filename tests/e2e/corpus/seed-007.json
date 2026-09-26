@@ -1,0 +1,21 @@
+{
+  "id": "seed-007",
+  "repo": "auth_timeout",
+  "topic": "auth",
+  "incident": {
+    "type": "test_failure",
+    "severity": "high",
+    "branch": "main",
+    "description": "Authentication requests timing out: test_login_within_timeout fails in the auth service",
+    "metadata": {
+      "error": "RequestTimeoutError: login request timed out after 0.001s (backend latency 0.05s)",
+      "ci_log": "ci/failure.log"
+    }
+  },
+  "expected": {
+    "must_surface": ["authservice.py", "config/auth.yaml", "test_login_within_timeout"],
+    "min_evidence": 5,
+    "min_source_types": 3
+  },
+  "rationale": "Second fixture, same shape: timeout traced from test through source to config."
+}

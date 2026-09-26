@@ -1,0 +1,5 @@
+auth:
+  issuer: auth.internal
+  # cut during load-shedding; suspected cause of login request timeouts
+  request_timeout_seconds: 0.001
+  max_retries: 0

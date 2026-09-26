@@ -1,0 +1,20 @@
+{
+  "id": "seed-003",
+  "repo": "seeded_failure",
+  "topic": "config",
+  "incident": {
+    "type": "test_failure",
+    "severity": "medium",
+    "branch": "main",
+    "description": "connection pool exhaustion after config change: database pool_size lowered in config",
+    "metadata": {
+      "error": "ExhaustionError: connection pool exhausted: 2/2 in use"
+    }
+  },
+  "expected": {
+    "must_surface": ["config/app.yaml", "dbpool.py"],
+    "min_evidence": 5,
+    "min_source_types": 3
+  },
+  "rationale": "The reporter already suspects config: evidence must confirm rather than assume."
+}

@@ -1,0 +1,20 @@
+============================= test session starts ==============================
+collected 2 items
+
+tests/test_authservice.py F.                                              [100%]
+
+=================================== FAILURES ===================================
+____________________________ test_login_within_timeout _________________________
+
+    def test_login_within_timeout():
+        """Config timeout (0.001s) must still admit a 0.05s backend round trip."""
+        service = AuthService(timeout_seconds=0.001)
+>       session = service.login("alice", "s3cret", backend_latency=0.05)
+
+authservice.py:26: RequestTimeoutError
+E       authservice.RequestTimeoutError: login request timed out after 0.001s (backend latency 0.05s) for user alice
+
+tests/test_authservice.py:10: RequestTimeoutError
+=========================== short test summary info ============================
+FAILED tests/test_authservice.py::test_login_within_timeout - authservice.RequestTimeoutError: login request timed out after 0.001s (backend latency 0.05s)
+========================= 1 failed, 1 passed in 0.03s ==========================

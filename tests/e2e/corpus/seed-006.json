@@ -1,0 +1,20 @@
+{
+  "id": "seed-006",
+  "repo": "seeded_failure",
+  "topic": "database",
+  "incident": {
+    "type": "test_failure",
+    "severity": "medium",
+    "branch": "main",
+    "description": "AssertionError: connection pool exhausted after 2 acquisitions in the dataforge database layer",
+    "metadata": {
+      "error": "AssertionError: connection pool exhausted after 2 acquisitions"
+    }
+  },
+  "expected": {
+    "must_surface": ["dbpool.py"],
+    "min_evidence": 5,
+    "min_source_types": 3
+  },
+  "rationale": "Bare assertion report with no file hints: keyword evidence alone must find the source."
+}
