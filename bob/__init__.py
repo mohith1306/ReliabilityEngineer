@@ -2,20 +2,62 @@
 
 Bob is treated as a boundary, not a library (ARCHITECTURE.md section 16). BRE sends
 task + relevant context + constraints + expected output + verification requirements;
-Bob returns analysis, code changes, tests and an explanation.
+Bob returns analysis. The write side (code changes, tests) belongs to S6 and is
+gated; see adapter.BobAdapter.remediate.
 
-    adapter.py    BobAdapter.investigate / .diagnose / .remediate / .verify
-                  (ARCHITECTURE.md section 16 omits `diagnose` while section 10
-                  assigns root-cause analysis to Bob -- ERRATA B. It belongs here.)
-    prompts.py    Task framing and constraint injection.
-    execution.py  Transport. UNVERIFIED -- see below.
+Mechanism -- CONFIRMED (session 0005, closes thread 0001#7):
 
-BLOCKING UNKNOWN (thread 0001#7): the actual Bob integration mechanism has not been
-confirmed by a working call. ARCHITECTURE.md section 16 defers it deliberately. Every
-downstream stage assumes it exists. Confirm it with a real call before building on it.
+    bobide agent host -> local WebSocket JSON-RPC 2.0 server (AHP protocol),
+    discovered through the CLI lockfile, authenticated by a connection token.
+    recovery sources: bin/bobide --help, agent-host-stable.lock, and the
+    method/param shapes in out/vs/workbench/workbench.desktop.main.js.
+
+    Residual gap: the supervisor downloads a server build before listening, and
+    IBM publishes no darwin archives (404 for darwin/*, 302 for linux/x64 and
+    win32/x64). On this Mac a live host cannot start; the round trip is proven
+    against tests/support/fake_bob_host.py, which implements the recovered
+    protocol verbatim. First run on linux/x64 closes the last unknowns
+    (default chat-channel encoding, turn-completion delivery) -- thread 0005#1.
+
+Files:
+    execution.py  Discovery (CLI probe, lockfile) + AgentHostClient.
+    prompts.py    Task framing, constraints, output contract.
+    adapter.py    BobAdapter.investigate / .diagnose, ledger cost capture.
+                  .remediate / .verify raise until S6 / S7.
 
 Obligations:
     - Capture token usage and wall time on EVERY call, into the outcome ledger.
       Cost cannot be reconstructed after the fact (ERRATA A8).
     - Until stage S6, nothing in this package may write to a target repository.
 """
+
+from .adapter import BobAdapter, DiagnosisParseError
+from .execution import (
+    AgentHostAddress,
+    AgentHostClient,
+    BobError,
+    BobHostUnavailable,
+    BobNotInstalled,
+    BobProtocolError,
+    BobTurnTimeout,
+    chat_channel_for,
+    discover_agent_host,
+    find_cli,
+    probe_cli,
+)
+
+__all__ = [
+    "AgentHostAddress",
+    "AgentHostClient",
+    "BobAdapter",
+    "BobError",
+    "BobHostUnavailable",
+    "BobNotInstalled",
+    "BobProtocolError",
+    "BobTurnTimeout",
+    "DiagnosisParseError",
+    "chat_channel_for",
+    "discover_agent_host",
+    "find_cli",
+    "probe_cli",
+]

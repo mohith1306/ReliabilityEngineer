@@ -1995,15 +1995,29 @@ GET  /api/investigations/{id}/evidence
 - Corpus: `tests/e2e/corpus/seed-001..010.json` across two fixture repos;
   artifacts stamped under the `--out` directory (`evaluation_<utc>.json`)
 
+### Bob adapter, read paths only (S4)
+
+- Interface confirmed: `probe_cli()` → `IBM Bob 1.126.0+bob2.1.0` (installed
+  `bobide` binary); agent host = local WebSocket JSON-RPC 2.0 (AHP),
+  discovered via the CLI lockfile `{"pid","port","host","connectionToken",...}`;
+  protocol recovered from `bin/bobide-tunnel` strings and
+  `out/vs/workbench/workbench.desktop.main.js` (`initialize`, `listSessions`,
+  `createSession`, `createChat`, `subscribe`, `dispatchAction`)
+- Platform note: IBM publishes REH servers for linux/x64 and win32/x64 only —
+  every `darwin/*` update URL 404s, so a live host cannot start on macOS;
+  the round trip is proven against `tests/support/fake_bob_host.py`, which
+  implements the recovered contract over real sockets
+- `pytest tests/integration/test_bob_adapter.py` → 12 passed
+  (real CLI call, lockfile discovery, protocol round trip, Diagnosis output,
+  ledger cost capture, four read-only guards)
+- Full suite at S4 close → **72 passed, 3 xfailed**
+
 ## Planned Phases — see docs/stages/STAGES.md for the authoritative order
 
 The stage tracker corrects §34's build order (ERRATA A2, ADR-0003): risk +
 approval precede remediation, and the outcome ledger precedes Bob integration.
 
 ```text
-S4  Bob adapter         — READ PATHS ONLY; investigate()/diagnose() structured
-                          output; token usage captured; mechanism must be
-                          confirmed by a working call (thread 0001#7)
 S5  Risk + approval     — RiskClassifier with factor breakdown; approval gate;
                           verified identity; HIGH/CRITICAL cannot skip the gate
 S6  Remediation         — git checkpoint before patch; branch-only writes;
