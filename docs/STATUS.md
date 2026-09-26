@@ -1,19 +1,19 @@
 # Project status
 
-> **Generated** by `python scripts/cockpit.py --write` at Sun 2026-09-27 02:51 India Standard Time, commit `705b335`. Do not edit by hand -- it is regenerated from git, the ledger, the stage tracker and the last test run. For the *why*, read `docs/memory/INDEX.md`.
+> **Generated** by `python scripts/cockpit.py --write` at Sun 2026-09-27 02:57 India Standard Time, commit `bcc955c`. Do not edit by hand -- it is regenerated from git, the ledger, the stage tracker and the last test run. For the *why*, read `docs/memory/INDEX.md`.
 
 ```text
-BRE COCKPIT                                           Sun 2026-09-27 02:51 India Standard Time
+BRE COCKPIT                                           Sun 2026-09-27 02:57 India Standard Time
 
 == CLOCK =====================================================================
 deadline  Sun 2026-09-27 20:30 India Standard Time  (11:00 AM EDT)
-remaining 17h 38m
+remaining 17h 32m
 
 == GIT =======================================================================
-branch    integration/reconcile-main @ 705b335  The loop over HTTP, the dashboard, demo mode, and de
-vs main   11 ahead / 0 behind origin/main (22cd27a)
+branch    integration/reconcile-main @ bcc955c  Docs, results and the submission pack; close session
+vs main   12 ahead / 0 behind origin/main (22cd27a)
 upstream  (none -- this branch exists only locally)
-worktree  26 uncommitted path(s)
+worktree  0 uncommitted path(s)
 
 == STAGES ====================================================================
 S0  DONE         ............  0/0  Alignment + working agreement
@@ -35,19 +35,19 @@ risk      **Bob has never been called live.** Both adapters (Bob Shell CLI,
 GREEN  329 passed, 0 failed, 0 errors, 1 skipped, 0 xfailed @ 705b335   (stale: code changed since)
 
 == SUBMISSION (lablab.ai) ====================================================
-HUMAN 5  TODO 7
-   1 TODO     agent       Project title
-   2 TODO     agent       Short description
-   3 TODO     agent       Long description
-   4 TODO     agent+human IBM Bob usage statement
-   5 TODO     agent       Technology & category tags
+DRAFTED 7  HUMAN 5
+   1 DRAFTED  agent       Project title
+   2 DRAFTED  agent       Short description
+   3 DRAFTED  agent       Long description
+   4 DRAFTED  agent+human IBM Bob usage statement
+   5 DRAFTED  agent       Technology & category tags
    6 HUMAN    human       Public code repository
    7 HUMAN    human       IBM Bob task-session summary screenshots, **
    8 HUMAN    human       Demo application platform
    9 HUMAN    human       Application URL
-  10 TODO     agent       Cover image
+  10 DRAFTED  agent       Cover image
   11 HUMAN    human       Video demonstration
-  12 TODO     agent       Slide presentation
+  12 DRAFTED  agent       Slide presentation
 
 == OPEN THREADS ==============================================================
 0001#7  [needs a human with] Bob has never been called live. Two adapters e
@@ -63,11 +63,9 @@ HUMAN 5  TODO 7
 last sessions: 0007 Bob interface document | 0008 Asymmetry measured, pr | 0009 Reconcile two lines, b
 
 == INTEGRITY =================================================================
-14/15 checks pass
-  FAIL  doc links resolve: 1 broken, e.g. README.md -> docs/STATUS.md
+15/15 checks pass
 
 == NEXT ======================================================================
-1. FIX INTEGRITY FIRST: doc links resolve
-2. Needs a person: #6 Public code repository; #7 IBM Bob task-session summary
-3. 11 commit(s) ahead of origin/main exist only locally -- the judged repo do
+1. Needs a person: #6 Public code repository; #7 IBM Bob task-session summary
+2. 12 commit(s) ahead of origin/main exist only locally -- the judged repo do
 ```
