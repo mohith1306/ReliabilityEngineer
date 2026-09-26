@@ -3,12 +3,14 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
-from dbpool import ConnectionPool, ExhaustionError
+from dbpool import ConnectionPool, ExhaustionError, load_pool_size
+
+CONFIG = pathlib.Path(__file__).resolve().parent.parent / "config" / "app.yaml"
 
 
 def test_pool_sized_from_config():
-    """Production needs >= 10 concurrent connections; config sets 2."""
-    pool = ConnectionPool(size=2)
+    """Production needs >= 10 concurrent connections; the pool is sized from config."""
+    pool = ConnectionPool(size=load_pool_size(CONFIG))
     acquired = []
     for _ in range(10):
         try:

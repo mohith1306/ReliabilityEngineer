@@ -1,0 +1,43 @@
+{
+  "scenario": "auth_timeout",
+  "provenance": "Hand-authored stand-in for the credential-free demo and CI. NOT recorded from IBM Bob and NOT evidence about Bob's diagnostic quality.",
+  "usage_is_simulated": true,
+  "match": {
+    "file": "config/auth.yaml",
+    "pattern": "^\\s*request_timeout_seconds:\\s*0\\.001\\s*$"
+  },
+  "cites": [
+    "config/auth.yaml",
+    "authservice.py",
+    "test_login",
+    "commit:",
+    "ci/failure.log"
+  ],
+  "diagnosis": {
+    "root_cause": "request_timeout_seconds in config/auth.yaml was cut to 0.001s under load. AuthService reads it as its request deadline, so every login call times out before the identity provider can answer; the CI failure log shows the authentication tests timing out.",
+    "confidence": 0.84,
+    "affected_components": [
+      "config/auth.yaml",
+      "authservice.py"
+    ],
+    "assumptions": [
+      "The timeout value is the regression, not the identity provider's latency",
+      "A multi-second deadline is the intended production setting"
+    ],
+    "unresolved_uncertainty": [
+      "Whether the load that motivated the cut has been addressed elsewhere"
+    ],
+    "usage_tokens": 3900
+  },
+  "remediation": {
+    "summary": "Restore auth request_timeout_seconds to 5 in config/auth.yaml.",
+    "edits": [
+      {
+        "file": "config/auth.yaml",
+        "find": "request_timeout_seconds: 0.001",
+        "replace": "request_timeout_seconds: 5"
+      }
+    ],
+    "usage_tokens": 5400
+  }
+}

@@ -77,3 +77,30 @@ def diagnose_prompt(incident: Any, evidence: Iterable[Any]) -> str:
 
 def prompt_fingerprint(prompt: str) -> str:
     return hashlib.sha256(prompt.encode()).hexdigest()[:16]
+
+
+REMEDIATION_CONSTRAINTS = """\
+CONSTRAINTS (binding -- BRE checks the resulting diff and rolls the patch back if it breaks any):
+- Make the smallest change that fixes the diagnosed root cause. Modify only necessary files.
+- No unrelated refactoring, renaming, or reformatting.
+- NEVER delete, skip, xfail, or weaken a test to make it pass. If a test is wrong, say so in
+  your summary instead of editing it away.
+- Do not touch CI / workflow configuration.
+- Do not run git commands that create commits or branches: BRE owns the branch and the commit.
+- Do not install packages or change dependency manifests unless the diagnosis requires it."""
+
+
+def remediate_prompt(incident: Any, diagnosis: Any, evidence: Iterable[Any]) -> str:
+    """The write-path prompt. Carries the diagnosis as a *claim under test*, not as truth."""
+    return (
+        "TASK: fix the root cause of this incident in the repository at your working directory.\n\n"
+        f"INCIDENT:\n{_dump(incident)}\n\n"
+        f"DIAGNOSIS (a hypothesis nobody has verified yet):\n{_dump(diagnosis)}\n\n"
+        f"EVIDENCE:\n{evidence_block(evidence)}\n\n"
+        f"{REMEDIATION_CONSTRAINTS}\n\n"
+        "EXPECTED OUTPUT: two or three plain sentences: what you changed, and why that fixes it.\n\n"
+        "VERIFICATION REQUIREMENTS:\n"
+        "BRE will run the previously failing tests, then the test files they live in, then the whole\n"
+        "suite. If any of them fail, or anything that used to pass now fails, your patch is rolled\n"
+        "back and the diagnosis is recorded as refuted."
+    )

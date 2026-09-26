@@ -13,8 +13,8 @@ the command output or session entry that proves it. No evidence, not done.
 
 | | |
 |---|---|
-| **Current stage** | S6 — Remediation (the write path) |
-| **Blocked on** | S4 live verification — Bob Shell must be installed and `BOB_API_KEY` set *by a human*; nothing else is blocked |
+| **Current stage** | S7 — Verification + rollback + bounded loop |
+| **Blocked on** | S4 live verification (and S6's live agent-mode call) — Bob Shell must be installed and `BOB_API_KEY` set *by a human*; nothing else is blocked |
 | **Sharpest risk** | **Bob has never been called live.** Both adapters (Bob Shell CLI, agent-host WebSocket) are proven only against documentation and fakes |
 | **Environment** | CPython 3.13.7 venv on Windows (also run on macOS, 3.14.7); see the latest session for the current `pytest` count |
 
@@ -30,7 +30,7 @@ the command output or session entry that proves it. No evidence, not done.
 | S3 | Outcome ledger + evaluation harness | S1 | `DONE` | `pytest` → 60 passed, 3 xfailed; harness `10 incidents: 10 confirmed, 0 refuted` — session [0004](../memory/sessions/0004-outcome-ledger-and-harness.md) #6 |
 | S4 | Bob adapter — **read paths only** | S2 | `BLOCKED` | adapter + transports + 27 tests done against fakes and docs; live call needs Bob Shell + `BOB_API_KEY` — sessions [0005](../memory/sessions/0005-bob-interface-spike-and-adapter.md), [0007](../memory/sessions/0007-bob-interface-confirmed.md), 0009 |
 | S5 | Risk engine + approval gate | S3, S4 | `DONE` | `pytest` → 84 passed, 3 xfailed; gate denies + unblocks with approval — session [0006](../memory/sessions/0006-risk-engine-and-approval-gate.md) #8 |
-| S6 | Remediation — the write path | S5 | `NOT_STARTED` | — |
+| S6 | Remediation — the write path | S5 | `DONE` | `pytest tests/integration/test_remediation.py` → 26 passed; suite 152 passed, 1 skipped — session 0009. **Caveat:** exercised through `ReplayExecutor`; `BobShellExecutor` (agent mode) has never run against a live Bob |
 | S7 | Verification + rollback + bounded feedback loop | S6 | `NOT_STARTED` | — |
 | S8 | ASMOS ownership routing + learning | S3, S7 | `NOT_STARTED` | — |
 | S9 | Metrics, baseline comparison, demo | S8 | `NOT_STARTED` | — |
@@ -131,10 +131,26 @@ Criteria are written as commands with expected results. "Engine works" is not a 
       (12 new tests; suite → 84 passed, 3 xfailed)
 
 ### S6 — Remediation (write path)
-- [ ] A git checkpoint is created before any patch is applied
-- [ ] Bob's changes land on a branch, never on the target's default branch
-- [ ] Changed files are recorded against the remediation record
-- [ ] Repository allowlist enforced; a write to a non-allowlisted repo is rejected in test
+- [x] A git checkpoint is created before any patch is applied
+      — `test_checkpoint_then_branch_never_the_default_branch` (`checkpoint_sha` == pre-patch HEAD, pinned
+      under `refs/bre/checkpoints/*`)
+- [x] Bob's changes land on a branch, never on the target's default branch
+      — same test (`bre/<incident>/attempt-<n>`; default branch tip unmoved); `assert_on_bre_branch` guards every write
+- [x] Changed files are recorded against the remediation record
+      — `test_changed_files_are_recorded_from_git`, and `test_a_lying_executor_cannot_falsify_the_changed_files`
+      (from `git diff`, never from the agent's claim)
+- [x] Repository allowlist enforced; a write to a non-allowlisted repo is rejected in test
+      — `test_a_repo_outside_the_allowlist_is_rejected_and_untouched`, `test_empty_allowlist_is_read_only_mode`
+      (deny by default), `test_allowlist_cannot_be_escaped_with_dotdot`
+- [x] *(added)* Every failure path rolls back exactly; rollback never deletes the user's own untracked files
+      — `test_executor_crash_rolls_back_to_the_checkpoint`, `test_rollback_never_deletes_the_users_own_untracked_files`
+- [x] *(added)* An agent cannot turn the suite green by weakening it: deleted / skipped / vacuous tests and
+      CI-config edits are rejected on the diff, and the rejected patch is kept under `refs/bre/failed/*`
+      — `test_deleting_the_failing_test_is_caught_rolled_back_and_kept_as_evidence`, `test_each_guard_rule_fires`
+- [x] *(added)* The gate is re-checked inside the engine, so a hand-edited status column cannot bypass it
+      — `test_engine_rechecks_the_gate_even_if_the_status_was_forced`
+- [x] *(added)* The write path stays grep-able: exactly one `allow_writes=True` call site exists
+      — `test_exactly_one_allow_writes_true_exists_outside_tests` (AST-based)
 
 ### S7 — Verification + rollback + bounded loop
 - [ ] Targeted / component / regression levels run and are distinguishable in the result
@@ -177,3 +193,4 @@ Criteria are written as commands with expected results. "Engine works" is not a 
 | 2026-09-17 | S4 | (thread-8 line) NOT_STARTED → BLOCKED — interface documented, adapter built; live call pending credentials | 0007 |
 | 2026-09-19 | S8 | premise revised — ownership from the ledger, not from git | 0008 |
 | 2026-09-27 | S4 | DONE → BLOCKED — reconcile: the "confirmed by a working call" criterion was met only against a fake host. S5 was started while S4 was DONE; it does not call Bob, so no S5 result depends on the reopening | 0009 |
+| 2026-09-27 | S6 | NOT_STARTED → DONE — all four exit criteria plus four added safety criteria closed by test evidence; run through the replay executor only | 0009 |

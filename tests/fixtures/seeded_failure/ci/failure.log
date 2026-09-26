@@ -7,8 +7,8 @@ tests/test_dbpool.py .F                                                    [100%
 ___________________________ test_pool_sized_from_config ________________________
 
     def test_pool_sized_from_config():
-        """Production needs >= 10 concurrent connections; config sets 2."""
-        pool = ConnectionPool(size=2)
+        """Production needs >= 10 concurrent connections; the pool is sized from config."""
+        pool = ConnectionPool(size=load_pool_size(CONFIG))
         acquired = []
         for _ in range(10):
             try:

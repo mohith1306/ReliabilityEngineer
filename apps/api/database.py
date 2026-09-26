@@ -154,6 +154,8 @@ class RemediationDB(Base):
     executor = Column(String, nullable=True)         # bob-shell | replay-bob | ...
     attempt = Column(Integer, default=1)
     baseline_failures = Column(JSON, default=list)   # tests already red at the checkpoint
+    preexisting_untracked = Column(JSON, default=list)  # untracked files that were there BEFORE the patch;
+                                                        # rollback must never delete these
     cost_tokens = Column(Integer, default=0)
     cost_wall_ms = Column(Float, default=0.0)
     created_at = Column(DateTime, default=datetime.utcnow)

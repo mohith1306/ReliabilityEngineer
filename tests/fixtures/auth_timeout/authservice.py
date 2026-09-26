@@ -3,7 +3,19 @@
 Regression under investigation: login requests time out against the backend.
 """
 
+import re
+from pathlib import Path
+
 DEFAULT_TIMEOUT_SECONDS = 5.0
+
+
+def load_timeout(config_path) -> float:
+    """Read `request_timeout_seconds` from a YAML config without a YAML dependency."""
+    for line in Path(config_path).read_text(encoding="utf-8").splitlines():
+        match = re.match(r"\s*request_timeout_seconds:\s*([0-9.]+)", line)
+        if match:
+            return float(match.group(1))
+    return DEFAULT_TIMEOUT_SECONDS
 
 
 class RequestTimeoutError(RuntimeError):
