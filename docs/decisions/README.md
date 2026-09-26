@@ -19,3 +19,5 @@ to `Superseded by ADR-NNNN`.
 | [0002](ADR-0002-session-memory-protocol.md) | Session memory protocol | Accepted |
 | [0003](ADR-0003-outcome-ledger.md) | Outcome ledger | Accepted |
 | [0004](ADR-0004-bob-invocation-surface.md) | Bob invocation surface | Accepted |
+| [0005](ADR-0005-bob-surfaces-and-replay.md) | Bob surfaces, and a labelled stand-in for running without Bob | Accepted (unverified vs live Bob) |
+| [0006](ADR-0006-routing-sources-and-tau.md) | What is routed, what "similar" means, and how tau is chosen | Accepted |

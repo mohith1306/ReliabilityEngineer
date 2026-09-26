@@ -13,8 +13,8 @@ the command output or session entry that proves it. No evidence, not done.
 
 | | |
 |---|---|
-| **Current stage** | S8 — ASMOS ownership routing + learning |
-| **Blocked on** | S4 live verification (and S6's live agent-mode call) — Bob Shell must be installed and `BOB_API_KEY` set *by a human*; nothing else is blocked |
+| **Current stage** | none — S0–S3 and S5–S9 are DONE; **S4 is BLOCKED on a human** (live Bob call) |
+| **Blocked on** | S4 live verification (and S6's live agent-mode call) — needs Bob Shell + `BOB_API_KEY` and a person, see `docs/submission/BOB_USAGE_PLAN.md` — Bob Shell must be installed and `BOB_API_KEY` set *by a human*; nothing else is blocked |
 | **Sharpest risk** | **Bob has never been called live.** Both adapters (Bob Shell CLI, agent-host WebSocket) are proven only against documentation and fakes |
 | **Environment** | CPython 3.13.7 venv on Windows (also run on macOS, 3.14.7); see the latest session for the current `pytest` count |
 
@@ -32,8 +32,8 @@ the command output or session entry that proves it. No evidence, not done.
 | S5 | Risk engine + approval gate | S3, S4 | `DONE` | `pytest` → 84 passed, 3 xfailed; gate denies + unblocks with approval — session [0006](../memory/sessions/0006-risk-engine-and-approval-gate.md) #8 |
 | S6 | Remediation — the write path | S5 | `DONE` | `pytest tests/integration/test_remediation.py` → 26 passed; suite 152 passed, 1 skipped — session 0009. **Caveat:** exercised through `ReplayExecutor`; `BobShellExecutor` (agent mode) has never run against a live Bob |
 | S7 | Verification + rollback + bounded feedback loop | S6 | `DONE` | `pytest tests/e2e/test_reliability_loop.py` → 15 passed, `tests/unit/test_verification_units.py` → 8 passed; suite 175 passed, 1 skipped — session 0009. **Caveat:** run against real git repos and real pytest, with Bob replaced by its labelled replay stand-in |
-| S8 | ASMOS ownership routing + learning | S3, S7 | `IN_PROGRESS` | 5 of 6 exit criteria met: `pytest tests/integration/test_asmos_routing.py` → 22 passed, `tests/unit/test_asmos_parity.py` → 95 passed (vectors generated from real ASMOS @ ee072ea); suite 292 passed — session 0009. Open: τ tuned on the corpus |
-| S9 | Metrics, baseline comparison, demo | S8 | `NOT_STARTED` | — |
+| S8 | ASMOS ownership routing + learning | S3, S7 | `DONE` | `pytest tests/integration/test_asmos_routing.py` → 22 passed, `tests/unit/test_asmos_parity.py` → 95 passed (vectors generated from real ASMOS @ ee072ea), `tests/unit/test_route_simulation.py` → 12 passed; tau tuned on the corpus — `docs/artifacts/tau_tuning_full_20260926T205245Z.json` — session 0009 |
+| S9 | Metrics, baseline comparison, demo | S8 | `DONE` | `tests/e2e/test_comparison_harness.py` → 8 passed; three stamped comparisons (`comparison_recurring_20260926T205900Z.json`, `comparison_full_20260926T210746Z.json`, `comparison_full_tau_from_recurring_20260926T211646Z.json`); report `docs/RESULTS.md` — session 0009. **Caveats:** token costs nominal (replayed Bob); the demo *video* and hosted URL are submission items (docs/submission/CHECKLIST.md), not exit criteria |
 
 ---
 
@@ -192,9 +192,8 @@ Criteria are written as commands with expected results. "Engine works" is not a 
 - [x] Routing decision records its components: similarity, ownership, τ, action
       — `test_a_verified_memory_earns_a_route_and_the_decision_records_its_components`; written to the ledger as a
       `routing` prediction at decision time
-- [ ] τ tuned on the corpus, not hardcoded; the tuning run is a stamped artifact
-      — the tuner and the τ resolution order exist and are tested (`tune_tau`, `resolve_tau`: env → tuned artifact →
-      labelled ASMOS default); the corpus-derived artifact is pending the look-alike scenarios (S9)
+- [x] τ tuned on the corpus, not hardcoded; the tuning run is a stamped artifact
+      — `scripts/tune_tau.py` simulates BRE's actual sequential routing policy over 50 orderings and picks the tau with the highest mean net saving; artifacts `docs/artifacts/tau_tuning_recurring_20260926T205235Z.json` (recurring slice) and `docs/artifacts/tau_tuning_full_20260926T205245Z.json` (full corpus). The simulator is validated against the measured end-to-end runs: **9 of 9 orderings agree exactly** (`docs/artifacts/simulator_validation_*.json`). An earlier pair-based tuner was wrong and was replaced (ADR-0006 "Rejected")
 - [x] Cold-start and no-owner cases fall back to full investigation rather than misrouting
       — `test_cold_start_falls_back_to_full_investigation`, `test_a_dissimilar_incident_falls_back_rather_than_misrouting`,
       `test_memory_from_another_topic_is_invisible`
@@ -207,12 +206,15 @@ Criteria are written as commands with expected results. "Engine works" is not a 
       — `test_memory_refuses_anything_not_backed_by_a_passed_run`, `test_corrections_supersede_and_never_overwrite`
 
 ### S9 — Metrics + baseline + demo
-- [ ] Baseline arm (Bob alone) and BRE arm run over the same corpus
-- [ ] Cost per incident reported for both, with the ablation that isolates the cause
-- [ ] Resolution rate reported with the seed count and variance, not a single run
-- [ ] Any negative or flat result is reported as such
-
----
+- [x] Baseline arm (Bob alone) and BRE arm run over the same corpus
+      — `python -m reliability.evaluation.compare`: same incidents, same order, fresh DB and fresh git repos per arm, through the real loop
+- [x] Cost per incident reported for both, with the ablation that isolates the cause
+      — `docs/RESULTS.md`; the `bre_frozen` arm (ownership frozen at its prior) is ASMOS's own single-variable ablation. **Result: flat** —
+      one refutation moves trust ≈0.03 at ASMOS's prior strength, so ownership evolution does not change behaviour on 14 incidents. Reported as such
+- [x] Resolution rate reported with the seed count and variance, not a single run
+      — 3 orderings per slice (mean ± std), 50 in the tuner; paired differences vs baseline
+- [x] Any negative or flat result is reported as such
+      — the flat ablation; the cost of forced/out-of-distribution routing (wasted attempts); and my own earlier tuner that returned "never route" where routing wins (ADR-0006)
 
 ## Stage log
 
@@ -231,3 +233,5 @@ Criteria are written as commands with expected results. "Engine works" is not a 
 | 2026-09-27 | S6 | NOT_STARTED → DONE — all four exit criteria plus four added safety criteria closed by test evidence; run through the replay executor only | 0009 |
 | 2026-09-27 | S7 | NOT_STARTED → DONE — all four exit criteria plus five added criteria closed by test evidence; Bob replay stand-in | 0009 |
 | 2026-09-27 | S8 | NOT_STARTED → IN_PROGRESS — router, ledger-derived ownership, verified memory, consolidation and ASMOS parity done; tau tuning on the corpus pending | 0009 |
+| 2026-09-27 | S8 | IN_PROGRESS → DONE — tau tuned on the corpus; simulator validated against measured runs | 0009 |
+| 2026-09-27 | S9 | NOT_STARTED → DONE — three-arm comparison over 3 slices, ablation flat and reported as such | 0009 |
