@@ -13,7 +13,7 @@ the command output or session entry that proves it. No evidence, not done.
 
 | | |
 |---|---|
-| **Current stage** | S7 — Verification + rollback + bounded loop |
+| **Current stage** | S8 — ASMOS ownership routing + learning |
 | **Blocked on** | S4 live verification (and S6's live agent-mode call) — Bob Shell must be installed and `BOB_API_KEY` set *by a human*; nothing else is blocked |
 | **Sharpest risk** | **Bob has never been called live.** Both adapters (Bob Shell CLI, agent-host WebSocket) are proven only against documentation and fakes |
 | **Environment** | CPython 3.13.7 venv on Windows (also run on macOS, 3.14.7); see the latest session for the current `pytest` count |
@@ -31,7 +31,7 @@ the command output or session entry that proves it. No evidence, not done.
 | S4 | Bob adapter — **read paths only** | S2 | `BLOCKED` | adapter + transports + 27 tests done against fakes and docs; live call needs Bob Shell + `BOB_API_KEY` — sessions [0005](../memory/sessions/0005-bob-interface-spike-and-adapter.md), [0007](../memory/sessions/0007-bob-interface-confirmed.md), 0009 |
 | S5 | Risk engine + approval gate | S3, S4 | `DONE` | `pytest` → 84 passed, 3 xfailed; gate denies + unblocks with approval — session [0006](../memory/sessions/0006-risk-engine-and-approval-gate.md) #8 |
 | S6 | Remediation — the write path | S5 | `DONE` | `pytest tests/integration/test_remediation.py` → 26 passed; suite 152 passed, 1 skipped — session 0009. **Caveat:** exercised through `ReplayExecutor`; `BobShellExecutor` (agent mode) has never run against a live Bob |
-| S7 | Verification + rollback + bounded feedback loop | S6 | `NOT_STARTED` | — |
+| S7 | Verification + rollback + bounded feedback loop | S6 | `DONE` | `pytest tests/e2e/test_reliability_loop.py` → 15 passed, `tests/unit/test_verification_units.py` → 8 passed; suite 175 passed, 1 skipped — session 0009. **Caveat:** run against real git repos and real pytest, with Bob replaced by its labelled replay stand-in |
 | S8 | ASMOS ownership routing + learning | S3, S7 | `NOT_STARTED` | — |
 | S9 | Metrics, baseline comparison, demo | S8 | `NOT_STARTED` | — |
 
@@ -153,10 +153,27 @@ Criteria are written as commands with expected results. "Engine works" is not a 
       — `test_exactly_one_allow_writes_true_exists_outside_tests` (AST-based)
 
 ### S7 — Verification + rollback + bounded loop
-- [ ] Targeted / component / regression levels run and are distinguishable in the result
-- [ ] A verification failure transitions the incident to `REINVESTIGATING`
-- [ ] The loop carries an attempt counter with a hard cap; a test proves it terminates
-- [ ] Rollback restores the checkpoint and sets the remediation to `ROLLED_BACK`
+- [x] Targeted / component / regression levels run and are distinguishable in the result
+      — `test_the_three_levels_are_distinguishable_in_the_result` (`VerificationDB.levels` records each level's
+      selectors and verdict; a failed level marks the later ones `skipped`, visibly)
+- [x] A verification failure transitions the incident to `REINVESTIGATING`
+      — `test_a_failed_verification_rolls_back_refutes_and_reinvestigates`
+- [x] The loop carries an attempt counter with a hard cap; a test proves it terminates
+      — `test_the_loop_terminates_at_the_attempt_cap` (a patch that can never work is tried exactly
+      `BRE_MAX_ATTEMPTS`=3 times, then `ABANDONED`; the executor is invoked 3 times, never 4),
+      `test_the_cap_is_configurable_and_never_below_one`
+- [x] Rollback restores the checkpoint and sets the remediation to `ROLLED_BACK`
+      — same tests: branch, HEAD and tree identical to the checkpoint; `refs/bre/failed/*` keeps the rejected patch
+- [x] *(added)* Only verification closes outcomes: a passing run confirms them against a REAL `verification_runs` row;
+      a failing run refutes them — `test_full_lifecycle_resolves_and_only_verification_closes_outcomes`
+- [x] *(added)* An attempt that never reached verification is `abandoned`, not `refuted` — nothing tested it, so no
+      reputation may move — `test_an_attempt_that_never_reached_verification_is_abandoned_not_refuted`
+- [x] *(added)* No reproducing test => no verified fix (an unverifiable fix is not a verified one), and a run that
+      collected zero tests is never a pass — `test_no_reproducing_test_means_no_verified_fix`,
+      `test_a_run_that_ran_nothing_is_not_a_pass`
+- [x] *(added)* A re-investigation is told what already failed — `test_the_next_diagnosis_is_told_what_already_failed`
+- [x] *(added)* Analysis is free, mutation privileged: a HIGH-risk incident writes nothing until a human approves;
+      every new assessment needs a new approval — `test_high_risk_incident_waits_for_a_human_and_nothing_is_written`
 
 ### S8 — ASMOS ownership routing + learning
 
@@ -194,3 +211,4 @@ Criteria are written as commands with expected results. "Engine works" is not a 
 | 2026-09-19 | S8 | premise revised — ownership from the ledger, not from git | 0008 |
 | 2026-09-27 | S4 | DONE → BLOCKED — reconcile: the "confirmed by a working call" criterion was met only against a fake host. S5 was started while S4 was DONE; it does not call Bob, so no S5 result depends on the reopening | 0009 |
 | 2026-09-27 | S6 | NOT_STARTED → DONE — all four exit criteria plus four added safety criteria closed by test evidence; run through the replay executor only | 0009 |
+| 2026-09-27 | S7 | NOT_STARTED → DONE — all four exit criteria plus five added criteria closed by test evidence; Bob replay stand-in | 0009 |

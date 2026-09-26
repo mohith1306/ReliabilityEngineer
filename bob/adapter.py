@@ -64,11 +64,13 @@ class BobAdapter:
             transport = AgentHostTransport(address, provider=provider, turn_timeout=turn_timeout)
         self.transport = transport
 
-    def investigate(self, incident: Any, evidence: Iterable[Any], *, working_directory: Optional[str] = None) -> Diagnosis:
-        return self._run(incident, evidence, investigate_prompt, working_directory)
+    def investigate(self, incident: Any, evidence: Iterable[Any], *, working_directory: Optional[str] = None,
+                    attempt: int = 1, prior_attempts: Iterable[dict] = ()) -> Diagnosis:
+        return self._run(incident, evidence, investigate_prompt, working_directory, attempt, prior_attempts)
 
-    def diagnose(self, incident: Any, evidence: Iterable[Any], *, working_directory: Optional[str] = None) -> Diagnosis:
-        return self._run(incident, evidence, diagnose_prompt, working_directory)
+    def diagnose(self, incident: Any, evidence: Iterable[Any], *, working_directory: Optional[str] = None,
+                 attempt: int = 1, prior_attempts: Iterable[dict] = ()) -> Diagnosis:
+        return self._run(incident, evidence, diagnose_prompt, working_directory, attempt, prior_attempts)
 
     def remediate(self, *args, **kwargs):
         raise NotImplementedError(
@@ -83,9 +85,9 @@ class BobAdapter:
             self.transport = select_transport(turn_timeout=self.turn_timeout)
         return self.transport
 
-    def _run(self, incident, evidence, prompt_fn, working_directory) -> Diagnosis:
+    def _run(self, incident, evidence, prompt_fn, working_directory, attempt=1, prior_attempts=()) -> Diagnosis:
         evidence = list(evidence)
-        prompt = prompt_fn(incident, evidence)
+        prompt = prompt_fn(incident, evidence, list(prior_attempts))
         transport = self._resolve_transport()
         outcome = transport.run(prompt, working_directory=working_directory)
         diagnosis = _parse_diagnosis(outcome.text, incident_id=_incident_id(incident))
@@ -103,6 +105,7 @@ class BobAdapter:
                 components={
                     "provider": outcome.provider,
                     "transport": transport.name,
+                    "simulated": bool(outcome.extra.get("simulated", False)),
                     "evidence_count": len(evidence),
                     "source_types": sorted({
                         str(_field(item, "source_type")) for item in evidence
@@ -110,6 +113,7 @@ class BobAdapter:
                     "prompt_sha256": prompt_fingerprint(prompt),
                     "turn_id": outcome.turn_id,
                 },
+                attempt_number=attempt,
                 cost_tokens=outcome.tokens,
                 cost_wall_ms=outcome.wall_ms,
             )

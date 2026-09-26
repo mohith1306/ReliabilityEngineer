@@ -35,7 +35,7 @@ from .execution import (
 from .shell import BobShell
 
 DEFAULT_PROVIDER = "copilot"
-ENV_TRANSPORT = "BRE_BOB_TRANSPORT"  # "shell" | "host" | unset for auto
+ENV_TRANSPORT = "BRE_BOB_TRANSPORT"  # "shell" | "host" | "replay" (never automatic) | unset for auto
 
 
 @dataclass(frozen=True)
@@ -166,6 +166,10 @@ def select_transport(*, turn_timeout: float = DEFAULT_TURN_TIMEOUT) -> Transport
     BOB_API_KEY is set; else a running agent host; else BobNotAvailable explaining both.
     """
     forced = os.environ.get(ENV_TRANSPORT, "").strip().lower()
+    if forced == "replay":
+        from .replay import ReplayTransport  # lazy: replay imports this module
+
+        return ReplayTransport()
     if forced == "shell":
         return ShellTransport()
     if forced == "host":

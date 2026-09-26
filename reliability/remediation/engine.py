@@ -39,7 +39,7 @@ from bob.prompts import remediate_prompt
 from models.incident import IncidentStatus
 from reliability.ledger.record import open_remediation_prediction
 from reliability.orchestration import gate
-from reliability.orchestration.lifecycle import Lifecycle
+from reliability.orchestration.lifecycle import Lifecycle, incident_view as _incident_view
 from reliability.remediation import git_ops, guards
 from reliability.remediation.allowlist import RepoAllowlist
 from reliability.remediation.executors import Executor
@@ -242,10 +242,3 @@ class RemediationEngine:
             # The one outcome this engine must never hide: the target repo may be off-branch.
             raise RuntimeError(f"ROLLBACK FAILED for {cp.root}: {rollback_error}")
 
-
-def _incident_view(incident) -> dict:
-    return {
-        "id": incident.id, "repository": incident.repository, "type": incident.type,
-        "severity": incident.severity, "description": incident.description,
-        "metadata": incident.metadata_json or {},
-    }

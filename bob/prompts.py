@@ -62,17 +62,32 @@ def evidence_block(evidence: Iterable[Any]) -> str:
     return "\n".join(lines) if lines else "(no evidence collected)"
 
 
-def investigate_prompt(incident: Any, evidence: Iterable[Any]) -> str:
+def prior_attempts_block(prior: Iterable[dict]) -> str:
+    """What already failed verification for THIS incident. Without it a re-investigation would
+    cheerfully re-propose the same fix; with it the model is told that hypothesis was tested and lost."""
+    lines = [
+        f"- attempt {p.get('attempt')}: tried \"{str(p.get('summary', ''))[:240]}\" -> "
+        f"verification FAILED ({str(p.get('why_failed', 'unknown'))[:240]})"
+        for p in prior
+    ]
+    if not lines:
+        return ""
+    return ("PREVIOUS ATTEMPTS ON THIS INCIDENT (each was applied, tested, and rolled back -- do not "
+            "propose the same fix again):\n" + "\n".join(lines) + "\n\n")
+
+
+def investigate_prompt(incident: Any, evidence: Iterable[Any], prior_attempts: Iterable[dict] = ()) -> str:
     return (
         "TASK: diagnose the root cause of this incident from the evidence.\n\n"
         f"INCIDENT:\n{_dump(incident)}\n\n"
         f"EVIDENCE:\n{evidence_block(evidence)}\n\n"
+        f"{prior_attempts_block(prior_attempts)}"
         f"{CONSTRAINTS}\n\n{OUTPUT_CONTRACT}\n\n{VERIFICATION_REQUIREMENTS}"
     )
 
 
-def diagnose_prompt(incident: Any, evidence: Iterable[Any]) -> str:
-    return investigate_prompt(incident, evidence)
+def diagnose_prompt(incident: Any, evidence: Iterable[Any], prior_attempts: Iterable[dict] = ()) -> str:
+    return investigate_prompt(incident, evidence, prior_attempts)
 
 
 def prompt_fingerprint(prompt: str) -> str:

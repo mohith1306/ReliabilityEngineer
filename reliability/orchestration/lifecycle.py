@@ -53,6 +53,15 @@ def to_model(row: IncidentDB) -> Incident:
     )
 
 
+def incident_view(row: IncidentDB) -> dict:
+    """The incident as it goes into a prompt: identity and symptoms, nothing internal."""
+    return {
+        "id": row.id, "repository": row.repository, "type": row.type,
+        "severity": row.severity, "description": row.description,
+        "metadata": row.metadata_json or {},
+    }
+
+
 class Lifecycle:
     def __init__(self, db: Session) -> None:
         self._db = db

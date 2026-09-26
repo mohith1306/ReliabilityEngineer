@@ -97,13 +97,14 @@ def parse_pytest_report(output: str) -> list[CaseResult]:
     seen: set[tuple[str, str]] = set()
     for raw in output.splitlines():
         line = raw.strip()
-        m = _CASE_LINE.match(line)
-        if not m:
-            continue
-        kind, name, message = m.group(1), m.group(2), m.group(3)
-        if kind == "SKIPPED" and _SKIP_LINE.match(line):
-            skip = _SKIP_LINE.match(line)
-            name, message = skip.group(1), skip.group(2)
+        skip = _SKIP_LINE.match(line)  # "SKIPPED [1] path:line: reason" has its own shape
+        if skip:
+            kind, name, message = "SKIPPED", skip.group(1), skip.group(2)
+        else:
+            m = _CASE_LINE.match(line)
+            if not m:
+                continue
+            kind, name, message = m.group(1), m.group(2), m.group(3)
         key = (kind, name)
         if key in seen:
             continue

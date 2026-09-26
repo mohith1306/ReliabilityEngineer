@@ -216,5 +216,17 @@ def rollback(cp: Checkpoint, *, keep_as: Optional[str] = None) -> None:
         )
 
 
+def release(cp: Checkpoint) -> None:
+    """Return the user's checkout to the branch it started on. The bre/* branch keeps the patch
+    (BRE never merges); it is what a human reviews and merges."""
+    if current_branch(cp.root) == cp.branch:
+        dirty = tracked_modifications(cp.root)
+        if dirty:
+            raise GitError(f"cannot release: {len(dirty)} uncommitted change(s) on {cp.branch}")
+        _git(cp.root, "switch", "-q", cp.base_branch)
+    if head_sha(cp.root) != cp.base_sha:
+        raise GitError(f"{cp.base_branch} moved during remediation: {head_sha(cp.root)[:8]} != {cp.base_sha[:8]}")
+
+
 def files_touching_tests(paths: Iterable[str]) -> list[str]:
     return [p for p in paths if re.search(r"(^|/)(tests?/|test_[^/]+$|[^/]+_test\.[a-z]+$)", p)]
