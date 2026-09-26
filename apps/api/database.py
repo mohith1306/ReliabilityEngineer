@@ -190,6 +190,13 @@ class EngineeringMemoryDB(Base):
     source_incident_id = Column(String, nullable=True)
     confidence = Column(Float, default=0.0)
     embedding_reference = Column(String, nullable=True)
+    # --- S8: verified-memory fields (asmos_bridge/memory/store.py) ---
+    topic = Column(String, nullable=True, index=True)
+    keywords = Column(JSON, default=list)              # analysed incident keywords; the similarity basis
+    status = Column(String, default="active")          # active | superseded (corrections supersede, never overwrite)
+    superseded_by = Column(String, nullable=True)
+    verification_run_id = Column(String, nullable=True)  # a memory record must be backed by a real passed run
+    claim_class = Column(String, default="B")
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
 

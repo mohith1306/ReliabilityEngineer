@@ -32,7 +32,7 @@ the command output or session entry that proves it. No evidence, not done.
 | S5 | Risk engine + approval gate | S3, S4 | `DONE` | `pytest` → 84 passed, 3 xfailed; gate denies + unblocks with approval — session [0006](../memory/sessions/0006-risk-engine-and-approval-gate.md) #8 |
 | S6 | Remediation — the write path | S5 | `DONE` | `pytest tests/integration/test_remediation.py` → 26 passed; suite 152 passed, 1 skipped — session 0009. **Caveat:** exercised through `ReplayExecutor`; `BobShellExecutor` (agent mode) has never run against a live Bob |
 | S7 | Verification + rollback + bounded feedback loop | S6 | `DONE` | `pytest tests/e2e/test_reliability_loop.py` → 15 passed, `tests/unit/test_verification_units.py` → 8 passed; suite 175 passed, 1 skipped — session 0009. **Caveat:** run against real git repos and real pytest, with Bob replaced by its labelled replay stand-in |
-| S8 | ASMOS ownership routing + learning | S3, S7 | `NOT_STARTED` | — |
+| S8 | ASMOS ownership routing + learning | S3, S7 | `IN_PROGRESS` | 5 of 6 exit criteria met: `pytest tests/integration/test_asmos_routing.py` → 22 passed, `tests/unit/test_asmos_parity.py` → 95 passed (vectors generated from real ASMOS @ ee072ea); suite 292 passed — session 0009. Open: τ tuned on the corpus |
 | S9 | Metrics, baseline comparison, demo | S8 | `NOT_STARTED` | — |
 
 ---
@@ -182,11 +182,29 @@ Criteria are written as commands with expected results. "Engine works" is not a 
 > indistinguishable from chance. See [ASYMMETRY_FINDING.md](../architecture/ASYMMETRY_FINDING.md).
 
 - [x] Topic taxonomy derived from the target repo's structure — `connectors/git_history.py::default_topic_fn`
-- [ ] Ownership sourced from `OutcomeRecord` closures only, never from commit counts
-- [ ] Ownership updates **only** on a verification outcome (Invariant 3), asserted in test
-- [ ] Routing decision records its components: similarity, ownership, τ, action
+- [x] Ownership sourced from `OutcomeRecord` closures only, never from commit counts
+      — `OwnershipTable.from_ledger` joins to REAL `verification_runs` rows (excludes `eval:` closures, pending,
+      abandoned, class C, non-diagnosis records): `test_only_verification_backed_diagnosis_closures_move_reputation`;
+      `test_ownership_never_reads_git_history` (AST scan of `asmos_bridge/`)
+- [x] Ownership updates **only** on a verification outcome (Invariant 3), asserted in test
+      — `test_reputation_moves_on_verification_never_on_generation` (before/after); refutation lowers it:
+      `test_memory_reuse_that_fails_verification_is_refuted_excluded_next_time_and_costs_trust`
+- [x] Routing decision records its components: similarity, ownership, τ, action
+      — `test_a_verified_memory_earns_a_route_and_the_decision_records_its_components`; written to the ledger as a
+      `routing` prediction at decision time
 - [ ] τ tuned on the corpus, not hardcoded; the tuning run is a stamped artifact
-- [ ] Cold-start and no-owner cases fall back to full investigation rather than misrouting
+      — the tuner and the τ resolution order exist and are tested (`tune_tau`, `resolve_tau`: env → tuned artifact →
+      labelled ASMOS default); the corpus-derived artifact is pending the look-alike scenarios (S9)
+- [x] Cold-start and no-owner cases fall back to full investigation rather than misrouting
+      — `test_cold_start_falls_back_to_full_investigation`, `test_a_dissimilar_incident_falls_back_rather_than_misrouting`,
+      `test_memory_from_another_topic_is_invisible`
+- [x] *(added)* The bridge returns exactly what real ASMOS returns — `tests/unit/test_asmos_parity.py`, 95 vectors
+      generated from ASMOS's own source by `scripts/gen_asmos_parity_vectors.py` (ADR-0001's condition for vendoring)
+- [x] *(added)* End to end on real git repos: the 2nd similar incident is served from verified memory at 0 Bob tokens
+      and fixed + tested; a look-alike whose real cause differs is refuted, the memory is excluded on the retry, and its
+      ownership drops — `test_the_second_similar_incident_is_served_from_verified_memory_at_zero_bob_tokens`
+- [x] *(added)* Memory holds only what a passed verification run vouched for; corrections supersede, never overwrite
+      — `test_memory_refuses_anything_not_backed_by_a_passed_run`, `test_corrections_supersede_and_never_overwrite`
 
 ### S9 — Metrics + baseline + demo
 - [ ] Baseline arm (Bob alone) and BRE arm run over the same corpus
@@ -212,3 +230,4 @@ Criteria are written as commands with expected results. "Engine works" is not a 
 | 2026-09-27 | S4 | DONE → BLOCKED — reconcile: the "confirmed by a working call" criterion was met only against a fake host. S5 was started while S4 was DONE; it does not call Bob, so no S5 result depends on the reopening | 0009 |
 | 2026-09-27 | S6 | NOT_STARTED → DONE — all four exit criteria plus four added safety criteria closed by test evidence; run through the replay executor only | 0009 |
 | 2026-09-27 | S7 | NOT_STARTED → DONE — all four exit criteria plus five added criteria closed by test evidence; Bob replay stand-in | 0009 |
+| 2026-09-27 | S8 | NOT_STARTED → IN_PROGRESS — router, ledger-derived ownership, verified memory, consolidation and ASMOS parity done; tau tuning on the corpus pending | 0009 |

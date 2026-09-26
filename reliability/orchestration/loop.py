@@ -40,6 +40,8 @@ from apps.api.database import (
 )
 from apps.api.services import investigation_service
 from apps.api.services.risk_service import assess_risk
+from asmos_bridge.consolidation.learner import consolidate
+from asmos_bridge.memory.store import MemoryNotVerified
 from bob.adapter import BobAdapter
 from bob.errors import BobError, BobNotAvailable
 from models.diagnosis import Diagnosis
@@ -355,9 +357,20 @@ class ReliabilityLoop:
         except (ValueError, GitError) as exc:
             raise _Blocked("error", f"{type(exc).__name__}: {exc}") from exc
         note = ("verified: " + ", ".join(res.fixed)) if res.passed else (res.reason or "verification failed")
-        return Step("verify", before, row.status, note,
-                    {"verification_id": res.verification.id, "passed": res.passed,
-                     "levels": {k: v.get("ok") for k, v in res.levels.items() if k != "verdict"}})
+        data = {"verification_id": res.verification.id, "passed": res.passed,
+                "levels": {k: v.get("ok") for k, v in res.levels.items() if k != "verdict"}}
+        if res.passed:
+            # Only a passed verification promotes anything into memory (and the store re-checks it).
+            try:
+                memory = consolidate(self.db, row, res.verification)
+            except MemoryNotVerified as exc:  # pragma: no cover - defence in depth
+                logger.warning("consolidation refused for %s: %s", row.id, exc)
+                memory = None
+            if memory is not None:
+                data["memory_id"] = memory.id
+                self.lifecycle.record(row.id, "memory", actor="consolidation",
+                                      detail={"memory_id": memory.id, "topic": memory.topic})
+        return Step("verify", before, row.status, note, data)
 
 
 class _Blocked(Exception):
