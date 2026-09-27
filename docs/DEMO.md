@@ -7,6 +7,7 @@
 "$env:LOCALAPPDATA\Programs\Python\Python313\python.exe" -m venv venv
 venv\Scripts\python.exe -m pip install -r requirements.txt
 .\scripts\run_demo.ps1                 # http://127.0.0.1:8000  (simulated Bob)
+# "running scripts is disabled on this system"?  powershell -ExecutionPolicy Bypass -File scripts\run_demo.ps1
 ```
 ```bash
 # macOS / Linux
@@ -35,7 +36,9 @@ Never present a SIMULATED run as Bob's work. The judges can read the pill.
 
 ## Five-minute presenter script
 
-Reset first (**Reset** button) so the story is clean.
+Reset first (**Reset** button) so the story is clean, and press Ctrl+F5 once so the browser runs the current page.
+**Keep the order 2 → 3 → 4:** the look-alike only shows a refutation if scenario 1 was resolved first since the last Reset.
+The word-for-word 3-minute version, with a source for every sentence, is [submission/VIDEO_SCRIPT.md](submission/VIDEO_SCRIPT.md).
 
 **1 · The problem (30 s).** AI agents will write fixes. Teams can't answer: *was it right, is it safe, and did we learn?*
 BRE wraps Bob with exactly those answers.
@@ -54,7 +57,8 @@ Open **Diagnosis**: *"similarity 1.00 × ownership 0.42 = 0.42 ≥ τ 0.30"*. *"
 Memory answers (same symptom!) → the patch is applied → **the tests refute it** → **rolled back** → back to *AWAITING APPROVAL*, attempt 2.
 Open **Ledger**: attempt 1's diagnosis is **refuted**; open **Diagnosis**: attempt 2's routing says *"already tried … failed verification"*.
 Approve → Bob's full investigation finds the real cause (a cap in code) → **RESOLVED**.
-*"The agent was wrong. The system found out because the test suite said so, undid the change, and stopped offering that memory."*
+*"The agent was wrong. The system found out because the test suite said so, undid the change, stopped offering that memory for this incident, and lowered its standing."*
+(Memory is excluded for *this* incident, not retired: its ownership falls from 0.63 to 0.54 on the *What BRE has learned* tab.)
 
 **5 · What BRE has learned (30 s).** The *What BRE has learned* tab: ownership per source and topic, computed **only** from verification-backed ledger rows.
 
@@ -78,6 +82,10 @@ Expect the first live run to teach you something the stand-in could not. Keep th
 | Run stops with **allowlist** | Repo not writable | Demo mode allowlists only its own workspace; for your own repo set `BRE_REPO_ALLOWLIST` |
 | Run stops with **dirty_worktree** | Uncommitted tracked changes in the target | Commit/stash — BRE never mixes its patch with unsaved work |
 | Approve says 401 | Wrong/missing operator key | The demo key is shown beside the button (public on purpose) |
+| Approve shows `[object Object]` or a 422 | Old dashboard (before session 0010), or a cached copy of it | Update to a build with the fix; Ctrl+F5 |
+| The look-alike resolves first time, no refutation | Scenario 1 was not resolved first since the last Reset | Reset, then 1 → 1 again → look-alike |
+| Old incidents, odd ownership numbers | `bre.db` keeps state across restarts | **Reset** |
+| "this incident is already being advanced" | Run clicked twice | Harmless (HTTP 409); wait for *Working…* to finish |
 | `NOT NULL constraint failed: approvals.approved_by` | Old `bre.db` from before S5 | Fixed automatically on startup (`rebuild_legacy_tables`); or delete `bre.db` |
 | Port in use | Another instance | `-Port 8001` / `PORT=8001` |
 | `python` can't `pip install` (SSL) | msys2 python on PATH | Use CPython 3.13 explicitly (README) |

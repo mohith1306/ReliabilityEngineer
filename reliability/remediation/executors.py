@@ -107,6 +107,20 @@ def _diagnosis_root_cause(prompt: str) -> Optional[str]:
         return None
 
 
+def _token_starts(text: str, find: str) -> list[int]:
+    """Offsets where `find` occurs as a whole token, not glued to a longer word or number.
+
+    `str.count` saw `pool_size: 2` inside `pool_size: 20`, so on the look-alike the seeded fix "applied" as
+    20 -> 200 under the summary "Restore ... to 20", and the labelled when_misapplied path never ran.
+    """
+    pattern = re.escape(find)
+    if re.match(r"\w", find[:1]):
+        pattern = r"(?<!\w)" + pattern
+    if re.match(r"\w", find[-1:]):
+        pattern += r"(?!\w)"
+    return [m.start() for m in re.finditer(pattern, text)]
+
+
 class ReplayExecutor:
     """Applies a cassette's edits: exact find/replace, each `find` must occur exactly once.
 
@@ -143,9 +157,11 @@ class ReplayExecutor:
             # Bytes, not text: text mode would normalise a CRLF file to LF and turn a
             # one-line patch into a whole-file diff.
             text = target.read_bytes().decode("utf-8") if target.is_file() else ""
-            n = text.count(edit["find"])
+            starts = _token_starts(text, edit["find"])
+            n = len(starts)
             if n == 1:
-                target.write_bytes(text.replace(edit["find"], edit["replace"]).encode("utf-8"))
+                at = starts[0]
+                target.write_bytes((text[:at] + edit["replace"] + text[at + len(edit["find"]):]).encode("utf-8"))
                 continue
             wrong = cassette.remediation.get("when_misapplied")
             if n == 0 and wrong:

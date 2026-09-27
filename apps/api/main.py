@@ -32,7 +32,8 @@ def startup():
 @app.get("/", include_in_schema=False)
 def dashboard():
     """The dashboard. The JSON API lives under /api and is documented at /docs."""
-    return FileResponse(WEB / "index.html")
+    # no-cache: a browser that kept an older copy ran stale JavaScript after the approve-call fix and showed the old bug
+    return FileResponse(WEB / "index.html", headers={"Cache-Control": "no-cache"})
 
 
 if (WEB / "static").is_dir():

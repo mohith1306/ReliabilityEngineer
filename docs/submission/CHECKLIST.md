@@ -22,10 +22,10 @@ Status column, so keep it to one of those words.
 | 3 | Long description | agent | DRAFTED | `SUBMISSION.md` §3 — includes the measured results with their caveats |
 | 4 | IBM Bob usage statement | agent+human | DRAFTED | `SUBMISSION.md` §4 has `[TEAM: …]` markers that only the real Bob sessions can fill. Do not submit them unfilled |
 | 5 | Technology & category tags | agent | DRAFTED | `SUBMISSION.md` §5 |
-| 6 | Public code repository | human | HUMAN | Repo is PUBLIC (verified via `gh`). Integration branch is local-only until someone pushes/merges it |
+| 6 | Public code repository | human | HUMAN | Repo is PUBLIC (verified via `gh`). PR #2 merged to `main` 2026-09-26; the `demo-readiness` PR (Approve-button fix) still needs a merge |
 | 7 | IBM Bob task-session summary screenshots, **each team member** | human | HUMAN | Cannot be faked or generated. Plan in `BOB_USAGE_PLAN.md` |
 | 8 | Demo application platform | human | HUMAN | Needs an account (Render / Railway / HF Spaces / Vercel). Agent prepares the container config |
 | 9 | Application URL | human | HUMAN | Follows item 8 |
 | 10 | Cover image | agent | DRAFTED | `docs/submission/cover.png` (1280×720; regenerate with `scripts/make_cover.py`) |
-| 11 | Video demonstration | human | HUMAN | Needs a person on camera/screen. Agent writes the script and a one-command demo |
+| 11 | Video demonstration | human | HUMAN | Needs a person on camera/screen. `VIDEO_SCRIPT.md` is annotated (reason + source per line) and was checked by performing the flow in the dashboard |
 | 12 | Slide presentation | agent | DRAFTED | `docs/submission/BRE_pitch.html` — 12 slides, numbers read from the artifacts; yellow TEAM box on slide 4 must be updated; Ctrl+P → PDF |

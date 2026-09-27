@@ -59,7 +59,7 @@ Categories: **DevOps / SRE**, **AI agents & agent safety**, **Developer tools**,
 ## 6 · Public code repository
 
 `https://github.com/mohith1306/ReliabilityEngineer` — **public** (verified with `gh repo view`).
-**[TEAM: the reconciled work lives on the local branch `integration/reconcile-main` and is NOT pushed. Push it and merge to `main` before submitting, or the judges see the old repository.]**
+The reconciled work is on `main` (PR #2, merged 2026-09-26 22:18 UTC). **[TEAM: merge the `demo-readiness` PR before recording and submitting — it fixes the dashboard's Approve button, which fails in a browser on `main`.]**
 
 ## 7 · Bob task-session summary screenshots (each team member)
 

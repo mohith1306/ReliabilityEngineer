@@ -7,6 +7,8 @@ stand-in, and the system endpoint must say so.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -109,6 +111,7 @@ def test_demo_endpoints_do_not_exist_when_demo_mode_is_off(tmp_path, monkeypatch
 def test_the_dashboard_is_served_at_the_root(client):
     r = client.get("/")
     assert r.status_code == 200 and "Bob Reliability Engineer" in r.text and "text/html" in r.headers["content-type"]
+    assert r.headers["cache-control"] == "no-cache"  # a stale cached copy once ran the old, broken approve call
 
 
 # ── the whole lifecycle, over HTTP ───────────────────────────────────────────────────────
@@ -185,6 +188,13 @@ def test_a_lookalike_is_refuted_over_http_and_the_incident_recovers(client):
     assert (first_diag["predictor"], first_diag["status"]) == ("memory", "refuted")
     assert d["remediations"][0]["status"] == "rolled_back"
 
+    # the wrong fix is labelled as such and its diff matches its summary -- `pool_size: 2` once matched inside
+    # `pool_size: 20` and showed "Restore ... to 20" over a 20 -> 200 diff, on camera (found performing the demo)
+    wrong = d["remediations"][0]
+    assert wrong["summary"].endswith("(applied to a repository it does not fit)")
+    wrong_diff = client.get(f"/api/incidents/{b}/remediations/{wrong['id']}/diff").json()["diff"]
+    assert "-  pool_size: 20" in wrong_diff and "+  pool_size: 40" in wrong_diff and "200" not in wrong_diff
+
     approve(client, b)  # a new assessment needs a NEW approval
     assert advance(client, b)["status"] == "RESOLVED"  # attempt 2: a full investigation finds the cap in code
     d = client.get(f"/api/incidents/{b}/detail").json()
@@ -215,6 +225,18 @@ def test_reset_only_deletes_a_workspace_that_bre_itself_marked(tmp_path, monkeyp
     finally:
         app.dependency_overrides.clear()
         engine.dispose()
+
+
+def test_the_dashboard_api_helper_keeps_content_type_when_an_authorization_header_is_passed():
+    """Found by performing the demo script in a browser: `fetch(p, { headers: merged, ...opts })` lets opts.headers replace the
+    merged object, dropping Content-Type on the approval call (the only one that passes headers) -> 422 shown as "[object Object]".
+    The API tests use a proper client and could not see it, so pin the helper's shape."""
+    html = (Path(__file__).resolve().parents[2] / "apps" / "web" / "index.html").read_text(encoding="utf-8")
+    start = html.index("const api = async")
+    helper = html[start:html.index("};", start) + 2]
+    assert "const { headers, ...rest } = opts" in helper
+    assert helper.index("...rest") < helper.index('"Content-Type"')  # rest first, then the merged headers win
+    assert "...opts" not in helper.replace("...opts.headers", "")
 
 
 def test_results_endpoint_lists_stamped_comparisons(client):
