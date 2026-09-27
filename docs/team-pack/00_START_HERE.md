@@ -85,5 +85,6 @@ No browser? `python scripts/demo.py --twice`.
 - **`05_TEAM_DOSSIER.md` — the state of everything on one page: what is done (with evidence), what is not, demo-day risks, the GitHub issues reviewed, today's plan.** Read it second.
 - `00`–`04` — the guides (this folder)
 - `VIDEO_SCRIPT.md` — the 3-minute script. Every line has its reason, its source in the code, and how it was checked
+- **Recording the video?** Open [demo_walkthrough.html](../submission/demo_walkthrough.html) (the script as a click-through page with a timer; works offline) and read [recommendation.md](../submission/recommendation.md) (who says which part, and how to use the four photos)
 - `reference/` — snapshot copies of the key project documents (live status, results, demo guide, all submission drafts, cover image, slides, ADRs, the session ledger entry). They are a **snapshot**: the repo is the source of truth, and `MANIFEST.txt` says which commit this was taken from.
 - Regenerate the pack any time: `python scripts/make_team_pack.py`

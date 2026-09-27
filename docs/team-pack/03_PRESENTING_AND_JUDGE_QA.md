@@ -11,12 +11,14 @@ Judging criteria (from the event page): **Application of Technology** (a *clear*
 
 ## The 3-minute story (matches the video script)
 
-1. **Problem** (15 s) — the three unanswerable questions.
+1. **Problem, and what is real** (26 s) — the three unanswerable questions; say LIVE or SIMULATED.
 2. **Run an incident** (60 s) — it stops at *awaiting approval*; risk shown with every factor; **nothing has touched the repo**; approve with a key; fix on a branch; verified at three levels; ledger says *confirmed*.
-3. **Same incident again** (25 s) — diagnosis from **memory at 0 tokens**, with the routing decision shown.
-4. **The look-alike** (45 s) — same symptom, different cause; memory answers, **the tests say no**, rolled back, refuted, full investigation finds the real cause. *This is the strongest moment — don't cut it.*
-5. **What it learned + honest results** (30 s).
-6. **Close** (5 s).
+3. **Same incident again** (18 s) — diagnosis from **memory at 0 tokens**, with the routing decision shown.
+4. **The look-alike** (33 s) — same symptom, different cause; memory answers, **the tests say no**, rolled back, refuted, full investigation finds the real cause. *This is the strongest moment — don't cut it.*
+5. **What it learned + honest results** (37 s).
+6. **Close** (6 s).
+
+Four speakers? The split, and what each of you says: [recommendation.md](../submission/recommendation.md). Rehearse with [demo_walkthrough.html](../submission/demo_walkthrough.html).
 
 Script with timings: [VIDEO_SCRIPT.md](../submission/VIDEO_SCRIPT.md). Presenter guide and troubleshooting: [DEMO.md](../DEMO.md).
 
