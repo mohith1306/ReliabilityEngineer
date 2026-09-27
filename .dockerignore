@@ -10,3 +10,8 @@ runs
 docs/memory
 .claude
 tests/e2e/corpus_tmp
+.env
+.env.*
+!.env.example
+recordings
+dist

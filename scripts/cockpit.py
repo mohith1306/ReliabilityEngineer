@@ -108,8 +108,19 @@ def collect_git() -> dict:
     g["main_contained"] = sh("git", "merge-base", "--is-ancestor", "origin/main", "HEAD")[0] == 0
     _, status = sh("git", "status", "--porcelain")
     g["dirty_files"] = len([line for line in status.splitlines() if line.strip()])
+    status_rel = STATUS_MD.relative_to(ROOT).as_posix()
+    g["untracked_other"] = [line for line in status.splitlines() if line.startswith("??") and status_rel not in line]
     g["merge_in_progress"] = (ROOT / ".git" / "MERGE_HEAD").exists()
     return g
+
+
+def tests_are_current(sha: str | None, g: dict) -> bool:
+    """The recorded run still describes this code: nothing but the generated STATUS.md differs from the commit it ran at.
+    Comparing commits alone called every committed STATUS.md stale, because committing the status page moves HEAD."""
+    if not sha or g.get("untracked_other"):
+        return False
+    rc, _ = sh("git", "diff", "--quiet", sha, "--", ".", f":(exclude){STATUS_MD.relative_to(ROOT).as_posix()}")
+    return rc == 0
 
 
 def collect_stages() -> list[dict]:
@@ -349,7 +360,7 @@ def render(data: dict) -> str:
     if not t:
         L.append("no recorded run -- `python scripts/cockpit.py --tests`")
     else:
-        stale = "" if t.get("sha") == g["head"] and not g["dirty_files"] else "   (stale: code changed since)"
+        stale = "" if tests_are_current(t.get("sha"), g) else "   (stale: code changed since)"
         if not t.get("parsed", True) or not t.get("passed"):
             verdict = "UNKNOWN"  # a run that reports no passes proves nothing
         elif t.get("failed") or t.get("error") or t.get("exit") != 0:

@@ -1,19 +1,19 @@
 # Project status
 
-> **Generated** by `python scripts/cockpit.py --write` at Sun 2026-09-27 02:57 India Standard Time, commit `bcc955c`. Do not edit by hand -- it is regenerated from git, the ledger, the stage tracker and the last test run. For the *why*, read `docs/memory/INDEX.md`.
+> **Generated** by `python scripts/cockpit.py --write` at Sun 2026-09-27 06:04 India Standard Time, commit `769730a`. Do not edit by hand -- it is regenerated from git, the ledger, the stage tracker and the last test run. For the *why*, read `docs/memory/INDEX.md`.
 
 ```text
-BRE COCKPIT                                           Sun 2026-09-27 02:57 India Standard Time
+BRE COCKPIT                                           Sun 2026-09-27 06:04 India Standard Time
 
 == CLOCK =====================================================================
 deadline  Sun 2026-09-27 20:30 India Standard Time  (11:00 AM EDT)
-remaining 17h 32m
+remaining 14h 25m
 
 == GIT =======================================================================
-branch    integration/reconcile-main @ bcc955c  Docs, results and the submission pack; close session
-vs main   12 ahead / 0 behind origin/main (22cd27a)
-upstream  (none -- this branch exists only locally)
-worktree  0 uncommitted path(s)
+branch    demo-readiness @ 769730a  cockpit: a committed STATUS.md no longer marks its o
+vs main   3 ahead / 0 behind origin/main (cdcdd33)
+upstream  origin/demo-readiness: 1 unpushed, 0 to pull
+worktree  1 uncommitted path(s)
 
 == STAGES ====================================================================
 S0  DONE         ............  0/0  Alignment + working agreement
@@ -32,7 +32,7 @@ blocked   S4 live verification (and S6's live agent-mode call) — needs Bob S
 risk      **Bob has never been called live.** Both adapters (Bob Shell CLI, 
 
 == TESTS =====================================================================
-GREEN  329 passed, 0 failed, 0 errors, 1 skipped, 0 xfailed @ 705b335   (stale: code changed since)
+GREEN  335 passed, 0 failed, 0 errors, 1 skipped, 0 xfailed @ 769730a
 
 == SUBMISSION (lablab.ai) ====================================================
 DRAFTED 7  HUMAN 5
@@ -60,12 +60,12 @@ DRAFTED 7  HUMAN 5
 0009#14 [unassigned] tau tuning is in-sample; token figures are nom
 0009#17 [needs humans] Submission items only a person can do: Bob tas
 ------------------------------------------------------------------------------
-last sessions: 0007 Bob interface document | 0008 Asymmetry measured, pr | 0009 Reconcile two lines, b
+last sessions: 0008 Asymmetry measured, pr | 0009 Reconcile two lines, b | 0010 Demo readiness and the
 
 == INTEGRITY =================================================================
 15/15 checks pass
 
 == NEXT ======================================================================
 1. Needs a person: #6 Public code repository; #7 IBM Bob task-session summary
-2. 12 commit(s) ahead of origin/main exist only locally -- the judged repo do
+2. 3 commit(s) ahead of origin/main exist only locally -- the judged repo doe
 ```
