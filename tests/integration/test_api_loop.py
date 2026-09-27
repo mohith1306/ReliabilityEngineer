@@ -227,6 +227,14 @@ def test_reset_only_deletes_a_workspace_that_bre_itself_marked(tmp_path, monkeyp
         engine.dispose()
 
 
+def test_the_video_walkthrough_is_served_beside_the_dashboard(client):
+    """Same origin as `/`, so it can embed the real dashboard and check the server's Bob mode before a recording."""
+    r = client.get("/walkthrough")
+    assert r.status_code == 200 and "text/html" in r.headers["content-type"] and r.headers["cache-control"] == "no-cache"
+    assert "demo walkthrough" in r.text and 'id="realFrame"' in r.text and "/api/system" in r.text
+    assert client.get("/api/system").json()["bob"]["label"] == "SIMULATED BOB"  # what the page's mode check reads
+
+
 def test_the_dashboard_api_helper_keeps_content_type_when_an_authorization_header_is_passed():
     """Found by performing the demo script in a browser: `fetch(p, { headers: merged, ...opts })` lets opts.headers replace the
     merged object, dropping Content-Type on the approval call (the only one that passes headers) -> 422 shown as "[object Object]".

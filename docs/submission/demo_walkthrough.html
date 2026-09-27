@@ -91,6 +91,24 @@ header.top { background: var(--surface); border-bottom: 1px solid var(--line); }
 .card-head h2 { font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--text-3); margin: 0; font-weight: 600; }
 .card-head .right { margin-left: auto; font-size: 12.5px; color: var(--text-3); white-space: nowrap; }
 .card-body { padding: 14px 16px; overflow: auto; min-height: 0; flex: 1; }
+.seg.small button { padding: 3px 10px; font-size: 12.5px; }
+
+/* the real dashboard: loaded once, kept alive while you move between beats */
+.stage.real { height: clamp(650px, calc(100vh - 150px), 1000px); }
+.stage.real #leftBody { display: flex; flex-direction: column; overflow: hidden; }
+#real { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+#real[hidden] { display: none; }
+.real-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.real-bar input { flex: 1; min-width: 180px; font: 13px var(--mono); color: var(--text); background: var(--bg); border: 1px solid var(--line-strong); border-radius: 6px; padding: 5px 8px; }
+.real-bar a { font-size: 13px; color: var(--accent); white-space: nowrap; }
+.btn.slim { min-width: 0; padding: 5px 12px; font-size: 13px; }
+.tag.ok { border-color: var(--ok); color: var(--ok); background: var(--ok-soft); }
+.tag.bad { border-color: var(--bad); color: var(--bad); background: var(--bad-soft); }
+.real-warn { font-size: 13.5px; border: 1px solid var(--bad); background: var(--bad-soft); border-radius: 8px; padding: 8px 12px; }
+.real-warn:empty { display: none; }
+#realFrame { flex: 1; min-height: 360px; width: 100%; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--screen-bg); }
+.real-hint { margin: 0; font-size: 12.5px; color: var(--text-3); }
+.real-hint:empty { display: none; }
 
 .do { font-size: 14px; color: var(--text-2); margin: 0 0 10px; min-height: 42px; }
 @media (max-width: 900px) { .do { min-height: 63px; } }
@@ -219,6 +237,9 @@ table.plain th { font-size: 12px; text-transform: uppercase; letter-spacing: .04
   .speakers { display: none; }
   .timer { margin-left: 0; }
   .names { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stage.real { height: auto; }
+  .stage.real #leftBody { overflow: visible; }
+  #realFrame { flex: none; height: 640px; }
   .kv { grid-template-columns: 110px 1fr; }
 }
 
@@ -242,7 +263,7 @@ table.plain th { font-size: 12px; text-transform: uppercase; letter-spacing: .04
         <div class="mark" aria-hidden="true"></div>
         <div>
           <h1>Bob Reliability Engineer: demo walkthrough</h1>
-          <p>The 3:00 video, beat by beat. Matches <code>docs/submission/VIDEO_SCRIPT.md</code>.</p>
+          <p>The 3:00 video, beat by beat. Matches <code>docs/submission/VIDEO_SCRIPT.md</code>. Switch <i>On screen</i> to <b>Real dashboard</b> to run the actual demo beside the script.</p>
         </div>
       </div>
       <div class="seg" role="group" aria-label="Recording mode">
@@ -273,11 +294,27 @@ table.plain th { font-size: 12px; text-transform: uppercase; letter-spacing: .04
 
     <div class="stage">
       <div class="card">
-        <div class="card-head"><h2>On screen</h2><span class="right" id="screenPos"></span></div>
-        <div class="card-body">
+        <div class="card-head"><h2>On screen</h2>
+          <div class="seg small" role="group" aria-label="What the left panel shows">
+            <button type="button" data-left="mock" aria-pressed="true">Script view</button>
+            <button type="button" data-left="real" aria-pressed="false">Real dashboard</button>
+          </div>
+          <span class="right" id="screenPos"></span></div>
+        <div class="card-body" id="leftBody">
           <p class="do" id="doLine"></p>
           <div class="subtabs" id="subtabs"></div>
           <div id="mock"></div>
+          <div id="real" hidden>
+            <div class="real-bar">
+              <span class="tag" id="realStatus">not connected</span>
+              <input type="text" id="realUrl" aria-label="Dashboard address" spellcheck="false">
+              <button type="button" class="btn slim" id="realLoad">Load</button>
+              <a id="realOpen" href="#" target="_blank" rel="noopener">Open in a new tab ↗</a>
+            </div>
+            <div class="real-warn" id="realWarn"></div>
+            <iframe id="realFrame" title="The real BRE dashboard"></iframe>
+            <p class="real-hint" id="realHint"></p>
+          </div>
         </div>
       </div>
       <div class="card">
@@ -815,6 +852,7 @@ function setMode(m) {
   mode = m; store.set("mode", m);
   document.querySelectorAll("[data-mode]").forEach(el => el.setAttribute("aria-pressed", el.dataset.mode === m ? "true" : "false"));
   render(); renderTrack(); renderPrint();
+  if (left === "real") checkReal();
 }
 
 /* ── other views ── */
@@ -882,12 +920,75 @@ function fitMock() {
 window.addEventListener("resize", fitMock);
 if (window.ResizeObserver) new ResizeObserver(fitMock).observe($("mock"));
 
+/* ── the real dashboard ──
+   Served by BRE at /walkthrough, the page embeds the dashboard from its own server and reads /api/system to check the
+   Simulated/Live wording against what the server is really running. Opened as a file, it embeds http://127.0.0.1:8000/
+   (scripts/run_demo.*) but cannot read the server's mode, and says so. */
+const SERVED_BY_BRE = location.protocol.startsWith("http") && /\/walkthrough\/?$/.test(location.pathname);
+const defaultRealUrl = () => SERVED_BY_BRE ? new URL("/", location.href).href : "http://127.0.0.1:8000/";
+let left = store.get("left", "mock");
+let realUrl = store.get("realUrl", null) || defaultRealUrl();
+const START_HINT = "Blank or an error inside the frame? Start the dashboard first: powershell -ExecutionPolicy Bypass -File scripts\\run_demo.ps1 (macOS/Linux: scripts/run_demo.sh).";
+
+function setLeft(v) {
+  left = v === "real" ? "real" : "mock";
+  store.set("left", left);
+  document.querySelectorAll("[data-left]").forEach(el => el.setAttribute("aria-pressed", el.dataset.left === left ? "true" : "false"));
+  $("mock").hidden = left !== "mock";
+  $("real").hidden = left !== "real";
+  document.querySelector(".stage").classList.toggle("real", left === "real");
+  if (left === "real") { if (!$("realFrame").getAttribute("src")) loadReal(); else checkReal(); }
+  else fitMock();
+}
+function loadReal() {
+  const typed = $("realUrl").value.trim();
+  try { realUrl = new URL(typed || defaultRealUrl(), location.href).href; } catch { realUrl = defaultRealUrl(); }
+  $("realUrl").value = realUrl;
+  store.set("realUrl", realUrl);
+  $("realFrame").src = realUrl;
+  $("realOpen").href = realUrl;
+  checkReal();
+}
+async function checkReal() {
+  const st = $("realStatus"), warn = $("realWarn"), hint = $("realHint");
+  st.className = "tag"; warn.textContent = ""; hint.textContent = "";
+  let sameOrigin = false;
+  try { sameOrigin = new URL(realUrl).origin === location.origin; } catch { /* a bad address */ }
+  if (!sameOrigin) {
+    st.textContent = "mode not checked";
+    hint.textContent = "Opened from a file, this page cannot read the server's mode. For the automatic LIVE/SIMULATED check, open "
+      + new URL("walkthrough", realUrl).href + " instead. " + START_HINT;
+    return;
+  }
+  try {
+    const r = await fetch(new URL("/api/system", realUrl), { cache: "no-store" });
+    if (!r.ok) throw new Error(String(r.status));
+    const sys = await r.json();
+    const bob = sys.bob || {};
+    st.textContent = `Connected · ${bob.label || "?"} · τ ${sys.tau ? sys.tau.value : "?"}${sys.demo ? " · demo mode" : ""}`;
+    st.classList.add(bob.mode === "unavailable" ? "bad" : "ok");
+    if (!sys.demo) hint.textContent = "Demo mode is off on this server, so there is no Create demo incident button. Start it with scripts/run_demo.*.";
+    if (bob.mode === "unavailable") warn.textContent = "The server has NO BOB: nothing can diagnose. Start it with scripts/run_demo.* (simulated), or finish Task A for live Bob.";
+    else if (bob.simulated && mode === "live") warn.textContent = "The server is running SIMULATED BOB, but this page is set to Live wording. Switch to Simulated before you record.";
+    else if (!bob.simulated && mode === "sim") warn.textContent = `The server is running ${bob.label}, but this page is set to Simulated wording. Switch to Live Bob before you record.`;
+  } catch {
+    st.textContent = "dashboard not reachable"; st.classList.add("bad");
+    hint.textContent = START_HINT;
+  }
+}
+$("realUrl").value = realUrl;
+$("realOpen").href = realUrl;
+$("realLoad").addEventListener("click", loadReal);
+$("realUrl").addEventListener("keydown", e => { if (e.key === "Enter") loadReal(); });
+document.querySelectorAll("[data-left]").forEach(el => el.addEventListener("click", () => setLeft(el.dataset.left)));
+
 buildTimeline();
 paintThemeBtn();
 setMode(mode === "live" ? "live" : "sim");
 renderPre();
 renderFix();
 paintTimer();
+setLeft(left);
 fitMock();
 </script>
 </body>

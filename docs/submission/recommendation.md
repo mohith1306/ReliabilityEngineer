@@ -6,7 +6,8 @@ explaining and why**: the one idea you own, the words to lean on, what is on scr
 be ready for afterwards.
 
 Rehearse with [demo_walkthrough.html](demo_walkthrough.html): type your names under *Before recording*, press **T** for the timer, and read your part
-against the clock.
+against the clock. For a real run-through, start the demo (`scripts/run_demo.*`), open <http://127.0.0.1:8000/walkthrough> and switch *On screen* to
+**Real dashboard**: you click the working dashboard while your lines stay beside it.
 
 ---
 

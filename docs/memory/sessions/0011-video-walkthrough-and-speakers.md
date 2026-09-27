@@ -53,6 +53,18 @@ light mode; and a `recommendation.md` saying what each of the four team members 
 - **Evidence:** the quoted lines were compared programmatically with the script's spoken track: identical, in order.
 - **Status:** resolved
 
+### 5. The real, working dashboard inside the walkthrough; served at `/walkthrough`
+- **Type:** change
+- **What:** asked to include the real working demo. The page's *On screen* panel now switches between the script mock and **Real dashboard**, an embedded, clickable
+  dashboard loaded once and kept alive across beats. BRE serves the page at `GET /walkthrough` (same origin as `/`), so it can read `/api/system` and **warn when its
+  LIVE/SIMULATED wording disagrees with the server** (or the server has NO BOB). Opened as a file, it embeds `http://127.0.0.1:8000/` and says it can't check the mode.
+  `scripts/run_demo.*` print the walkthrough URL.
+- **Why:** the recording is of the real dashboard; rehearsing next to the real thing removes the translation step, and the mode check enforces rule 1 automatically.
+- **Evidence:** `apps/api/main.py` (`walkthrough`); `tests/integration/test_api_loop.py::test_the_video_walkthrough_is_served_beside_the_dashboard`. In the browser, via
+  `scripts/run_demo.ps1 -Port 8765`: status *Connected · SIMULATED BOB · τ 0.3 · demo mode*; Live wording → the warning appears; incident 1 run end to end inside the
+  frame (Run → Approve → Run → RESOLVED); the frame did not reload across all 10 beats; no clipping at 567 and 1366 px (a stacked-layout clipping bug found and fixed).
+- **Status:** resolved
+
 ## Close-out
 
 - **Shipped:** the walkthrough page, the four-speaker recommendation, a speakable script timing, exact live lines.

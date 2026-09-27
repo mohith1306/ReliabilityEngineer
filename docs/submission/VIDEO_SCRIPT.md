@@ -8,7 +8,9 @@ on-screen text was copied from the page; the numbers were compared with the arti
 fixed on `main` (PR #14; see *What checking the script found*, at the end). **Record from `main`.**
 
 **Rehearse with [demo_walkthrough.html](demo_walkthrough.html)**: this script as a click-through page, with the dashboard's exact on-screen text for every
-step, a timer, and a Simulated/Live switch. Who says which part: [recommendation.md](recommendation.md).
+step, a timer, and a Simulated/Live switch. With the demo running, open **<http://127.0.0.1:8000/walkthrough>** and switch *On screen* to
+**Real dashboard**: the working dashboard sits beside your lines, and the page warns if its LIVE/SIMULATED wording disagrees with the server.
+Who says which part: [recommendation.md](recommendation.md).
 
 ---
 
