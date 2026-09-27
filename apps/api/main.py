@@ -8,6 +8,7 @@ from apps.api.routes import approvals, demo, incidents, insights, investigations
 from apps.api.database import init_db
 
 WEB = Path(__file__).resolve().parents[1] / "web"
+WALKTHROUGH = Path(__file__).resolve().parents[2] / "docs" / "submission" / "demo_walkthrough.html"
 
 app = FastAPI(
     title="Bob Reliability Engineer",
@@ -34,6 +35,13 @@ def dashboard():
     """The dashboard. The JSON API lives under /api and is documented at /docs."""
     # no-cache: a browser that kept an older copy ran stale JavaScript after the approve-call fix and showed the old bug
     return FileResponse(WEB / "index.html", headers={"Cache-Control": "no-cache"})
+
+
+@app.get("/walkthrough", include_in_schema=False)
+def walkthrough():
+    """The video script beside the real dashboard. Served from the same origin as `/` so the page can embed the dashboard
+    and read /api/system to warn when its LIVE/SIMULATED wording disagrees with what this server is running."""
+    return FileResponse(WALKTHROUGH, headers={"Cache-Control": "no-cache"})
 
 
 if (WEB / "static").is_dir():

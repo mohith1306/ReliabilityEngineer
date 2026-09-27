@@ -1,0 +1,995 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BRE Demo Walkthrough</title>
+<meta name="description" content="The 3-minute BRE demo video script, beat by beat: what is on screen, what to say, why, and where it comes from.">
+<style>
+/* ── tokens ─────────────────────────────────────────────────────────────── */
+:root {
+  --bg: #f6f7f9; --surface: #ffffff; --surface-2: #f0f2f5; --line: #dfe3e8; --line-strong: #c8ced6;
+  --text: #16191d; --text-2: #4a525c; --text-3: #6f7883;
+  --accent: #2458d6; --accent-soft: #e6edfc; --on-accent: #ffffff;
+  --ok: #1d7a46; --ok-soft: #e3f3ea; --bad: #b3261e; --bad-soft: #fbe7e5;
+  --warn: #8a5a00; --warn-soft: #fdf1d8; --live: #0f7a5c; --live-soft: #dcf3ea;
+  --focus: #2458d6;
+  --screen-bg: #ffffff; --screen-top: #f3f5f8;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1216; --surface: #171b21; --surface-2: #1d222a; --line: #2a313b; --line-strong: #3a4350;
+    --text: #e8ebef; --text-2: #aab3be; --text-3: #7f8995;
+    --accent: #7ea2ff; --accent-soft: #1d2945; --on-accent: #0b1020;
+    --ok: #5cc98b; --ok-soft: #173325; --bad: #ff8a80; --bad-soft: #3a1c1a;
+    --warn: #f0b95a; --warn-soft: #3a2c12; --live: #5fd3a8; --live-soft: #123328;
+    --focus: #7ea2ff;
+    --screen-bg: #12161b; --screen-top: #191e25;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1216; --surface: #171b21; --surface-2: #1d222a; --line: #2a313b; --line-strong: #3a4350;
+  --text: #e8ebef; --text-2: #aab3be; --text-3: #7f8995;
+  --accent: #7ea2ff; --accent-soft: #1d2945; --on-accent: #0b1020;
+  --ok: #5cc98b; --ok-soft: #173325; --bad: #ff8a80; --bad-soft: #3a1c1a;
+  --warn: #f0b95a; --warn-soft: #3a2c12; --live: #5fd3a8; --live-soft: #123328;
+  --focus: #7ea2ff;
+  --screen-bg: #12161b; --screen-top: #191e25;
+  color-scheme: dark;
+}
+
+/* ── base: nothing moves, nothing resizes on its own ────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { scrollbar-gutter: stable; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--sans); font-variant-numeric: tabular-nums; }
+* { transition: none !important; animation: none !important; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+code { font: 0.9em var(--mono); background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; overflow-wrap: anywhere; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 0 16px; }
+
+/* ── header ─────────────────────────────────────────────────────────────── */
+header.top { background: var(--surface); border-bottom: 1px solid var(--line); }
+.top-row { display: flex; align-items: center; gap: 16px; min-height: 64px; flex-wrap: wrap; padding: 10px 0; }
+.brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
+.mark { width: 28px; height: 28px; border-radius: 7px; background: var(--accent); flex: none; }
+.brand h1 { font-size: 17px; margin: 0; line-height: 1.2; }
+.brand p { margin: 0; font-size: 12.5px; color: var(--text-3); }
+.seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: transparent; padding: 6px 12px; font-size: 13px; color: var(--text-2); }
+.seg button + button { border-left: 1px solid var(--line-strong); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.icon-btn { border: 1px solid var(--line-strong); background: transparent; border-radius: 8px; padding: 6px 12px; font-size: 13px; color: var(--text-2); min-width: 92px; }
+.views { display: flex; gap: 4px; flex-wrap: wrap; }
+.views button { border: 0; border-bottom: 2px solid transparent; background: none; padding: 10px 12px; font-size: 14px; color: var(--text-2); }
+.views button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+
+/* ── timeline ───────────────────────────────────────────────────────────── */
+.timeline-box { margin: 18px 0 14px; }
+.timeline { position: relative; display: flex; height: 58px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.tl-seg { position: relative; border: 0; border-right: 1px solid var(--line); background: transparent; text-align: left; padding: 7px 8px; min-width: 0; overflow: hidden; }
+.tl-seg:last-child { border-right: 0; }
+.tl-seg .t { display: block; font-size: 11.5px; color: var(--text-3); white-space: nowrap; }
+.tl-seg .n { display: block; font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-seg[aria-current="true"] { background: var(--accent-soft); }
+.tl-seg[aria-current="true"] .n { color: var(--accent); }
+.tl-seg:hover { background: var(--surface-2); }
+.tl-seg[aria-current="true"]:hover { background: var(--accent-soft); }
+.cursor { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--bad); left: 0; display: none; pointer-events: none; }
+.speakers { display: flex; margin-top: 6px; }
+.speakers div { font-size: 12px; color: var(--text-3); padding-left: 8px; border-left: 1px solid var(--line-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.speakers div:first-child { border-left: 0; padding-left: 2px; }
+
+/* ── stage: fixed height so switching beats never moves anything ─────────── */
+.stage { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 16px; height: 650px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; min-height: 0; display: flex; flex-direction: column; }
+.card-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); min-height: 50px; }
+.card-head h2 { font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--text-3); margin: 0; font-weight: 600; }
+.card-head .right { margin-left: auto; font-size: 12.5px; color: var(--text-3); white-space: nowrap; }
+.card-body { padding: 14px 16px; overflow: auto; min-height: 0; flex: 1; }
+.seg.small button { padding: 3px 10px; font-size: 12.5px; }
+
+/* the real dashboard: loaded once, kept alive while you move between beats */
+.stage.real { height: clamp(650px, calc(100vh - 150px), 1000px); }
+.stage.real #leftBody { display: flex; flex-direction: column; overflow: hidden; }
+#real { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+#real[hidden] { display: none; }
+.real-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.real-bar input { flex: 1; min-width: 180px; font: 13px var(--mono); color: var(--text); background: var(--bg); border: 1px solid var(--line-strong); border-radius: 6px; padding: 5px 8px; }
+.real-bar a { font-size: 13px; color: var(--accent); white-space: nowrap; }
+.btn.slim { min-width: 0; padding: 5px 12px; font-size: 13px; }
+.tag.ok { border-color: var(--ok); color: var(--ok); background: var(--ok-soft); }
+.tag.bad { border-color: var(--bad); color: var(--bad); background: var(--bad-soft); }
+.real-warn { font-size: 13.5px; border: 1px solid var(--bad); background: var(--bad-soft); border-radius: 8px; padding: 8px 12px; }
+.real-warn:empty { display: none; }
+#realFrame { flex: 1; min-height: 360px; width: 100%; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--screen-bg); }
+.real-hint { margin: 0; font-size: 12.5px; color: var(--text-3); }
+.real-hint:empty { display: none; }
+
+.do { font-size: 14px; color: var(--text-2); margin: 0 0 10px; min-height: 42px; }
+@media (max-width: 900px) { .do { min-height: 63px; } }
+.do b { color: var(--text); }
+.subtabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; min-height: 28px; }
+.subtabs button { border: 1px solid var(--line-strong); background: transparent; border-radius: 999px; padding: 2px 10px; font-size: 12.5px; color: var(--text-2); }
+.subtabs button[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+.say-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.tag { font-size: 12px; border: 1px solid var(--line-strong); border-radius: 999px; padding: 1px 9px; color: var(--text-2); white-space: nowrap; }
+.tag.mode-sim { border-color: var(--warn); color: var(--warn); background: var(--warn-soft); }
+.tag.mode-live { border-color: var(--live); color: var(--live); background: var(--live-soft); }
+.say { font-size: clamp(17px, 1.5vw, 20px); line-height: 1.55; margin: 0; }
+.say b { background: var(--accent-soft); color: var(--text); padding: 0 3px; border-radius: 3px; font-weight: 600; }
+.note { margin-top: 16px; font-size: 13.5px; border: 1px solid var(--warn); background: var(--warn-soft); color: var(--text); border-radius: 8px; padding: 8px 12px; }
+.note:empty { display: none; }
+
+/* ── the three evidence cards under the stage ─────────────────────────────── */
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 4px 0 28px; }
+.facts .card-body { height: 150px; font-size: 13.5px; color: var(--text-2); }
+
+/* ── controls ───────────────────────────────────────────────────────────── */
+.controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 12px 0 0; }
+.btn { border: 1px solid var(--line-strong); background: var(--surface); border-radius: 8px; padding: 8px 14px; font-size: 14px; min-width: 96px; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.pos { font-size: 14px; color: var(--text-2); min-width: 150px; text-align: center; }
+.timer { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.clock { font: 600 20px var(--mono); min-width: 64px; text-align: right; }
+.target { font-size: 13px; color: var(--text-3); min-width: 230px; }
+.keys { font-size: 12.5px; color: var(--text-3); width: 100%; }
+.kbd { font: 12px var(--mono); border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; }
+label.inline { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-2); }
+
+/* ── the dashboard mock ─────────────────────────────────────────────────── */
+/* laid out at one fixed width and scaled as a whole to its column (--mz, set on resize only), so it looks the same everywhere */
+.screen { width: 720px; zoom: var(--mz, 1); border: 1px solid var(--line-strong); border-radius: 10px; background: var(--screen-bg); overflow: hidden; font-size: 12px; }
+.s-top { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: var(--screen-top); border-bottom: 1px solid var(--line); }
+.s-logo { width: 14px; height: 14px; border-radius: 4px; background: var(--accent); flex: none; }
+.s-title { font-weight: 600; white-space: nowrap; }
+.s-nav { display: flex; gap: 10px; color: var(--text-3); white-space: nowrap; overflow: hidden; }
+.s-nav .on { color: var(--text); font-weight: 600; }
+.pill { margin-left: auto; font-size: 11px; font-weight: 700; letter-spacing: .03em; border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+.pill.sim { color: var(--warn); background: var(--warn-soft); border: 1px solid var(--warn); }
+.pill.live { color: var(--live); background: var(--live-soft); border: 1px solid var(--live); }
+.s-body { padding: 8px 10px; }
+.inc-title { font-weight: 700; font-size: 13px; }
+.inc-meta { display: flex; gap: 6px; margin: 3px 0 6px; }
+.mini { font-size: 11px; border: 1px solid var(--line-strong); border-radius: 4px; padding: 0 6px; color: var(--text-2); }
+.chips { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 6px; }
+.chip { font-size: 9.5px; font-weight: 700; letter-spacing: .02em; border-radius: 4px; padding: 2px 5px; background: var(--surface-2); color: var(--text-3); white-space: nowrap; }
+.chip.done { background: var(--ok-soft); color: var(--ok); }
+.chip.now { background: var(--accent); color: var(--on-accent); }
+.bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; min-height: 28px; }
+.fake-btn { font-size: 11.5px; border-radius: 6px; padding: 4px 10px; border: 1px solid var(--line-strong); color: var(--text-2); white-space: nowrap; }
+.fake-btn.blue { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.fake-btn.green { background: var(--ok); border-color: var(--ok); color: var(--screen-bg); }
+.fake-btn.red { color: var(--bad); border-color: var(--bad); }
+.fake-btn.off { opacity: .55; }
+.approve-box { display: flex; align-items: center; gap: 6px; border: 1px dashed var(--warn); border-radius: 6px; padding: 3px 6px; background: var(--warn-soft); }
+.approve-box .lbl { font-weight: 700; font-size: 11.5px; }
+.fake-input { font: 11px var(--mono); border: 1px solid var(--line-strong); border-radius: 4px; padding: 2px 6px; min-width: 120px; color: var(--text-3); background: var(--screen-bg); }
+.msg { font-size: 11.5px; color: var(--text-2); background: var(--surface-2); border-radius: 4px; padding: 3px 8px; margin-bottom: 6px; }
+.msg.ok { color: var(--ok); background: var(--ok-soft); }
+.s-tabs { display: flex; gap: 12px; border-bottom: 1px solid var(--line); margin-bottom: 6px; white-space: nowrap; overflow: hidden; }
+.s-tabs span { padding: 3px 0; color: var(--text-3); border-bottom: 2px solid transparent; }
+.s-tabs .on { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+.pane { font-size: 12px; }
+.pane h4 { margin: 0 0 4px; font-size: 12.5px; }
+.pane p { margin: 0 0 4px; }
+.kv { display: grid; grid-template-columns: 150px 1fr; gap: 1px 10px; margin-bottom: 4px; }
+.kv div:nth-child(odd) { color: var(--text-3); }
+.muted { color: var(--text-3); }
+table.t { border-collapse: collapse; width: 100%; font-size: 11.5px; }
+table.t th { text-align: left; font-weight: 600; font-size: 10.5px; letter-spacing: .03em; color: var(--text-3); border-bottom: 1px solid var(--line); padding: 3px 6px; white-space: nowrap; }
+table.t td { border-bottom: 1px solid var(--line); padding: 2px 6px; white-space: nowrap; }
+.st-ok { color: var(--ok); font-weight: 600; }
+.st-bad { color: var(--bad); font-weight: 600; }
+.st-wait { color: var(--text-3); }
+pre.diff { font: 11px/1.45 var(--mono); background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; margin: 6px 0 0; overflow: auto; }
+pre.diff .add { color: var(--ok); display: block; background: var(--ok-soft); }
+pre.diff .del { color: var(--bad); display: block; background: var(--bad-soft); }
+.level { display: grid; grid-template-columns: 90px 150px 1fr; gap: 8px; padding: 3px 0; border-bottom: 1px solid var(--line); }
+.level:last-child { border-bottom: 0; }
+.banner { font-size: 11.5px; border: 1px solid var(--warn); background: var(--warn-soft); border-radius: 6px; padding: 6px 8px; margin-bottom: 8px; }
+.title-card { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; min-height: 330px; padding: 28px; }
+.title-card .big { font-size: 30px; font-weight: 800; line-height: 1.15; margin: 10px 0 8px; }
+.title-card .tag-line { font-size: 16px; color: var(--text-2); }
+.title-card .url { font: 14px var(--mono); margin-top: 18px; color: var(--accent); }
+.qs { display: grid; gap: 8px; margin-top: 18px; }
+.qs div { font-size: 14px; border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; background: var(--surface-2); }
+.slice { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; }
+.slice h4 { display: flex; gap: 8px; align-items: baseline; }
+.slice .big-num { font-size: 18px; font-weight: 800; }
+
+/* the thing to point at: a steady outline, nothing that blinks */
+.focus { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+
+/* ── other views ────────────────────────────────────────────────────────── */
+.view[hidden] { display: none; }
+.page { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px 24px; margin: 18px 0 28px; }
+.page h2 { margin: 0 0 6px; font-size: 20px; }
+.page h3 { margin: 22px 0 8px; font-size: 15px; }
+.page p.lead { margin: 0 0 14px; color: var(--text-2); }
+.check { display: grid; grid-template-columns: 26px 1fr; gap: 6px 10px; padding: 10px 0; border-bottom: 1px solid var(--line); align-items: start; }
+.check:last-of-type { border-bottom: 0; }
+.check input { width: 18px; height: 18px; margin: 2px 0 0; }
+.check .why { color: var(--text-3); font-size: 13.5px; }
+table.plain { border-collapse: collapse; width: 100%; font-size: 14px; }
+table.plain th, table.plain td { text-align: left; border-bottom: 1px solid var(--line); padding: 8px 10px; vertical-align: top; }
+table.plain th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-3); }
+.track p { font-size: 17px; line-height: 1.65; margin: 0 0 14px; }
+.track .who { display: block; font-size: 12px; color: var(--text-3); margin-bottom: 2px; }
+.names { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.names label { font-size: 12.5px; color: var(--text-3); display: grid; gap: 4px; }
+.names input { font: inherit; font-size: 14px; color: var(--text); background: var(--bg); border: 1px solid var(--line-strong); border-radius: 6px; padding: 6px 8px; }
+.table-scroll { overflow-x: auto; }
+
+/* ── narrow screens: stack, let heights follow content ───────────────────── */
+@media (max-width: 900px) {
+  .stage { grid-template-columns: minmax(0, 1fr); height: auto; }
+  .card-body { overflow: visible; }
+  .facts { grid-template-columns: minmax(0, 1fr); }
+  .facts .card-body { height: auto; }
+  .timeline { height: 50px; }
+  .tl-seg .n { display: none; }
+  .speakers { display: none; }
+  .timer { margin-left: 0; }
+  .names { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stage.real { height: auto; }
+  .stage.real #leftBody { overflow: visible; }
+  #realFrame { flex: none; height: 640px; }
+  .kv { grid-template-columns: 110px 1fr; }
+}
+
+/* ── print: the whole script on paper ───────────────────────────────────── */
+.print-only { display: none; }
+@media print {
+  header.top, .timeline-box, .stage, .facts, .controls, .view { display: none !important; }
+  .print-only { display: block; }
+  body { background: #fff; color: #000; font-size: 12pt; }
+  .print-only h2 { font-size: 13pt; margin: 14pt 0 4pt; }
+  .print-only p { margin: 0 0 4pt; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="top-row">
+      <div class="brand">
+        <div class="mark" aria-hidden="true"></div>
+        <div>
+          <h1>Bob Reliability Engineer: demo walkthrough</h1>
+          <p>The 3:00 video, beat by beat. Matches <code>docs/submission/VIDEO_SCRIPT.md</code>. Switch <i>On screen</i> to <b>Real dashboard</b> to run the actual demo beside the script.</p>
+        </div>
+      </div>
+      <div class="seg" role="group" aria-label="Recording mode">
+        <button type="button" data-mode="sim" aria-pressed="true">Simulated</button>
+        <button type="button" data-mode="live" aria-pressed="false">Live Bob</button>
+      </div>
+      <button type="button" class="icon-btn" id="themeBtn" aria-label="Switch colour theme">Dark</button>
+    </div>
+    <nav class="views" role="tablist" aria-label="Views">
+      <button type="button" role="tab" data-view="walk" aria-selected="true">Walkthrough</button>
+      <button type="button" role="tab" data-view="pre" aria-selected="false">Before recording</button>
+      <button type="button" role="tab" data-view="track" aria-selected="false">Spoken track</button>
+      <button type="button" role="tab" data-view="fix" aria-selected="false">If it goes wrong</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ── walkthrough ── -->
+  <section class="view" id="view-walk">
+    <div class="timeline-box">
+      <div class="timeline" id="timeline" aria-label="Timeline">
+        <div class="cursor" id="cursor" aria-hidden="true"></div>
+      </div>
+      <div class="speakers" id="speakers" aria-hidden="true"></div>
+    </div>
+
+    <div class="stage">
+      <div class="card">
+        <div class="card-head"><h2>On screen</h2>
+          <div class="seg small" role="group" aria-label="What the left panel shows">
+            <button type="button" data-left="mock" aria-pressed="true">Script view</button>
+            <button type="button" data-left="real" aria-pressed="false">Real dashboard</button>
+          </div>
+          <span class="right" id="screenPos"></span></div>
+        <div class="card-body" id="leftBody">
+          <p class="do" id="doLine"></p>
+          <div class="subtabs" id="subtabs"></div>
+          <div id="mock"></div>
+          <div id="real" hidden>
+            <div class="real-bar">
+              <span class="tag" id="realStatus">not connected</span>
+              <input type="text" id="realUrl" aria-label="Dashboard address" spellcheck="false">
+              <button type="button" class="btn slim" id="realLoad">Load</button>
+              <a id="realOpen" href="#" target="_blank" rel="noopener">Open in a new tab ↗</a>
+            </div>
+            <div class="real-warn" id="realWarn"></div>
+            <iframe id="realFrame" title="The real BRE dashboard"></iframe>
+            <p class="real-hint" id="realHint"></p>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Say</h2><span class="right" id="beatTime"></span></div>
+        <div class="card-body">
+          <div class="say-meta" id="sayMeta"></div>
+          <p class="say" id="sayText"></p>
+          <div class="note" id="noteText"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button type="button" class="btn" id="prevBtn">◀ Previous</button>
+      <span class="pos" id="posText"></span>
+      <button type="button" class="btn primary" id="nextBtn">Next ▶</button>
+      <div class="timer">
+        <span class="clock" id="clock">0:00</span>
+        <button type="button" class="btn" id="timerBtn">Start timer</button>
+        <button type="button" class="btn" id="resetBtn">Reset</button>
+        <label class="inline"><input type="checkbox" id="follow"> follow the timer</label>
+        <span class="target" id="target"></span>
+      </div>
+      <p class="keys"><span class="kbd">←</span> <span class="kbd">→</span> previous / next screen · <span class="kbd">T</span> start / pause timer · <span class="kbd">1</span>–<span class="kbd">9</span>, <span class="kbd">0</span> jump to a beat</p>
+    </div>
+    <div class="facts">
+      <div class="card"><div class="card-head"><h2>Why this beat</h2></div><div class="card-body" id="whyText"></div></div>
+      <div class="card"><div class="card-head"><h2>Source</h2></div><div class="card-body" id="srcText"></div></div>
+      <div class="card"><div class="card-head"><h2>How it was checked</h2></div><div class="card-body" id="chkText"></div></div>
+    </div>
+  </section>
+
+  <!-- ── before recording ── -->
+  <section class="view" id="view-pre" hidden>
+    <div class="page">
+      <h2>Before you press record (5 minutes)</h2>
+      <p class="lead">Tick each one on the recording machine. Ticks are kept in this browser only.</p>
+      <div id="checklist"></div>
+      <h3>Order is load-bearing</h3>
+      <p>Incident 1 (<i>Connection pool exhaustion (config regression)</i>) → Incident 2 (the same) → Incident 3 (<i>LOOK-ALIKE</i>). Each <b>Run the loop</b> click takes under 4 s locally.</p>
+      <h3>Who speaks</h3>
+      <p class="lead">Type your names; they appear on the timeline and on each beat. The split is explained in <code>recommendation.md</code>.</p>
+      <div class="names" id="names"></div>
+    </div>
+  </section>
+
+  <!-- ── spoken track ── -->
+  <section class="view" id="view-track" hidden>
+    <div class="page track">
+      <h2>Spoken track only</h2>
+      <p class="lead" id="trackLead"></p>
+      <div id="trackBody"></div>
+    </div>
+  </section>
+
+  <!-- ── troubleshooting ── -->
+  <section class="view" id="view-fix" hidden>
+    <div class="page">
+      <h2>If something goes wrong while recording</h2>
+      <div class="table-scroll">
+        <table class="plain">
+          <thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead>
+          <tbody id="fixBody"></tbody>
+        </table>
+      </div>
+      <h3>Do-nots</h3>
+      <ul id="doNots"></ul>
+    </div>
+  </section>
+
+  <div class="print-only" id="printAll"></div>
+</main>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════════════
+   Content. Every string on the mock screens was copied from the running dashboard
+   (demo mode, BRE_TAU=0.30) on 2026-09-27. The Say / Why / Source / Checked text
+   is VIDEO_SCRIPT.md, word for word. If you change one, change the other.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+const INCIDENT_TITLE = "DatabaseConnector test failed: connection pool exhaustion in tests/test_dbpool.py";
+const CHIPS = ["DETECTED", "INVESTIGATING", "DIAGNOSED", "RISK ASSESSED", "AWAITING APPROVAL", "REMEDIATING", "VERIFYING", "RESOLVED"];
+const TABS = ["Story", "Evidence", "Diagnosis", "Risk & approval", "Patch", "Verification", "Ledger"];
+const AWAIT = 4, RESOLVED = 7;
+const MSG = {
+  stop4: "4 step(s): investigate → diagnose → assess_risk → request_approval. HIGH risk: waiting for an authenticated operator to approve",
+  approved: "Approved. Run the loop to continue.",
+  resolved: "3 step(s): approved → remediate → verify. incident is RESOLVED",
+  refuted7: "7 step(s): approved → remediate → verify → investigate → diagnose → assess_risk → request_approval. HIGH risk: waiting for an authenticated operator to approve",
+};
+const ROOT_CAUSE_CFG = "database.pool_size in config/app.yaml was lowered to 2 (a load-shedding change). ConnectionPool in dbpool.py sizes itself from that value, so the third concurrent acquire raises ExhaustionError; test_pool_sized_from_config asserts production needs at least 10 concurrent connections.";
+const ROOT_CAUSE_CODE = "ConnectionPool.__init__ in dbpool.py clamps the pool with min(size, 2), so the pool is capped at 2 slots no matter what config/app.yaml asks for (it asks for 20). The third concurrent acquire raises ExhaustionError; test_pool_sized_from_config needs at least 10 concurrent connections.";
+const BANNER = "<b>Simulated Bob.</b> The diagnosing and fixing agent here is a labelled replay stand-in, not IBM Bob. Everything else is real: the git checkpoint and branch, the pytest runs, the verification levels, the rollback and the outcome ledger.";
+
+/* pane builders ─ each returns the HTML of one dashboard tab */
+const P = {
+  risk: () => `
+    <h4>Risk <span class="st-bad">HIGH</span> · score 4 · approval required</h4>
+    <p class="muted">Every score stores its components (ASMOS Invariant 8): a level without its breakdown is unauditable.</p>
+    <table class="t"><thead><tr><th>FACTOR</th><th>INPUT</th><th>POINTS</th></tr></thead><tbody>
+      <tr><td>severity</td><td>high</td><td>2</td></tr>
+      <tr><td>database migration</td><td>false</td><td>0</td></tr>
+      <tr><td>api surface affected</td><td>false</td><td>0</td></tr>
+      <tr><td>blast radius</td><td>2</td><td>1</td></tr>
+      <tr><td>tests available</td><td>partial</td><td>1</td></tr>
+      <tr><td>low confidence</td><td>0.86</td><td>0</td></tr>
+    </tbody></table>
+    <p class="muted" style="margin-top:6px">Thresholds: {"CRITICAL":7,"HIGH":4,"MEDIUM":2}</p>`,
+  patch1: () => `
+    <h4>Attempt 1 <span class="st-ok">completed</span> <span class="muted">· executor: replay</span></h4>
+    <div class="kv">
+      <div>Branch</div><div><code>bre/‹id›/attempt-1</code></div>
+      <div>Checkpoint</div><div><code>‹sha›</code> on master</div>
+      <div>Changed (from git)</div><div><code>config/app.yaml</code></div>
+      <div>Was already failing</div><div><code>tests/test_dbpool.py::test_pool_sized_from_config</code></div>
+      <div>Summary</div><div>Restore database.pool_size to 20 in config/app.yaml.</div>
+    </div>
+    <pre class="diff">--- a/config/app.yaml
++++ b/config/app.yaml
+   port: 5432
+   # lowered during load-shedding; suspected cause of connection pool exhaustion
+<span class="del">-  pool_size: 2</span><span class="add">+  pool_size: 20</span>   max_overflow: 0</pre>`,
+  verifyPass: () => `
+    <h4>Verification <span class="st-ok">passed</span></h4>
+    <div class="level"><b>targeted</b><span class="muted">the tests that were red</span><span><span class="st-ok">passed</span> 1 ran · 1 passed · 0 failed<br><code>tests/test_dbpool.py::test_pool_sized_from_config</code></span></div>
+    <div class="level"><b>component</b><span class="muted">their whole files</span><span><span class="st-ok">passed</span> 2 ran · 2 passed · 0 failed<br><code>tests/test_dbpool.py</code></span></div>
+    <div class="level"><b>regression</b><span class="muted">the entire suite</span><span><span class="st-ok">passed</span> 2 ran · 2 passed · 0 failed</span></div>`,
+  ledger1: () => ledgerTable([
+    [1, "routing", "asmos-router", "confirmed", "0.00", "0"],
+    [1, "diagnosis", "bob-adapter", "confirmed", "0.86", "4200*"],
+    [1, "risk level", "risk-classifier", "confirmed", "0.86", "0"],
+    [1, "remediation plan", "replay-bob", "confirmed", "0.86", "6100*"],
+  ]),
+  diagMemory: (own) => `
+    <h4>Attempt 1 <span class="muted">· source: memory · confidence 0.86 · pending · 0 tokens</span></h4>
+    <p>${ROOT_CAUSE_CFG}</p>
+    <p class="focus" style="display:inline-block;padding:1px 4px">Routing: similarity 1.00 x ownership ${own} = ${own} &gt;= tau 0.30 (τ 0.300, env:BRE_TAU)</p>
+    <p class="muted">reused from verified incident ‹id› (similarity 1.00); this incident may differ in a way the keywords do not capture</p>`,
+  verifyFail: () => `
+    <h4>Verification <span class="st-bad">failed</span> <span class="muted">· targeted: 1 of 1 previously failing test(s) still fail</span></h4>
+    <div class="level"><b>targeted</b><span class="muted">the tests that were red</span><span><span class="st-bad">FAILED</span> 1 ran · 0 passed · 1 failed<br><code>tests/test_dbpool.py::test_pool_sized_from_config</code></span></div>
+    <div class="level"><b>component</b><span class="muted">their whole files</span><span class="muted">skipped — an earlier level failed</span></div>
+    <div class="level"><b>regression</b><span class="muted">the entire suite</span><span class="muted">skipped — an earlier level failed</span></div>`,
+  patchRolledBack: () => `
+    <h4>Attempt 1 <span class="st-bad">rolled_back</span> <span class="muted">· executor: replay</span></h4>
+    <div class="kv">
+      <div>Branch</div><div><code>bre/‹id›/attempt-1</code></div>
+      <div>Changed (from git)</div><div><code>config/app.yaml</code></div>
+      <div>Summary</div><div class="focus">Restore database.pool_size to 20 in config/app.yaml. (applied to a repository it does not fit)</div>
+    </div>
+    <pre class="diff"> database:
+   host: db.internal
+   port: 5432
+<span class="del">-  pool_size: 20</span><span class="add">+  pool_size: 40</span>   max_overflow: 0</pre>`,
+  diagAttempt2: () => `
+    <h4>Attempt 1 <span class="muted">· source: memory · confidence 0.86 ·</span> <span class="st-bad">refuted</span> <span class="muted">· 0 tokens</span></h4>
+    <p class="muted">Routing: similarity 1.00 x ownership 0.63 = 0.63 &gt;= tau 0.30 (τ 0.300, env:BRE_TAU)</p>
+    <h4 style="margin-top:8px">Attempt 2 <span class="muted">· source: bob-adapter · confidence 0.83 ·</span> <span class="st-ok">confirmed</span> <span class="muted">· 4600 tokens (nominal)</span></h4>
+    <p class="focus" style="padding:1px 4px">${ROOT_CAUSE_CODE}</p>
+    <p>Routing: every candidate memory was already tried on this incident and failed verification (τ 0.300, env:BRE_TAU)</p>`,
+  ledger3: () => ledgerTable([
+    [1, "routing", "asmos-router", "refuted", "0.63", "0"],
+    [1, "diagnosis", "memory", "refuted", "0.86", "0"],
+    [1, "risk level", "risk-classifier", "refuted", "0.86", "0"],
+    [1, "remediation plan", "replay-bob", "refuted", "0.86", "6100*"],
+    [2, "routing", "asmos-router", "confirmed", "0.00", "0"],
+    [2, "diagnosis", "bob-adapter", "confirmed", "0.83", "4600*"],
+    [2, "risk level", "risk-classifier", "confirmed", "0.83", "0"],
+    [2, "remediation plan", "replay-bob", "confirmed", "0.83", "5900*"],
+  ]),
+};
+
+function ledgerTable(rows) {
+  const cls = s => s === "confirmed" ? "st-ok" : s === "refuted" ? "st-bad" : "st-wait";
+  return `<p class="muted">Every prediction is written here when it is made, as pending. Only a verification run may close it — confirmed or refuted.</p>
+    <table class="t"><thead><tr><th>ATTEMPT</th><th>TYPE</th><th>SOURCE</th><th>STATUS</th><th>CONF.</th><th>TOKENS</th><th>CLOSED BY</th></tr></thead><tbody>
+    ${rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="${cls(r[3])}">${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>verification-engine</td></tr>`).join("")}
+    </tbody></table><p class="muted" style="margin-top:6px">* nominal (simulated agent). Only measured when Bob is live.</p>`;
+}
+
+/* the beats: VIDEO_SCRIPT.md, in order */
+const BEATS = [
+  {
+    t: [0, 12], title: "The problem", speaker: 0,
+    screens: [{ label: "Title card", do: "Show the <b>title card</b> (slide 1 of <code>BRE_pitch.html</code>, or <code>cover.png</code>).", view: "title" }],
+    say: "AI agents like IBM Bob can write a fix in minutes. The question every team then asks is: <b>was it right, was it safe, and did we learn anything?</b>",
+    why: "Presentation criterion; names the three questions the rest of the video answers, in order.",
+    src: "Problem statement, `README.md`; `docs/team-pack/01_WHAT_WE_BUILT.md` (\"The problem\").",
+    chk: "Opinion/framing, no factual claim.",
+  },
+  {
+    t: [12, 26], title: "Say what is real", speaker: 0,
+    screens: [{ label: "Dashboard", do: "Show the dashboard. <b>Point at the pill</b>, top right.", view: "pill" }],
+    say: "In this recording the diagnosing and fixing agent is a <b>labelled stand-in for Bob</b>, and the dashboard says so here. Everything else is real: the git branches, the test runs, the approval gate and the ledger.",
+    sayLive: "This run uses <b>live IBM Bob</b>. Everything you'll see is real: Bob, git, the test suite, the gate, the ledger.",
+    why: "Rule 1 of the team pack. Judges will see the pill; saying it first turns a weakness into credibility.",
+    src: "Pill text from `apps/api/settings.py:47` (`\"label\": \"SIMULATED BOB\"`); the orange banner on every incident tab says \"Everything else is real: the git checkpoint and branch, the pytest runs, the verification levels, the rollback and the outcome ledger.\"",
+    chk: "In the browser. Test: `test_system_endpoint_says_bob_is_simulated_and_what_is_writable` (`tests/integration/test_api_loop.py`).",
+    noteLive: "Say LIVE only if the pill says <b>LIVE IBM BOB</b>. Never mix a live start with a simulated finish.",
+  },
+  {
+    t: [26, 43], title: "It stops before touching anything", speaker: 0,
+    screens: [
+      { label: "Run the loop", do: "Pick <b>Connection pool exhaustion (config regression)</b> → <b>Create demo incident</b> → <b>▶ Run the loop</b>. It stops at <b>AWAITING APPROVAL</b>.",
+        view: "incident", chips: AWAIT, attempt: "1 / 3", bar: "await", msg: MSG.stop4, tab: "Story", focus: "chips" },
+      { label: "Risk & approval", do: "Open <b>Risk &amp; approval</b>. Point at the factor table and <b>HIGH</b>.",
+        view: "incident", chips: AWAIT, attempt: "1 / 3", bar: "await", msg: MSG.stop4, tab: "Risk & approval", pane: P.risk, focus: "pane" },
+    ],
+    say: "BRE gathers evidence, has the agent diagnose it read-only, and scores the risk. Every factor is visible: severity, blast radius, missing tests. It's HIGH, so it stops and waits for a human. <b>Nothing has touched the repository yet.</b>",
+    sayLive: "BRE gathers evidence, has Bob diagnose it read-only, and scores the risk. Every factor is visible: severity, blast radius, missing tests. It's HIGH, so it stops and waits for a human. <b>Nothing has touched the repository yet.</b>",
+    why: "Application of technology and safety. Shows the approval gate *before* any write, and that the score is auditable (non-negotiable §4.3: every score stores its components).",
+    src: "Factor table from `reliability/risk/classifier.py:51-70` (each factor stored with its input and points); gate `reliability/orchestration/gate.py`, re-checked inside the write engine at `reliability/remediation/engine.py:116`.",
+    chk: "In the browser. Test: `test_full_lifecycle_over_http_with_an_authenticated_human_approval` asserts exactly these 4 steps and `blocked_on == \"approval\"`.",
+  },
+  {
+    t: [43, 53], title: "A human approves", speaker: 1,
+    screens: [{ label: "Approve", do: "Type the key into <b>operator API key</b> (shown under the button: <code>demo-operator-key</code>) → <b>Approve</b>.",
+      view: "incident", chips: AWAIT, attempt: "1 / 3", bar: "approved", msg: MSG.approved, msgOk: true, tab: "Risk & approval", pane: P.risk, focus: "bar" }],
+    say: "A human approves, and the record stores who it was <b>from their API key</b>. Never a name typed into a form.",
+    why: "Business value (audit trail) and safety (approval can't be forged).",
+    src: "`apps/api/routes/approvals.py:50` (`operator = auth.authenticate(db, authorization)`); stored name comes from the operator record (`approvals.py:60`), not the body.",
+    chk: "In the browser. Test: the same lifecycle test sends forged `operator_name`/`approved_by` in the body and asserts they're ignored; wrong or missing key → 401.",
+  },
+  {
+    t: [53, 74], title: "Fix on a branch, verified 3 ways", speaker: 1,
+    screens: [
+      { label: "Patch", do: "<b>▶ Run the loop</b> → <b>RESOLVED</b>. Open <b>Patch</b>: branch, checkpoint, changed files, the diff.",
+        view: "incident", chips: RESOLVED, attempt: "1 / 3", bar: "finished", msg: MSG.resolved, msgOk: true, tab: "Patch", pane: P.patch1, focus: "pane" },
+      { label: "Verification", do: "Open <b>Verification</b>: targeted → component → regression, all passed.",
+        view: "incident", chips: RESOLVED, attempt: "1 / 3", bar: "finished", msg: MSG.resolved, msgOk: true, tab: "Verification", pane: P.verifyPass, focus: "pane" },
+    ],
+    say: "The fix lands on its own branch, after a pinned git checkpoint, never on the main branch. The changed files come from git, not from what the agent claims. Then it's verified three ways: <b>the test that was failing, its whole file, and the entire suite.</b> Only then is it called fixed.",
+    sayLive: "The fix lands on its own branch, after a pinned git checkpoint, never on the main branch. The changed files come from git, not from what Bob claims. Then it's verified three ways: <b>the test that was failing, its whole file, and the entire suite.</b> Only then is it called fixed.",
+    why: "The core product claim. Verification is a test-suite exit code, not a model grading itself.",
+    src: "Checkpoint ref `reliability/remediation/git_ops.py:139-141` (`refs/bre/checkpoints/…`); branch-only rule `git_ops.py:10`; changed files from `git diff --name-only` at `git_ops.py:105,172`; the three levels at `reliability/verification/verifier.py:137-176` (a later level is skipped if an earlier one fails).",
+    chk: "In the browser. Test: the lifecycle test asserts `changed_files == [\"config/app.yaml\"]`, a `bre/` branch, levels `[\"targeted\",\"component\",\"regression\"]`, and the diff `-  pool_size: 2` / `+  pool_size: 20`.",
+  },
+  {
+    t: [74, 86], title: "The ledger", speaker: 1,
+    screens: [{ label: "Ledger", do: "Open <b>Ledger</b>: four rows for attempt 1, all <b>confirmed</b>, closed by <b>verification-engine</b>.",
+      view: "incident", chips: RESOLVED, attempt: "1 / 3", bar: "finished", msg: MSG.resolved, msgOk: true, tab: "Ledger", pane: P.ledger1, focus: "pane" }],
+    say: "Every prediction — the diagnosis, the risk level, the fix — was <b>written down as pending before anyone knew if it was right</b>, and closed only by that test run.",
+    why: "Originality. The outcome ledger is what makes the learning honest (ADR-0003; non-negotiable §4.4).",
+    src: "Pending on creation `reliability/ledger/record.py:101`; closed only by verification `record.py:168` (`close_for_verification`). The tab's own caption says the same.",
+    chk: "In the browser. Test: the lifecycle test asserts every outcome is `confirmed` and carries a `verification_run_id`.",
+  },
+  {
+    t: [86, 104], title: "Same failure, from memory", speaker: 2,
+    screens: [{ label: "Diagnosis", do: "Same scenario → <b>Create demo incident</b> → <b>▶ Run the loop</b> → open <b>Diagnosis</b>. Point at <b>source: memory · 0 tokens</b> and the routing line.",
+      view: "incident", chips: AWAIT, attempt: "1 / 3", bar: "await", msg: MSG.stop4, tab: "Diagnosis", pane: () => P.diagMemory("0.42"), focus: "" }],
+    say: "Same failure again. This time the diagnosis comes <b>from memory, at zero agent cost</b>, because a passing test suite already vouched for it. It only reuses it because similarity times ownership clears a threshold, and ownership is earned from verified outcomes. That's the ASMOS routing idea.",
+    sayLive: "Same failure again. This time the diagnosis comes <b>from memory, at zero Bob cost</b>, because a passing test suite already vouched for it. It only reuses it because similarity times ownership clears a threshold, and ownership is earned from verified outcomes. That's the ASMOS routing idea.",
+    why: "Business value (cost of recurring failures) and originality (verification-gated reputation, not a cache).",
+    src: "Routing score and threshold `asmos_bridge/routing/router.py:12-13`; ownership = 0.6 × Trust + 0.4 × Share `asmos_bridge/ownership/trust.py:54`; Trust = (7 + correct)/(10 + total) `trust.py:26-30`. Formulas are pinned to the real ASMOS source by 95 parity tests (`tests/unit/test_asmos_parity.py`).",
+    chk: "In the browser. Test: `test_the_second_similar_incident_is_answered_from_memory_and_ownership_shows_it` asserts `(\"memory\", 0)` and `ROUTE` with `tau 0.30`.",
+    note: "Do not say \"zero cost\" without \"agent\", and do not say \"Bob\" here if the pill says SIMULATED. Optional: approve and run to RESOLVED, since the look-alike needs this incident resolved.",
+  },
+  {
+    t: [104, 137], title: "The look-alike", speaker: 2,
+    screens: [
+      { label: "1 · Memory answers", do: "Pick <b>Connection pool exhaustion (LOOK-ALIKE: the cause is in code)</b> → Create → Run → open <b>Diagnosis</b>: source memory, ownership <b>0.63</b>.",
+        view: "incident", chips: AWAIT, attempt: "1 / 3", bar: "await", msg: MSG.stop4, tab: "Diagnosis", pane: () => P.diagMemory("0.63"), focus: "" },
+      { label: "2 · Tests say no", do: "Approve → Run. Open <b>Verification</b>: <b>failed</b>, component and regression skipped. Back to AWAITING APPROVAL, attempt 2.",
+        view: "incident", chips: AWAIT, attempt: "2 / 3", bar: "await", msg: MSG.refuted7, tab: "Verification", pane: P.verifyFail, focus: "pane" },
+      { label: "3 · Rolled back", do: "Open <b>Patch</b>: attempt 1 <b>rolled_back</b>, labelled <i>applied to a repository it does not fit</i>.",
+        view: "incident", chips: AWAIT, attempt: "2 / 3", bar: "await", msg: MSG.refuted7, tab: "Patch", pane: P.patchRolledBack, focus: "" },
+      { label: "4 · Real cause", do: "Approve again → Run → <b>RESOLVED</b>. Open <b>Diagnosis</b>: attempt 2 from <b>bob-adapter</b> finds <code>min(size, 2)</code>.",
+        view: "incident", chips: RESOLVED, attempt: "2 / 3", bar: "finished", msg: MSG.resolved, msgOk: true, tab: "Diagnosis", pane: P.diagAttempt2, focus: "" },
+      { label: "5 · Ledger", do: "Open <b>Ledger</b>: attempt 1 <b>refuted</b>, attempt 2 <b>confirmed</b>.",
+        view: "incident", chips: RESOLVED, attempt: "2 / 3", bar: "finished", msg: MSG.resolved, msgOk: true, tab: "Ledger", pane: P.ledger3, focus: "pane" },
+    ],
+    say: "Now a trap: <b>same symptom, different cause.</b> Memory answers, the patch goes in, and <b>the tests say no.</b> BRE rolls it back, records that diagnosis as refuted, and asks for a new approval. On attempt two it won't reuse that memory for this incident, runs a full investigation, and finds the real cause, a hard cap in the code. <b>The agent was wrong, and the system found out because the tests said so.</b>",
+    sayLive: "Now a trap: <b>same symptom, different cause.</b> Memory answers, the patch goes in, and <b>the tests say no.</b> BRE rolls it back, records that diagnosis as refuted, and asks for a new approval. On attempt two it won't reuse that memory for this incident, runs a full investigation, and finds the real cause, a hard cap in the code. <b>The reused diagnosis was wrong, and the system found out because the tests said so.</b>",
+    why: "Strongest moment. It shows the safety loop catching a plausible wrong answer, which is what separates this from a cache or plain RAG.",
+    src: "Exclusion `reliability/orchestration/routed.py:15` and `asmos_bridge/routing/router.py:105`; rollback `reliability/remediation/git_ops.py:191` (the rejected patch kept under `refs/bre/failed/*`); new approval required per attempt `reliability/orchestration/gate.py`; attempt cap `reliability/orchestration/loop.py:12-13` (default 3).",
+    chk: "In the browser. Test: `test_a_lookalike_is_refuted_over_http_and_the_incident_recovers` asserts refuted memory, `rolled_back`, `attempt == 2`, the misapplied label and diff, and predictors `[\"memory\", \"bob-adapter\"]`.",
+    note: "Do not cut this beat. Say \"rolled back\", not \"reverted\": the patch is kept as evidence.",
+  },
+  {
+    t: [137, 174], title: "What it learned + honest numbers", speaker: 3,
+    screens: [
+      { label: "What BRE has learned", do: "Open <b>What BRE has learned</b>: memory's ownership fell to <b>0.542</b>; bob's is <b>0.703</b>.", view: "learned" },
+      { label: "Evaluation", do: "Open <b>Evaluation</b>: slice <b>recurring</b> (10 incidents) and slice <b>full</b> (14 incidents, 4 look-alikes).", view: "evaluation" },
+    ],
+    say: "Ownership is computed only from verified outcomes. The look-alike cost memory standing. We measured it against the agent alone on the same incidents with real git and real tests. On recurring failures, <b>6 of 10</b> diagnoses came from memory, none refuted, about 25% cheaper. With look-alike twins mixed in, the tests refuted <b>4 of 13</b> reuses, each was rolled back and retried, and it was still about 10% cheaper, with the same resolution rate. <b>Those costs are nominal while Bob is simulated.</b> And at this scale, ownership evolving over time made no difference, which we report as found.",
+    sayLive: "Ownership is computed only from verified outcomes. The look-alike cost memory standing. We measured it against the agent alone on the same incidents with real git and real tests. On recurring failures, <b>6 of 10</b> diagnoses came from memory, none refuted, about 25% cheaper. With look-alike twins mixed in, the tests refuted <b>4 of 13</b> reuses, each was rolled back and retried, and it was still about 10% cheaper, with the same resolution rate. <b>Those comparison costs are nominal: that evaluation ran with the stand-in, not live Bob.</b> And at this scale, ownership evolving over time made no difference, which we report as found.",
+    why: "Business value with evidence, and the limits said out loud before a judge raises them.",
+    src: "`docs/artifacts/comparison_recurring_*.json` (6.0 from memory, 0 refuted, −24.8% nominal); `docs/artifacts/comparison_full_20260926T210746Z.json` (13.0 from memory, 4.0 refuted, 4.0 wasted attempts, −10.1% nominal, resolution identical); ablation flat (same file, `bre_frozen` arm). Summary in `docs/RESULTS.md`.",
+    chk: "Numbers copied from the Evaluation tab and matched to the artifact files. Ownership values from the learned tab: 0.6·(7.5/11) + 0.4·(1/3) = 0.542.",
+    note: "Must say \"nominal\". Do not say \"saves 25%\" on its own.",
+  },
+  {
+    t: [174, 180], title: "Close", speaker: 3,
+    screens: [{ label: "Close", do: "Show the <b>repository URL</b> and the tagline.", view: "close" }],
+    say: "Bob Reliability Engineer: <b>don't just generate a fix. Verify it, and learn who was right.</b>",
+    why: "Memorable close; the URL is what judges click.",
+    src: "<https://github.com/mohith1306/ReliabilityEngineer>",
+    chk: "The repository is public.",
+  },
+];
+
+const PREFLIGHT = [
+  ["Start the dashboard: <code>powershell -ExecutionPolicy Bypass -File scripts\\run_demo.ps1</code> (macOS/Linux: <code>scripts/run_demo.sh</code>). Open <code>http://127.0.0.1:8000</code>", "<code>-ExecutionPolicy Bypass</code> avoids Windows' \"running scripts is disabled\" error on a fresh machine"],
+  ["Press <b>Ctrl+F5</b> once", "Makes sure the browser runs the current dashboard, not a cached copy"],
+  ["Press <b>Reset</b>", "The demo database (<code>bre.db</code>) survives restarts. Without a reset, old incidents and old memory change what the look-alike does"],
+  ["Decide: <b>LIVE</b> or <b>SIMULATED</b>. Check the pill in the top-right corner says the same", "The one mistake that cannot be recovered in Q&amp;A is saying \"Bob did this\" over a SIMULATED run"],
+  ["1080p, browser zoom ~110%, dark theme (◐ button). Close other tabs. Mute notifications", "Readability on a judge's laptop"],
+  ["Do one full dry run, then <b>Reset</b> again", "Steps must run in this order: the look-alike only shows a refutation if the first incident was resolved first"],
+];
+const FIXES = [
+  ["Approve shows an error like <code>[object Object]</code> or a 422", "The browser is running a cached copy of the old dashboard", "Ctrl+F5 (fixed in PR #14: the page is now served <code>no-cache</code>)"],
+  ["The look-alike is answered by a full investigation and resolves first time", "Incident 1 wasn't resolved first, or the database was reset in between", "Reset, then run 1 → 2 → 3 in order"],
+  ["Old incidents or odd ownership numbers", "<code>bre.db</code> kept state from an earlier session", "Reset"],
+  ["\"this incident is already being advanced\"", "Run clicked twice", "Wait for <i>Working…</i> to finish; it is harmless (HTTP 409)"],
+  ["<code>running scripts is disabled on this system</code>", "Windows execution policy", "<code>powershell -ExecutionPolicy Bypass -File scripts\\run_demo.ps1</code>"],
+  ["Port 8000 in use", "Another server running", "<code>.\\scripts\\run_demo.ps1 -Port 8010</code>"],
+];
+const DONOTS = [
+  "Do not describe a SIMULATED run as Bob's work.",
+  "Do not show the operator key of a real deployment. (The demo key is public by design and says so.)",
+  "Do not quote a token saving without \"nominal\" unless the run was live and measured.",
+  "Do not skip the look-alike: it is the strongest evidence that the safety story is real.",
+  "Do not say \"it never makes mistakes\". The video's best moment is the system catching its own mistake.",
+];
+
+/* ════════════════════════════════════════════════════════════════════════════
+   Rendering
+   ════════════════════════════════════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const TOTAL = 180;
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("bre-walk:" + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("bre-walk:" + k, JSON.stringify(v)); } catch { /* private window: fine */ } },
+};
+const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+/* the script's inline markdown: `code`, *emphasis*, <url> */
+const md = s => esc(s)
+  .replace(/&lt;(https?:\/\/[^&]+)&gt;/g, '<code>$1</code>')
+  .replace(/`([^`]+)`/g, "<code>$1</code>")
+  .replace(/\*([^*]+)\*/g, "<i>$1</i>");
+
+let mode = store.get("mode", "sim");
+let names = store.get("names", ["Speaker 1", "Speaker 2", "Speaker 3", "Speaker 4"]);
+let beat = 0, screen = 0;
+
+function speakerName(i) { return (names[i] || "").trim() || `Speaker ${i + 1}`; }
+
+function pill() {
+  return mode === "live" ? '<span class="pill live">LIVE IBM BOB</span>' : '<span class="pill sim">SIMULATED BOB</span>';
+}
+function topBar(on) {
+  const nav = ["Incidents", "What BRE has learned", "Evaluation"].map(n => `<span class="${n === on ? "on" : ""}">${n}</span>`).join("");
+  return `<div class="s-top"><span class="s-logo"></span><span class="s-title">Bob Reliability Engineer</span><span class="s-nav">${nav}</span>__PILL__</div>`;
+}
+
+function renderMock(s) {
+  const focus = f => s.focus === f ? " focus" : "";
+  if (s.view === "title" || s.view === "close") {
+    const extra = s.view === "title"
+      ? `<div class="qs"><div>1 · Was it right?</div><div>2 · Was it safe?</div><div>3 · Did we learn anything?</div></div>`
+      : `<div class="url">github.com/mohith1306/ReliabilityEngineer</div>`;
+    return `<div class="screen"><div class="title-card"><span class="mini">IBM Bob 2.0 Hackathon</span>
+      <div class="big">Bob Reliability Engineer</div>
+      <div class="tag-line">Don't just generate a fix. Verify it — and learn who was right.</div>${extra}</div></div>`;
+  }
+  if (s.view === "pill") {
+    return `<div class="screen">${topBar("Incidents").replace("__PILL__", pill().replace('class="pill', 'class="focus pill'))}
+      <div class="s-body">
+        ${mode === "sim" ? `<div class="banner">${BANNER}</div>` : `<p class="muted">Live mode: no stand-in banner. The pill is green.</p>`}
+        <p class="muted">INCIDENTS</p>
+        <div class="bar"><span class="fake-input" style="min-width:300px">Connection pool exhaustion (config regression) ▾</span><span class="fake-btn blue">Create demo incident</span><span class="fake-btn">Reset</span></div>
+        <p class="muted">The first time BRE sees this failure it does a full investigation. Once the fix is verified it becomes memory, and the next similar incident is answered from it at zero Bob cost.</p>
+      </div></div>`;
+  }
+  if (s.view === "learned") {
+    return `<div class="screen">${topBar("What BRE has learned").replace("__PILL__", pill())}
+      <div class="s-body pane">
+        <h4>What BRE has learned</h4>
+        <p class="muted">Ownership(source, topic) = 0.6 x Trust + 0.4 x ContributionShare, computed only from ledger closures backed by a real verification run. Trust = (7 + verified_correct) / (10 + verified_total). Class-B claims move reputation by half.</p>
+        <h4>Ownership by source and topic</h4>
+        <table class="t focus"><thead><tr><th>SOURCE</th><th>TOPIC</th><th>VERIFIED ✓ / TOTAL</th><th>TRUST</th><th>SHARE</th><th>OWNERSHIP</th></tr></thead><tbody>
+          <tr><td>bob</td><td>database</td><td>1 / 1</td><td>0.727</td><td>0.67</td><td><b>0.703</b></td></tr>
+          <tr><td>memory</td><td>database</td><td>0.5 / 1</td><td>0.682</td><td>0.33</td><td><b>0.542</b></td></tr>
+        </tbody></table>
+        <h4 style="margin-top:10px">Ledger accuracy (confirmed ÷ graded)</h4>
+        <table class="t"><thead><tr><th>PREDICTOR</th><th>CONFIRMED</th><th>REFUTED</th><th>ABANDONED</th><th>ACCURACY</th></tr></thead><tbody>
+          <tr><td>bob-adapter</td><td>2</td><td>0</td><td>0</td><td>100%</td></tr>
+          <tr><td>memory</td><td>1</td><td>1</td><td>0</td><td>50%</td></tr>
+        </tbody></table>
+        <p class="muted" style="margin-top:6px">Rows shown are the two that matter here; the page also lists asmos-router, replay-bob and risk-classifier.</p>
+      </div></div>`;
+  }
+  if (s.view === "evaluation") {
+    return `<div class="screen">${topBar("Evaluation").replace("__PILL__", pill())}
+      <div class="s-body pane">
+        <h4>BRE vs Bob alone</h4>
+        <p class="muted">Same incidents, same order, real git + pytest verification. Findings are generated from the numbers, including the unflattering ones.</p>
+        <div class="slice focus"><h4>Slice: recurring <span class="muted">10 incidents · 0 look-alikes · 3 orderings · τ 0.234</span></h4>
+          <p>BRE served <span class="big-num">6.0</span> diagnoses from verified memory per run and had <b>0.0</b> refuted. Nominal token cost per incident: BRE <b>24.8% lower</b> (9900 → 7440). Resolution identical.</p></div>
+        <div class="slice focus"><h4>Slice: full <span class="muted">14 incidents · 4 look-alikes · 3 orderings · τ 0.058</span></h4>
+          <table class="t"><thead><tr><th>ARM</th><th>RESOLUTION</th><th>TOKENS / INCIDENT (NOMINAL)</th><th>FROM MEMORY</th><th>REFUTED REUSES</th><th>WASTED ATTEMPTS</th></tr></thead><tbody>
+            <tr><td>baseline</td><td>100%</td><td>10071</td><td>0.0</td><td>0.0</td><td>0.0</td></tr>
+            <tr><td>bre</td><td>100%</td><td>9052</td><td>13.0</td><td>4.0</td><td>4.0</td></tr>
+            <tr><td>bre_frozen</td><td>100%</td><td>9052</td><td>13.0</td><td>4.0</td><td>4.0</td></tr>
+          </tbody></table>
+          <p class="muted" style="margin-top:4px">Ablation (ownership frozen at its prior): no difference. Reported as found.</p></div>
+        <p class="muted">Token figures are NOMINAL when Bob is replayed. Reuse, refutation, attempt and resolution counts are measured.</p>
+      </div></div>`;
+  }
+  /* incident view */
+  const chips = CHIPS.map((c, i) => `<span class="chip ${i < s.chips ? "done" : i === s.chips ? "now" : ""}">${c}</span>`).join("");
+  let bar;
+  if (s.bar === "await") {
+    bar = `<span class="fake-btn blue off">▶ Run the loop</span><span class="approve-box"><span class="lbl">HIGH risk: a human must approve</span><span class="fake-input">operator API key</span><span class="fake-btn green">Approve</span><span class="fake-btn red">Reject</span></span><span class="muted" style="font-size:11px">demo key: <code>demo-operator-key</code></span>`;
+  } else if (s.bar === "approved") {
+    bar = `<span class="fake-btn blue">▶ Run the loop</span><span class="msg ok" style="margin:0">approved — run the loop to continue</span>`;
+  } else {
+    bar = `<span class="fake-btn off">Finished</span>`;
+  }
+  const tabs = TABS.map(t => `<span class="${t === s.tab ? "on" : ""}">${esc(t)}</span>`).join("");
+  const pane = s.pane ? s.pane() : `<p class="muted">DETECTED → INVESTIGATING · investigator</p><p class="muted">Diagnosis · routing · risk assessed · waiting for approval…</p>`;
+  return `<div class="screen">${topBar("Incidents").replace("__PILL__", pill())}
+    <div class="s-body">
+      <div class="inc-title">${INCIDENT_TITLE}</div>
+      <div class="inc-meta"><span class="mini">attempt ${s.attempt}</span><span class="mini">high</span></div>
+      <div class="chips${focus("chips")}">${chips}</div>
+      <div class="bar${focus("bar")}">${bar}</div>
+      <div class="msg${s.msgOk ? " ok" : ""}">${esc(s.msg)}</div>
+      <div class="s-tabs">${tabs}</div>
+      <div class="pane${focus("pane")}">${pane}</div>
+    </div></div>`;
+}
+
+function buildTimeline() {
+  const tl = $("timeline");
+  tl.querySelectorAll(".tl-seg").forEach(n => n.remove());
+  BEATS.forEach((b, i) => {
+    const d = b.t[1] - b.t[0];
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = "tl-seg";
+    el.style.flex = `${d} 0 0`;
+    el.innerHTML = `<span class="t">${fmt(b.t[0])}</span><span class="n">${esc(b.title)}</span>`;
+    el.title = `${fmt(b.t[0])}–${fmt(b.t[1])} · ${b.title}`;
+    el.addEventListener("click", () => go(i, 0));
+    tl.appendChild(el);
+  });
+  const sp = $("speakers");
+  sp.innerHTML = "";
+  [0, 1, 2, 3].forEach(k => {
+    const beats = BEATS.filter(b => b.speaker === k);
+    const d = beats.reduce((a, b) => a + b.t[1] - b.t[0], 0);
+    const div = document.createElement("div");
+    div.style.flex = `${d} 0 0`;
+    div.textContent = `${speakerName(k)} · ${fmt(beats[0].t[0])}–${fmt(beats[beats.length - 1].t[1])}`;
+    sp.appendChild(div);
+  });
+}
+
+function sayFor(b) { return mode === "live" && b.sayLive ? b.sayLive : b.say; }
+
+function render() {
+  const b = BEATS[beat], s = b.screens[screen];
+  document.querySelectorAll(".tl-seg").forEach((el, i) => el.setAttribute("aria-current", i === beat ? "true" : "false"));
+  $("doLine").innerHTML = s.do;
+  $("mock").innerHTML = renderMock(s);
+  const sub = $("subtabs");
+  /* always one row of screen labels, even for a single screen, so the mock never shifts between beats */
+  sub.innerHTML = b.screens.map((x, i) => `<button type="button" data-s="${i}" aria-pressed="${i === screen}">${esc(x.label)}</button>`).join("");
+  sub.querySelectorAll("button").forEach(el => el.addEventListener("click", () => go(beat, +el.dataset.s)));
+  $("screenPos").textContent = b.screens.length > 1 ? `screen ${screen + 1} of ${b.screens.length}` : "";
+  $("beatTime").textContent = `${fmt(b.t[0])}–${fmt(b.t[1])} · ${b.t[1] - b.t[0]} s`;
+  $("sayMeta").innerHTML = `<span class="tag">${esc(speakerName(b.speaker))}</span><span class="tag">${esc(b.title)}</span>` +
+    `<span class="tag ${mode === "live" ? "mode-live" : "mode-sim"}">${mode === "live" ? "Live wording" : "Simulated wording"}</span>`;
+  $("sayText").innerHTML = sayFor(b);
+  $("noteText").innerHTML = [b.note, mode === "live" ? b.noteLive : null,
+    mode === "live" && s.view === "incident" ? "Live: Bob's wording, sources and token counts will differ from this mock. Read the screen." : null]
+    .filter(Boolean).map(x => `<div>${x}</div>`).join("");
+  $("whyText").innerHTML = md(b.why);
+  $("srcText").innerHTML = md(b.src);
+  $("chkText").innerHTML = md(b.chk);
+  $("posText").textContent = `Beat ${beat + 1} of ${BEATS.length}`;
+  $("prevBtn").disabled = beat === 0 && screen === 0;
+  $("nextBtn").disabled = beat === BEATS.length - 1 && screen === b.screens.length - 1;
+}
+
+function go(i, j) { beat = i; screen = j; render(); }
+function next() {
+  const b = BEATS[beat];
+  if (screen < b.screens.length - 1) go(beat, screen + 1);
+  else if (beat < BEATS.length - 1) go(beat + 1, 0);
+}
+function prev() {
+  if (screen > 0) go(beat, screen - 1);
+  else if (beat > 0) go(beat - 1, BEATS[beat - 1].screens.length - 1);
+}
+
+/* ── rehearsal timer: steady, once-per-second updates ── */
+let running = false, startedAt = 0, carried = 0, tick = null;
+function elapsed() { return carried + (running ? (Date.now() - startedAt) / 1000 : 0); }
+function beatAt(sec) { const i = BEATS.findIndex(b => sec < b.t[1]); return i === -1 ? BEATS.length - 1 : i; }
+function paintTimer() {
+  const e = elapsed();
+  $("clock").textContent = fmt(e);
+  const cur = $("cursor");
+  if (e > 0) { cur.style.display = "block"; cur.style.left = `${Math.min(e / TOTAL, 1) * 100}%`; } else { cur.style.display = "none"; }
+  const i = beatAt(e), b = BEATS[i];
+  $("target").textContent = e >= TOTAL ? `Over time by ${fmt(e - TOTAL)}` : (e > 0 ? `Now: ${fmt(b.t[0])} ${b.title}` : "");
+  if ($("follow").checked && running && i !== beat) go(i, 0);
+}
+function toggleTimer() {
+  if (running) { carried = elapsed(); running = false; clearInterval(tick); $("timerBtn").textContent = "Resume timer"; }
+  else { startedAt = Date.now(); running = true; tick = setInterval(paintTimer, 1000); $("timerBtn").textContent = "Pause timer"; }
+  paintTimer();
+}
+function resetTimer() { running = false; clearInterval(tick); carried = 0; $("timerBtn").textContent = "Start timer"; paintTimer(); }
+
+/* ── theme ── */
+function effectiveTheme() {
+  const set = document.documentElement.dataset.theme;
+  if (set) return set;
+  return window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+function paintThemeBtn() { $("themeBtn").textContent = effectiveTheme() === "dark" ? "☀ Light" : "☾ Dark"; }
+function toggleTheme() {
+  const nextTheme = effectiveTheme() === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = nextTheme;
+  store.set("theme", nextTheme);
+  paintThemeBtn();
+}
+
+/* ── mode ── */
+function setMode(m) {
+  mode = m; store.set("mode", m);
+  document.querySelectorAll("[data-mode]").forEach(el => el.setAttribute("aria-pressed", el.dataset.mode === m ? "true" : "false"));
+  render(); renderTrack(); renderPrint();
+  if (left === "real") checkReal();
+}
+
+/* ── other views ── */
+function setView(v) {
+  document.querySelectorAll("[data-view]").forEach(el => el.setAttribute("aria-selected", el.dataset.view === v ? "true" : "false"));
+  document.querySelectorAll(".view").forEach(el => { el.hidden = el.id !== "view-" + v; });
+  if (v === "walk") fitMock();
+}
+function renderPre() {
+  const ticks = store.get("ticks", []);
+  $("checklist").innerHTML = PREFLIGHT.map((p, i) => `<label class="check"><input type="checkbox" data-i="${i}" ${ticks[i] ? "checked" : ""}><span>${p[0]}<br><span class="why">${p[1]}</span></span></label>`).join("");
+  $("checklist").querySelectorAll("input").forEach(el => el.addEventListener("change", () => {
+    const t = store.get("ticks", []); t[+el.dataset.i] = el.checked; store.set("ticks", t);
+  }));
+  $("names").innerHTML = [0, 1, 2, 3].map(k => {
+    const beats = BEATS.filter(b => b.speaker === k);
+    return `<label>${fmt(beats[0].t[0])}–${fmt(beats[beats.length - 1].t[1])} · ${beats.map(b => esc(b.title)).join(", ")}<input type="text" data-k="${k}" value="${esc(names[k] || "")}" placeholder="Speaker ${k + 1}"></label>`;
+  }).join("");
+  $("names").querySelectorAll("input").forEach(el => el.addEventListener("input", () => {
+    names[+el.dataset.k] = el.value; store.set("names", names); buildTimeline(); render(); renderTrack();
+  }));
+}
+function renderTrack() {
+  $("trackLead").textContent = mode === "live"
+    ? "Live wording. 438 words, about 2:45 at ~160 words per minute. Read it aloud once with the timer before recording."
+    : "Simulated wording. 438 words, about 2:45 at ~160 words per minute. Use it for a separate voice recording.";
+  $("trackBody").innerHTML = BEATS.map(b => `<p><span class="who">${fmt(b.t[0])} · ${esc(speakerName(b.speaker))} · ${esc(b.title)}</span>${sayFor(b)}</p>`).join("");
+}
+function renderFix() {
+  $("fixBody").innerHTML = FIXES.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("");
+  $("doNots").innerHTML = DONOTS.map(d => `<li>${esc(d)}</li>`).join("");
+}
+function renderPrint() {
+  $("printAll").innerHTML = `<h1>BRE demo video script (${mode === "live" ? "live" : "simulated"} wording)</h1>` +
+    BEATS.map(b => `<h2>${fmt(b.t[0])}–${fmt(b.t[1])} · ${esc(b.title)} · ${esc(speakerName(b.speaker))}</h2>
+      <p><b>On screen:</b> ${b.screens.map(s => s.do).join(" → ")}</p>
+      <p><b>Say:</b> ${sayFor(b)}</p>
+      <p><b>Why:</b> ${md(b.why)}</p><p><b>Source:</b> ${md(b.src)}</p>`).join("");
+}
+
+/* ── wire up ── */
+const savedTheme = store.get("theme", null);
+if (savedTheme === "light" || savedTheme === "dark") document.documentElement.dataset.theme = savedTheme;
+if (window.matchMedia) matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", paintThemeBtn);
+$("themeBtn").addEventListener("click", toggleTheme);
+document.querySelectorAll("[data-mode]").forEach(el => el.addEventListener("click", () => setMode(el.dataset.mode)));
+document.querySelectorAll("[data-view]").forEach(el => el.addEventListener("click", () => setView(el.dataset.view)));
+$("prevBtn").addEventListener("click", prev);
+$("nextBtn").addEventListener("click", next);
+$("timerBtn").addEventListener("click", toggleTimer);
+$("resetBtn").addEventListener("click", resetTimer);
+document.addEventListener("keydown", e => {
+  if ((e.target instanceof Element && e.target.matches("input, textarea")) || e.ctrlKey || e.metaKey || e.altKey) return;
+  if ($("view-walk").hidden) return; /* keys only drive the walkthrough view */
+  if (e.key === "ArrowRight") { next(); e.preventDefault(); }
+  else if (e.key === "ArrowLeft") { prev(); e.preventDefault(); }
+  else if (e.key === "t" || e.key === "T") toggleTimer();
+  else if (/^[0-9]$/.test(e.key)) { const i = e.key === "0" ? 9 : +e.key - 1; if (i < BEATS.length) go(i, 0); }
+});
+
+function fitMock() {
+  const w = $("mock").clientWidth;
+  if (w) document.documentElement.style.setProperty("--mz", Math.min(1, w / 720).toFixed(3));
+}
+window.addEventListener("resize", fitMock);
+if (window.ResizeObserver) new ResizeObserver(fitMock).observe($("mock"));
+
+/* ── the real dashboard ──
+   Served by BRE at /walkthrough, the page embeds the dashboard from its own server and reads /api/system to check the
+   Simulated/Live wording against what the server is really running. Opened as a file, it embeds http://127.0.0.1:8000/
+   (scripts/run_demo.*) but cannot read the server's mode, and says so. */
+const SERVED_BY_BRE = location.protocol.startsWith("http") && /\/walkthrough\/?$/.test(location.pathname);
+const defaultRealUrl = () => SERVED_BY_BRE ? new URL("/", location.href).href : "http://127.0.0.1:8000/";
+let left = store.get("left", "mock");
+let realUrl = store.get("realUrl", null) || defaultRealUrl();
+const START_HINT = "Blank or an error inside the frame? Start the dashboard first: powershell -ExecutionPolicy Bypass -File scripts\\run_demo.ps1 (macOS/Linux: scripts/run_demo.sh).";
+
+function setLeft(v) {
+  left = v === "real" ? "real" : "mock";
+  store.set("left", left);
+  document.querySelectorAll("[data-left]").forEach(el => el.setAttribute("aria-pressed", el.dataset.left === left ? "true" : "false"));
+  $("mock").hidden = left !== "mock";
+  $("real").hidden = left !== "real";
+  document.querySelector(".stage").classList.toggle("real", left === "real");
+  if (left === "real") { if (!$("realFrame").getAttribute("src")) loadReal(); else checkReal(); }
+  else fitMock();
+}
+function loadReal() {
+  const typed = $("realUrl").value.trim();
+  try { realUrl = new URL(typed || defaultRealUrl(), location.href).href; } catch { realUrl = defaultRealUrl(); }
+  $("realUrl").value = realUrl;
+  store.set("realUrl", realUrl);
+  $("realFrame").src = realUrl;
+  $("realOpen").href = realUrl;
+  checkReal();
+}
+async function checkReal() {
+  const st = $("realStatus"), warn = $("realWarn"), hint = $("realHint");
+  st.className = "tag"; warn.textContent = ""; hint.textContent = "";
+  let sameOrigin = false;
+  try { sameOrigin = new URL(realUrl).origin === location.origin; } catch { /* a bad address */ }
+  if (!sameOrigin) {
+    st.textContent = "mode not checked";
+    hint.textContent = "Opened from a file, this page cannot read the server's mode. For the automatic LIVE/SIMULATED check, open "
+      + new URL("walkthrough", realUrl).href + " instead. " + START_HINT;
+    return;
+  }
+  try {
+    const r = await fetch(new URL("/api/system", realUrl), { cache: "no-store" });
+    if (!r.ok) throw new Error(String(r.status));
+    const sys = await r.json();
+    const bob = sys.bob || {};
+    st.textContent = `Connected · ${bob.label || "?"} · τ ${sys.tau ? sys.tau.value : "?"}${sys.demo ? " · demo mode" : ""}`;
+    st.classList.add(bob.mode === "unavailable" ? "bad" : "ok");
+    if (!sys.demo) hint.textContent = "Demo mode is off on this server, so there is no Create demo incident button. Start it with scripts/run_demo.*.";
+    if (bob.mode === "unavailable") warn.textContent = "The server has NO BOB: nothing can diagnose. Start it with scripts/run_demo.* (simulated), or finish Task A for live Bob.";
+    else if (bob.simulated && mode === "live") warn.textContent = "The server is running SIMULATED BOB, but this page is set to Live wording. Switch to Simulated before you record.";
+    else if (!bob.simulated && mode === "sim") warn.textContent = `The server is running ${bob.label}, but this page is set to Simulated wording. Switch to Live Bob before you record.`;
+  } catch {
+    st.textContent = "dashboard not reachable"; st.classList.add("bad");
+    hint.textContent = START_HINT;
+  }
+}
+$("realUrl").value = realUrl;
+$("realOpen").href = realUrl;
+$("realLoad").addEventListener("click", loadReal);
+$("realUrl").addEventListener("keydown", e => { if (e.key === "Enter") loadReal(); });
+document.querySelectorAll("[data-left]").forEach(el => el.addEventListener("click", () => setLeft(el.dataset.left)));
+
+buildTimeline();
+paintThemeBtn();
+setMode(mode === "live" ? "live" : "sim");
+renderPre();
+renderFix();
+paintTimer();
+setLeft(left);
+fitMock();
+</script>
+</body>
+</html>

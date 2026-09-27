@@ -9,4 +9,5 @@ export BRE_DEMO=1 BRE_DEMO_DIR="${TMPDIR:-/tmp}/bre-demo" BRE_OPERATOR_KEY=demo-
 if [[ "${1:-}" == "--live" ]]; then unset BRE_BOB_TRANSPORT; MODE=LIVE; else export BRE_BOB_TRANSPORT=replay; MODE=SIMULATED; fi
 PY=venv/bin/python; [[ -x venv/Scripts/python.exe ]] && PY=venv/Scripts/python.exe; command -v "$PY" >/dev/null || PY=python3
 echo "BRE dashboard: http://127.0.0.1:${PORT:-8000}   (Bob: $MODE)"
+echo "Video walkthrough (script beside the real dashboard): http://127.0.0.1:${PORT:-8000}/walkthrough"
 exec "$PY" -m uvicorn apps.api.main:app --host 127.0.0.1 --port "${PORT:-8000}"

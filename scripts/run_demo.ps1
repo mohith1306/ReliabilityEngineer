@@ -11,4 +11,5 @@ $env:BRE_TAU = "0.30"
 if ($Live) { Remove-Item Env:BRE_BOB_TRANSPORT -ErrorAction SilentlyContinue } else { $env:BRE_BOB_TRANSPORT = "replay" }
 $py = if (Test-Path "venv\Scripts\python.exe") { "venv\Scripts\python.exe" } else { "python" }
 Write-Host "BRE dashboard: http://127.0.0.1:$Port   (Bob: $(if ($Live) {'LIVE'} else {'SIMULATED'}))" -ForegroundColor Cyan
+Write-Host "Video walkthrough (script beside the real dashboard): http://127.0.0.1:$Port/walkthrough" -ForegroundColor Cyan
 & $py -m uvicorn apps.api.main:app --host 127.0.0.1 --port $Port
