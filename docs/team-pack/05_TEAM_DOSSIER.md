@@ -107,7 +107,7 @@ a claim a judge can disprove does not.
 
 | Need | File |
 |---|---|
-| Record the video | [VIDEO_SCRIPT.md](VIDEO_SCRIPT.md), with a reason and a source on every line |
+| Record the video | [VIDEO_SCRIPT.md](../submission/VIDEO_SCRIPT.md), with a reason and a source on every line |
 | Answer a judge | [03_PRESENTING_AND_JUDGE_QA.md](03_PRESENTING_AND_JUDGE_QA.md) |
 | Exact steps for Tasks A–D | [02_TASKS_AND_ORDER.md](02_TASKS_AND_ORDER.md) |
 | Numbers and their caveats | [RESULTS.md](../RESULTS.md) |
